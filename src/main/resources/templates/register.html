@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url("/img/background.webp");
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .register-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 28%;
+            text-align: left;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #888;
+        }
+
+        .input-group input, .input-group select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .register-btn {
+            width: calc(100% - 20px);
+            padding: 10px;
+            background-color: #6200ea;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background-color: #5a00d1;
+        }
+    </style>
+</head>
+<body>
+<div class="register-container">
+    <h2>Register account</h2>
+
+    <form th:action="@{/auth/register}" method="post" th:object="${userDTO}">
+
+        <div class="input-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" th:field="*{firstName}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" th:field="*{lastName}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="age">Age</label>
+            <input type="number" id="age" th:field="*{age}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" th:field="*{password}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="reenterPassword">Re-enter Password</label>
+            <input type="password" id="reenterPassword" name="reenterPassword" placeholder="Confirm your password..." required>
+            <div class="error-message" th:if="${errorMessage != null && errorMessage.contains('Passwords do not match')}" th:text="${errorMessage}"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input type="text" id="phoneNumber" th:field="*{phoneNumber}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="gmail">E-Mail Address</label>
+            <input type="email" id="gmail" th:field="*{gmail}" required>
+            <div class="error-message" th:if="${#fields.hasErrors('gmail')}" th:errors="*{gmail}"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="role">Role</label>
+            <select id="role" th:field="*{role}" required>
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+            </select>
+            <div class="error-message" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+        </div>
+
+        <button type="submit" class="register-btn">Register</button>
+    </form>
+</div>
+</body>
+</html>
