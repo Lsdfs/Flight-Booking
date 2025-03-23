@@ -47,4 +47,23 @@ public class ImplementAuth implements AuthService {
         );
     }
 
+    @Override
+    public User updateUser(UserDTO userDTO, String phoneNumber) {
+        User user = userRepo.findByPhoneNumber(phoneNumber);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        // Only allow updating these fields
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setPassportNumber(userDTO.getPassportNumber());
+        user.setCitizenID(userDTO.getCitizenID());
+        user.setDateOfBirth(userDTO.getDateOfBirth());
+        user.setGender(userDTO.getGender());
+        user.setAddress(userDTO.getAddress());
+
+        return userRepo.save(user);
+    }
 }

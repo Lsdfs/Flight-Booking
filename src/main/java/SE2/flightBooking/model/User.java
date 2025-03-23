@@ -1,7 +1,9 @@
 package SE2.flightBooking.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
+
+import java.time.LocalDate;
 
 
 @Entity
@@ -21,13 +23,57 @@ public class User {
     @NotBlank(message = "Password is mandatory")
     private String password;
 
+    @Size(max = 70, message = "Address must be at most 70 characters")
+    private String address;
     private String firstName;
     private String lastName;
 
+    @Size(min = 10, max = 20, message = "Passport number must be at most 20 characters")
+    private String passportNumber;
+
+    @Size(min = 8, max = 15, message = "Citizen ID must be at most 15 characters")
+    private String citizenID;
+
+    @Past(message = "Date of birth must be a past date")
+    private LocalDate dateOfBirth;
+
+//    Vẫn còn thiếu biến boolean isEnabled
+//    nên bỏ age đi vì nó có thể suy ra từ năm sinh
     private Integer age;
+    private String gender;
 
-    private String address;
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
+    public String getGender() {
+        return gender;
+    }
+
+
+    public void setPassportNumber(String passportNumber) {
+        this.passportNumber = passportNumber;
+    }
+
+    public void setCitizenID(String citizenID) {
+        this.citizenID = citizenID;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getPassportNumber() {
+        return passportNumber;
+    }
+
+    public String getCitizenID() {
+        return citizenID;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
 
     @NotBlank(message = "Gmail is mandatory")
     @Column(unique=true)

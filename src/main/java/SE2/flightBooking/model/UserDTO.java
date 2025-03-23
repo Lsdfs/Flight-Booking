@@ -1,5 +1,7 @@
 package SE2.flightBooking.model;
 
+import java.time.LocalDate;
+
 public class UserDTO {
 
     private Integer id;
@@ -8,12 +10,48 @@ public class UserDTO {
 
     private String firstName;
     private String lastName;
-
+    private LocalDate dateOfBirth;
+    private String gender;
+    //    nên bỏ age đi vì nó có thể suy ra từ năm sinh
     private Integer age;
 
     private String address;
 
     private String phoneNumber;
+    private String passportNumber;
+    private String citizenID;
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public void setPassportNumber(String passportNumber) {
+        this.passportNumber = passportNumber;
+    }
+
+    public void setCitizenID(String citizenID) {
+        this.citizenID = citizenID;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public String getPassportNumber() {
+        return passportNumber;
+    }
+
+    public String getCitizenID() {
+        return citizenID;
+    }
 
     private String gmail;
 
