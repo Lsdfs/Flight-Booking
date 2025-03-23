@@ -1,0 +1,121 @@
+body {
+  min-height: 100vh;
+  background-size: auto, cover, cover;
+  background-image: url(/footer-pattern.webp), url(/sub-background-desktop.webp),
+    url(/backgroundDesktop.webp);
+  background-repeat: no-repeat;
+  background-position: right bottom, left top, right bottom;
+  background-attachment: fixed;
+}
+
+@media only screen and (max-width: 1200px) {
+  .page-items {
+    flex-direction: column !important;
+  }
+  .sidebar-title {
+    font-size: 11px;
+  }
+  .bar-item {
+    padding: 0px 3px;
+    justify-content: space-between;
+  }
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  margin-top: 10px;
+}
+
+.info-icon {
+  width: 11px;
+  height: 17px;
+  color: #6e6e6e;
+}
+
+.row > * {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.info-title {
+  background-color: rgb(241, 241, 241);
+}
+.sidebar {
+  margin: 0;
+  display: flex;
+  padding: 0;
+  position: sticky;
+  list-style: none;
+  flex-direction: row;
+  justify-content: space-around;
+}
+@media (min-width: 600px) {
+  .sidebar {
+    background: #f8f8f8;
+    border-radius: 10px;
+    flex-direction: column;
+  }
+  .info-icon {
+    width: 21px;
+    height: 24px;
+  }
+}
+.sidebar li:last-child {
+  border-bottom: 0;
+}
+
+.bar-item {
+  cursor: pointer;
+  display: flex;
+  transition: all 0.35s;
+  padding-top: 30px;
+  align-items: center;
+  flex-direction: column;
+  padding: 15px 15px;
+  border-bottom: 1px solid #d1d3d4;
+  flex-direction: row;
+  background-color: #ffffff;
+}
+
+.info {
+  font-size: 18px;
+}
+
+.info-container {
+  background-color: white;
+}
+
+p {
+  margin-bottom: 0px;
+}
+.info-cate {
+  color: #6d6e71;
+  font-size: 15px;
+  min-width: 102px;
+  margin-left: 9px;
+  margin-right: 26px;
+}
+
+@media (min-width: 600px) {
+  .bar-item {
+  }
+
+  .bar-item:hover {
+    background-color: #ffadad;
+  }
+  .icon-img {
+    width: 30px;
+    margin-right: 20px;
+  }
+}
+
+.icon-img {
+  width: 20px;
+  height: 19px;
+}
+@media (min-width: 600px) {
+  .icon-img {
+    margin-right: 25px;
+  }
+}

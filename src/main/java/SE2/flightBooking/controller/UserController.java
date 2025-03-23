@@ -24,7 +24,7 @@ public class UserController {
         this.userRepo = userRepo;
     }
 
-    @GetMapping("/account")
+    @GetMapping("/profile")
     public String getCurrentUser(Model model, @AuthenticationPrincipal UserDetails authenticatedUser) {
         if (authenticatedUser == null) {
             return "error"; // Redirect to an error page if not authenticated
@@ -32,13 +32,19 @@ public class UserController {
 
         String phoneNumber = authenticatedUser.getUsername();
         User user = userRepo.findByPhoneNumber(phoneNumber);
-
         if (user == null) {
             return "error"; // Show an error page if the user is not found
         }
-
-        model.addAttribute("user", user);
-        return "account"; // Render the "account.html" Thymeleaf template
+        UserDTO userDTO = new UserDTO();
+        userDTO.setDateOfBirth(user.getDateOfBirth());
+        userDTO.setAddress(user.getAddress());
+        userDTO.setGender(user.getGender());
+        userDTO.setLastName(user.getLastName());
+        userDTO.setFirstName(user.getFirstName());
+        userDTO.setCitizenID(user.getCitizenID());
+        userDTO.setPassportNumber(user.getPassportNumber());
+        model.addAttribute("user", userDTO);
+        return "profile"; // Render the "profile.html" template
     }
 
     @GetMapping("/update")
@@ -55,6 +61,7 @@ public class UserController {
         }
 
         UserDTO userDTO = new UserDTO();
+        userDTO.setPhoneNumber(user.getPhoneNumber());
         userDTO.setDateOfBirth(user.getDateOfBirth());
         userDTO.setAddress(user.getAddress());
         userDTO.setGender(user.getGender());
@@ -65,7 +72,7 @@ public class UserController {
 
 
         model.addAttribute("user", userDTO);
-        return "update"; // Render "update.html" Thymeleaf template
+        return "update"; // Render "update.html" template
     }
 
     @PostMapping("/update")
