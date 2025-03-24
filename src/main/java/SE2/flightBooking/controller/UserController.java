@@ -12,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
     private final AuthService authService;
@@ -77,7 +77,7 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public String updateUser(@Valid @ModelAttribute("userDTO") UserDTO userDTO,
+    public String updateUser(@Valid @ModelAttribute("user") UserDTO userDTO,
                              @AuthenticationPrincipal UserDetails authenticatedUser) {
         if (authenticatedUser == null) {
             return "error"; // Redirect to an error page if not authenticated
@@ -86,6 +86,6 @@ public class UserController {
         String phoneNumber = authenticatedUser.getUsername();
         authService.updateUser(userDTO, phoneNumber);
 
-        return "redirect:/users/profile"; // Redirect to the account page after update
+        return "redirect:/user/profile"; // Redirect to the account page after update
     }
 }

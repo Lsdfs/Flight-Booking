@@ -23,9 +23,13 @@ public class User {
     @NotBlank(message = "Password is mandatory")
     private String password;
 
-    @Size(max = 70, message = "Address must be at most 70 characters")
+    @Size(max = 100, message = "Address must be at most 70 characters")
     private String address;
+
+    @Size(max = 60, message = "First name must be at most 60 characters")
     private String firstName;
+
+    @Size(max = 60, message = "Last name must be at most 60 characters")
     private String lastName;
 
     @Size(min = 10, max = 20, message = "Passport number must be at most 20 characters")
@@ -40,6 +44,8 @@ public class User {
 //    Vẫn còn thiếu biến boolean isEnabled
 //    nên bỏ age đi vì nó có thể suy ra từ năm sinh
     private Integer age;
+
+    @Pattern(regexp = "Male|Female|Other", message = "Gender must be either Male or Female or Other")
     private String gender;
 
     public void setGender(String gender) {

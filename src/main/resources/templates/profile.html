@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      >
   <head>
     <meta charset="utf-8" />
     <title></title>
@@ -21,63 +23,63 @@
       crossorigin="anonymous"
     ></script>
   </head>
-  <body>
-    <header>
-      <nav class="navbar navbar-expand-xl px-5 navbar-light bg-light">
-        <a class="navbar-brand" href="#"
-          ><img src="/img/just-title.png" width="170px"
-        /></a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNavDropdown"
-          aria-controls="navbarNavDropdown"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul class="navbar-nav d-flex justify-content-between w-100">
-            <div class="page-items d-flex">
-              
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="#">Skyjoy</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="#">My Booking</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="#">Online Check-in</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="#">Flight Extras</a>
-              </li>
-            </div>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle fs-5"
-                href="#"
-                id="navbarDropdownMenuLink"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Account
-              </a>
-              <div
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="navbarDropdownMenuLink"
-              >
-                <a class="dropdown-item fs-5" href="#">Sign in</a>
-                <a class="dropdown-item fs-5" href="#">Sign up</a>
-              </div>
+  <header>
+    <nav class="navbar navbar-expand-xl px-5 navbar-light bg-light">
+      <a class="navbar-brand" href="#"
+      ><img src="/img/just-title.png" width="170px"
+      /></a>
+      <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNavDropdown"
+              aria-controls="navbarNavDropdown"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav d-flex justify-content-between w-100">
+          <div class="page-items d-flex">
+
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">Skyjoy</a>
             </li>
-          </ul>
-        </div>
-      </nav>
-    </header>
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">My Booking</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">Online Check-in</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">Flight Extras</a>
+            </li>
+          </div>
+          <li class="nav-item dropdown">
+            <a
+                    class="nav-link dropdown-toggle fs-5"
+                    href="#"
+                    id="navbarDropdownMenuLink"
+                    data-bs-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+            >
+              Account
+            </a>
+            <div
+                    class="dropdown-menu dropdown-menu-end"
+                    aria-labelledby="navbarDropdownMenuLink"
+            >
+              <a class="dropdown-item fs-5" href="#">Sign in</a>
+              <a class="dropdown-item fs-5" href="#">Sign up</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <body>
     <div class="row not-nav m-5">
       <div class="sidebar-container col-4 me-4 rounded rounded-lg">
         <ul class="sidebar">
@@ -119,8 +121,9 @@
       </div>
       <div class="info-container col-6 shadow-sm rounded rounded-lg">
         <div class="info-block">
-          <div class="info-title w-100 p-1">
+          <div class="info-title w-100 p-1 d-flex flex-row justify-content-between">
             <p class="text m-0 fs-4 py-2 px-3"><b>My account</b></p>
+            <button type="button" class="btn btn-info" onclick="window.location.href='/user/update'">Update</button>
           </div>
           <div class="actual-info px-3 pb-3">
             <div class="info-row d-flex flex-row">
