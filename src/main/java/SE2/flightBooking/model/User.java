@@ -43,9 +43,6 @@ public class User {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
-//    Vẫn còn thiếu biến boolean isEnabled
-//    nên bỏ age đi vì nó có thể suy ra từ năm sinh
-    private Integer age;
 
     @Pattern(regexp = "Male|Female|Other", message = "Gender must be either Male or Female or Other")
     private String gender;
@@ -126,14 +123,6 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
     }
 
     public String getAddress() {

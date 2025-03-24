@@ -25,8 +25,6 @@ public class UserDTO {
 
     @Pattern(regexp = "Male|Female|Other", message = "Gender must be either Male or Female or Other")
     private String gender;
-    //    nên bỏ age đi vì nó có thể suy ra từ năm sinh
-    private Integer age;
 
     @Size(max = 100, message = "Address must be at most 70 characters")
     private String address;
@@ -113,13 +111,6 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
 
     public String getAddress() {
         return address;
