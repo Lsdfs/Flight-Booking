@@ -30,7 +30,7 @@ public class SecurityImpl {
                 )
                 .formLogin(
                         form -> form.loginPage("/auth/login")
-                                .defaultSuccessUrl("/main", true)
+                                .defaultSuccessUrl("/", true)
                                 .usernameParameter("phoneNumber")
                                 .permitAll()
                 )

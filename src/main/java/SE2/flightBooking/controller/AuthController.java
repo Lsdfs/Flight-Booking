@@ -46,7 +46,7 @@ public class AuthController {
             User user = (User) authService.loadUserByUsername(userDTO.getPhoneNumber());
 
             if (user != null) {
-                return "redirect:/mainTest"; // If login successfully
+                return "redirect:/"; // If login successfully
             }
 
         } catch (UsernameNotFoundException e) {
