@@ -156,7 +156,7 @@
                     </div>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Date of Birth</p>
-                        <input type="date" class="info form-control" th:field="*{dateOfBirth}">
+                        <input type="date" class="info form-control" id="dateOfBirth" th:field="*{dateOfBirth}">
                     </div>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Address</p>
@@ -179,5 +179,10 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    document.getElementById('dateOfBirth').max = new Date().toISOString().split('T')[0];
+</script>
 </body>
 </html>

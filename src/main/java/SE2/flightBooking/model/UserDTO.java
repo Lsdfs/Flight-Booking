@@ -3,6 +3,7 @@ package SE2.flightBooking.model;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -19,6 +20,7 @@ public class UserDTO {
     private String lastName;
 
     @Past(message = "Date of birth must be a past date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
     @Pattern(regexp = "Male|Female|Other", message = "Gender must be either Male or Female or Other")

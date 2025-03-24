@@ -2,6 +2,7 @@ package SE2.flightBooking.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -39,6 +40,7 @@ public class User {
     private String citizenID;
 
     @Past(message = "Date of birth must be a past date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
 //    Vẫn còn thiếu biến boolean isEnabled
