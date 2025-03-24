@@ -1,8 +1,8 @@
 body {
   min-height: 100vh;
   background-size: auto, cover, cover;
-  background-image: url(/footer-pattern.webp), url(/sub-background-desktop.webp),
-    url(/backgroundDesktop.webp);
+  background-image: url(/img/footer-pattern.webp), url(/img/sub-background-desktop.webp),
+    url(/img/backgroundDesktop.webp);
   background-repeat: no-repeat;
   background-position: right bottom, left top, right bottom;
   background-attachment: fixed;
@@ -95,6 +95,11 @@ p {
   min-width: 102px;
   margin-left: 9px;
   margin-right: 26px;
+  flex: 1;
+}
+
+.info{
+    flex: 4;
 }
 
 @media (min-width: 600px) {

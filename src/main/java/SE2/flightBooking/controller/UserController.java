@@ -37,6 +37,7 @@ public class UserController {
         }
         UserDTO userDTO = new UserDTO();
         userDTO.setDateOfBirth(user.getDateOfBirth());
+        userDTO.setPhoneNumber(user.getPhoneNumber());
         userDTO.setAddress(user.getAddress());
         userDTO.setGender(user.getGender());
         userDTO.setLastName(user.getLastName());
@@ -85,6 +86,6 @@ public class UserController {
         String phoneNumber = authenticatedUser.getUsername();
         authService.updateUser(userDTO, phoneNumber);
 
-        return "redirect:/users/account"; // Redirect to the account page after update
+        return "redirect:/users/profile"; // Redirect to the account page after update
     }
 }

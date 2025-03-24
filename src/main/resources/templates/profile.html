@@ -25,7 +25,7 @@
     <header>
       <nav class="navbar navbar-expand-xl px-5 navbar-light bg-light">
         <a class="navbar-brand" href="#"
-          ><img src="just-title.png" width="170px"
+          ><img src="/img/just-title.png" width="170px"
         /></a>
         <button
           class="navbar-toggler"
@@ -43,21 +43,21 @@
             <div class="page-items d-flex">
               
               <li class="nav-item">
-                <a class="nav-link" href="#">Skyjoy</a>
+                <a class="nav-link fs-5" href="#">Skyjoy</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">My Booking</a>
+                <a class="nav-link fs-5" href="#">My Booking</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Online Check-in</a>
+                <a class="nav-link fs-5" href="#">Online Check-in</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Flight Extras</a>
+                <a class="nav-link fs-5" href="#">Flight Extras</a>
               </li>
             </div>
             <li class="nav-item dropdown">
               <a
-                class="nav-link dropdown-toggle"
+                class="nav-link dropdown-toggle fs-5"
                 href="#"
                 id="navbarDropdownMenuLink"
                 data-bs-toggle="dropdown"
@@ -70,8 +70,8 @@
                 class="dropdown-menu dropdown-menu-end"
                 aria-labelledby="navbarDropdownMenuLink"
               >
-                <a class="dropdown-item" href="#">Sign in</a>
-                <a class="dropdown-item" href="#">Sign up</a>
+                <a class="dropdown-item fs-5" href="#">Sign in</a>
+                <a class="dropdown-item fs-5" href="#">Sign up</a>
               </div>
             </li>
           </ul>
@@ -82,36 +82,36 @@
       <div class="sidebar-container col-4 me-4 rounded rounded-lg">
         <ul class="sidebar">
           <li class="bar-item">
-            <img src="accountIcon.svg" alt="ProfileAccount" class="icon-img" />
-            <span class="sidebar-title">My account</span>
+            <img src="/icons/accountIcon.svg" alt="ProfileAccount" class="icon-img" />
+            <span class="sidebar-title fs-5">My account</span>
           </li>
           <li class="bar-item">
             <img
-              src="personalInfo.svg"
+              src="/icons/personalInfo.svg"
               alt="ProfilePersonalInfo"
               class="icon-img"
             />
-            <span class="sidebar-title">Personal Information</span>
+            <span class="sidebar-title fs-5">Personal Information</span>
           </li>
           <li class="bar-item">
             <img
-              src="history.png"
+              src="/icons/history.png"
               alt="ProfileTransactionHistory"
               class="icon-img"
             />
-            <span class="sidebar-title">Transaction History</span>
+            <span class="sidebar-title fs-5">Transaction History</span>
           </li>
           <li class="bar-item">
-            <img src="familyIcon.svg" alt="FamilyList" class="icon-img" />
-            <span class="sidebar-title">List of family members</span>
+            <img src="/icons/familyIcon.svg" alt="FamilyList" class="icon-img" />
+            <span class="sidebar-title fs-5">List of family members</span>
           </li>
           <li class="bar-item">
             <img
-              src="manage-booking.svg"
+              src="/icons/manage-booking.svg"
               alt="BookingHistory"
               class="icon-img"
             />
-            <span class="sidebar-title" customcolor="black"
+            <span class="sidebar-title fs-5" customcolor="black"
               >Manage booking</span
             >
           </li>
@@ -120,42 +120,35 @@
       <div class="info-container col-6 shadow-sm rounded rounded-lg">
         <div class="info-block">
           <div class="info-title w-100 p-1">
-            <p class="text m-0 fs-5 px-3"><b>Account</b></p>
+            <p class="text m-0 fs-4 py-2 px-3"><b>My account</b></p>
           </div>
           <div class="actual-info px-3 pb-3">
             <div class="info-row d-flex flex-row">
-              <img class="info-icon" src="memberNumber.svg" />
-              <p class="info-cate">Phone number</p>
+              <p class="info-cate fs-5">Phone number</p>
               <p class="info"><b th:text="${user.phoneNumber}"></b></p>
             </div>
             <div class="info-row d-flex flex-row">
-              <img class="info-icon" src="email.svg" />
-              <p class="info-cate">Full name</p>
+              <p class="info-cate fs-5">Full name</p>
               <p class="info"><b th:text="|${user.lastName} ${user.firstName}|"></b></p>
             </div>
             <div class="info-row d-flex flex-row">
-              <img class="info-icon" src="email.svg" />
-              <p class="info-cate">Gender</p>
+              <p class="info-cate fs-5">Gender</p>
               <p class="info"><b th:text="${user.gender}"></b></p>
             </div>
             <div class="info-row d-flex flex-row">
-              <img class="info-icon" src="email.svg" />
-              <p class="info-cate">Date of birth</p>
+              <p class="info-cate fs-5">Date of birth</p>
               <p class="info"><b th:text="${user.dateOfBirth}"></b></p>
             </div>
             <div class="info-row d-flex flex-row">
-              <img class="info-icon" src="email.svg" />
-              <p class="info-cate">Address</p>
+              <p class="info-cate fs-5">Address</p>
               <p class="info"><b th:text="${user.address}"></b></p>
             </div>
             <div class="info-row d-flex flex-row">
-              <img class="info-icon" src="email.svg" />
-              <p class="info-cate">Passport number</p>
+              <p class="info-cate fs-5">Passport number</p>
               <p class="info"><b th:text="${user.passportNumber}"></b></p>
             </div>
             <div class="info-row d-flex flex-row">
-              <img class="info-icon" src="email.svg" />
-              <p class="info-cate">Citizen ID</p>
+              <p class="info-cate fs-5">Citizen ID</p>
               <p class="info"><b th:text="${user.citizenID}"></b></p>
             </div>
           </div>
