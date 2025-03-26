@@ -17,11 +17,13 @@ public class User {
 
 
     @NotBlank(message = "Phone number is mandatory")
+    @Pattern(regexp = "\\d{10,}", message = "Phone number must be at least 10 digits")
     @Column(unique=true)
     private String phoneNumber;
 
 
     @NotBlank(message = "Password is mandatory")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
     @Size(max = 100, message = "Address must be at most 70 characters")

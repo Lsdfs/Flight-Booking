@@ -79,7 +79,18 @@
         </div>
     </nav>
 </header>
+
+
     <body>
+
+<!--    Logout o day nhe cac ban, hay copy lai -->
+    <div th:if="${isAuthenticated}">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+
         <div layout:fragment="content" class="m-5">
             <h1>Welcome to the Main Page!</h1>
         </div>

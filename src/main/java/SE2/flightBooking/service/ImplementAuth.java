@@ -7,6 +7,7 @@ import SE2.flightBooking.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -16,13 +17,16 @@ public class ImplementAuth implements AuthService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public User registerUser(UserDTO userRegistrationDTO) {
 
         User user = new User();
 
         user.setPhoneNumber(userRegistrationDTO.getPhoneNumber());
-        user.setPassword("{noop}" + userRegistrationDTO.getPassword()); /// Danh dau cho spring biet password chua duoc ma hoa
+        user.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
         user.setFirstName(userRegistrationDTO.getFirstName());
         user.setLastName(userRegistrationDTO.getLastName());
         user.setGmail(userRegistrationDTO.getGmail());
