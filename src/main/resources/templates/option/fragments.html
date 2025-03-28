@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Booking Options</title>
+    <style>
+        .popup.hidden {
+            display: none;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            right: -100%;
+            transform: translateY(-50%);
+            width: 300px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: right 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .popup.active {
+            right: 20px;
+            display: block;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            right: -33.33%;
+            width: 33.33%;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+            visibility: hidden;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            right: 0;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: #f4f4f4;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .modal select,
+        .modal input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px auto;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .modal button {
+            display: block;
+            width: 90%;
+            margin: 10px auto;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal button:first-of-type {
+            background: #28a745;
+            color: white;
+        }
+
+        .modal button:last-of-type {
+            background: #dc3545;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+<div id="applyReturnPopup" class="popup hidden">
+    <p>Do you want to apply this service for the return trip?</p>
+    <button onclick="applyToReturnTrip(true)">Yes</button>
+    <button onclick="applyToReturnTrip(false)">No</button>
+</div>
+
+<div th:fragment="seatModal" id="seatModal" class="modal">
+    <button class="close-btn" onclick="closeModal('seatModal')">X</button>
+    <h2>Select a Seat</h2>
+    <div class="tab-container" id="seatTabs">
+        <div class="tab active" onclick="changeTab('seat', 'departure')">Departure</div>
+        <div class="tab" id="returnSeatTab" onclick="changeTab('seat', 'return')">Return</div>
+    </div>
+    <div id="departureSeat">
+        <label for="seatSelect"></label><select id="seatSelect" name="seatId">
+            <option th:each="seat : ${seats}"
+                    th:value="${seat.id}"
+                    th:text="${seat.seatNumber} + ' (' + ${seat.seatClass} + ', ' + ${seat.price} + ' USD)'"
+                    th:disabled="${seat.status != 'AVAILABLE'}"></option>
+        </select>
+    </div>
+    <div id="returnSeat" class="hidden">
+        <label for="returnSeatSelect"></label><select id="returnSeatSelect" name="returnSeatId">
+            <option th:each="seat : ${seats}"
+                    th:value="${seat.id}"
+                    th:text="${seat.seatNumber} + ' (' + ${seat.seatClass} + ', ' + ${seat.price} + ' USD)'"
+                    th:disabled="${seat.status != 'AVAILABLE'}"></option>
+        </select>
+    </div>
+    <button onclick="confirm('seat')">Confirm</button>
+    <button onclick="submitSelection('seat')">No, thanks</button>
+</div>
+
+<div th:fragment="mealModal" id="mealModal" class="modal">
+    <button class="close-btn" onclick="closeModal('mealModal')">X</button>
+    <h2>Select a Meal</h2>
+    <div class="tab-container" id="mealTabs">
+        <div class="tab active" onclick="changeTab('meal', 'departure')">Departure</div>
+        <div class="tab" id="returnMealTab" onclick="changeTab('meal', 'return')">Return</div>
+    </div>
+    <div id="departureMeal">
+        <label for="mealSelect"></label><select id="mealSelect" name="mealId">
+            <option th:each="meal : ${meals}"
+                    th:value="${meal.id}"
+                    th:src="${meal.image}"
+                    th:text="${meal.name} + ' (' + ${meal.price} + ' USD, Stock: ' + ${meal.stock} + ')'"
+                    th:disabled="${meal.stock == 0}"></option>
+        </select>
+        <div>
+            <button onclick="adjustQuantity(-1)">-</button>
+            <label for="mealQuantity"></label><input type="number" id="mealQuantity" value="1" min="0">
+            <button onclick="adjustQuantity(1)">+</button>
+        </div>
+    </div>
+    <div id="returnMeal" class="hidden">
+        <label for="returnMealSelect"></label><select id="returnMealSelect" name="returnMealId">
+            <option th:each="meal : ${meals}"
+                    th:value="${meal.id}"
+                    th:text="${meal.name} + ' (' + ${meal.price} + ' USD, Stock: ' + ${meal.stock} + ')'"
+                    th:disabled="${meal.stock == 0}"></option>
+        </select>
+    </div>
+    <button onclick="confirm('meal')">Confirm</button>
+    <button onclick="submitSelection('meal')">No, thanks</button>
+</div>
+
+<div th:fragment="baggageModal" id="baggageModal" class="modal">
+    <button class="close-btn" onclick="closeModal('baggageModal')">X</button>
+    <h2>Select Baggage</h2>
+    <div class="tab-container" id="baggageTabs">
+        <div class="tab active" onclick="changeTab('baggage', 'departure')">Departure</div>
+        <div class="tab" id="returnBaggageTab" onclick="changeTab('baggage', 'return')">Return</div>
+    </div>
+    <div id="departureBaggage">
+        <label for="baggageSelect"></label><select id="baggageSelect" name="baggageId">
+            <option th:each="baggage : ${baggages}"
+                    th:value="${baggage.id}"
+                    th:src="@{/image/baggage.png}"
+                    th:text="${baggage.weight} + 'kg (' + ${baggage.price} + ' USD)'"
+                    th:disabled="${baggage.booking != null}"></option>
+        </select>
+    </div>
+    <div id="returnBaggage" class="hidden">
+        <label for="returnBaggageSelect"></label><select id="returnBaggageSelect" name="returnBaggageId">
+            <option th:each="baggage : ${baggages}"
+                    th:value="${baggage.id}"
+                    th:text="${baggage.weight} + 'kg (' + ${baggage.price} + ' USD)'"
+                    th:disabled="${baggage.booking != null}"></option>
+        </select>
+    </div>
+    <button onclick="confirm('baggage')">Confirm</button>
+    <button onclick="submitSelection('baggage')">No, thanks</button>
+</div>
+
+<script>
+</script>
+</body>
+</html>

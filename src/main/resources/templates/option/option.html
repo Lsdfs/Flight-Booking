@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Booking Options</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #fdeff2, #d3c8f1);
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            color: #d0021b;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .option h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .option button {
+            background: white;
+            color: black;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .option button:hover {
+            background: #d0021b;
+            color: white;
+        }
+
+        #applyReturnPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #applyReturnPopup button {
+            margin: 10px;
+            padding: 10px 15px;
+            border: none;
+            background: #d0021b;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #applyReturnPopup button:hover {
+            background: #a00216;
+        }
+
+        img {
+            display: block !important;
+            width: auto;
+            height: auto;
+        }
+
+
+    </style>
+</head>
+<body>
+<h1>Select Your Option</h1>
+<div th:if="${error}" th:text="${error}" style="color: red;"></div>
+
+<div class="container">
+    <div class="option choose-seat">
+        <img th:src="@{/image/seat.png}" alt="baggage img">
+        <h2>Select your seat</h2>
+        <button onclick="openModal('seatModal')">&gt;</button>
+    </div>
+    <div class="option choose-meal">
+        <img th:src="@{/image/meal.png}" alt="meal img">
+        <h2>Select your meal</h2>
+        <button onclick="openModal('mealModal')">&gt;</button>
+    </div>
+    <div class="option choose-baggage">
+        <img th:src="@{/image/baggage.png}" alt="seat img">
+        <h2>Select your baggage</h2>
+        <button onclick="openModal('baggageModal')">&gt;</button>
+    </div>
+</div>
+
+<div th:replace="fragments :: seatModal"></div>
+<div th:replace="fragments :: mealModal"></div>
+<div th:replace="fragments :: baggageModal"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const isRoundTrip = /*[[${isRoundTrip}]]*/ false;
+    const bookingId = /*[[${bookingId}]]*/ 0;
+    let currentService = '';
+
+    function openModal(id) {
+        document.getElementById(id).classList.add("show");
+        currentService = id.replace('Modal', '');
+        if (!isRoundTrip) {
+            let returnTab = document.getElementById(`return${currentService.charAt(0).toUpperCase() + currentService.slice(1)}Tab`);
+            if (returnTab) returnTab.classList.add("hidden");
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove("show");
+    }
+
+    function changeTab(service, trip) {
+        document.getElementById(`${trip}${service.charAt(0).toUpperCase() + service.slice(1)}`).classList.remove("hidden");
+        document.getElementById(`${trip === 'departure' ? 'return' : 'departure'}${service.charAt(0).toUpperCase() + service.slice(1)}`).classList.add("hidden");
+
+        let tabs = document.querySelectorAll(`#${service}Tabs .tab`);
+        tabs.forEach(tab => tab.classList.remove("active"));
+        document.querySelector(`#${service}Tabs .tab[onclick="changeTab('${service}', '${trip}')"]`).classList.add("active");
+    }
+
+    function confirm(service) {
+        if (isRoundTrip) document.getElementById("applyReturnPopup").classList.remove("hidden");
+        else submitSelection(service);
+    }
+
+    function applyToReturnTrip(apply) {
+        document.getElementById("applyReturnPopup").classList.add("hidden");
+        if (!apply) changeTab(currentService, 'return');
+        else submitSelection(currentService);
+    }
+
+    function submitSelection(service) {
+        let idField = `${service}Select`;
+        let selectedId = document.getElementById(idField).value;
+        let applyToReturn = document.getElementById("applyReturnPopup").classList.contains("hidden");
+        let endpoint = `/booking/select-${service}`;
+        let params = `bookingId=${bookingId}&${service}Id=${selectedId}&applyToReturn=${applyToReturn}`;
+        if (service === 'meal') {
+            let quantity = document.getElementById('mealQuantity').value;
+            params += `&quantity=${quantity}`;
+        }
+        window.location.href = `${endpoint}?${params}`;
+    }
+
+    function adjustQuantity(change) {
+        let qtyInput = document.getElementById('mealQuantity');
+        let currentQty = parseInt(qtyInput.value);
+        qtyInput.value = Math.max(0, currentQty + change);
+    }
+</script>
+</body>
+</html>
