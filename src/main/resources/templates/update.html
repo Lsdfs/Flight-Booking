@@ -81,34 +81,43 @@
 </header>
 <body>
 <div class="row not-nav m-5">
-    <div class="sidebar-container col-4 me-4 rounded rounded-lg">
+    <div class="sidebar-container col-4 me-4">
         <ul class="sidebar">
-            <li class="bar-item">
-                <img src="/icons/accountIcon.svg" alt="ProfileAccount" class="icon-img" />
-                <span class="sidebar-title fs-5">My account</span>
-            </li>
-            <li class="bar-item">
-                <img
-                        src="/icons/history.png"
-                        alt="ProfileTransactionHistory"
-                        class="icon-img"
-                />
-                <span class="sidebar-title fs-5">Transaction History</span>
-            </li>
-            <li class="bar-item">
-                <img src="/icons/familyIcon.svg" alt="FamilyList" class="icon-img" />
-                <span class="sidebar-title fs-5">List of family members</span>
-            </li>
-            <li class="bar-item">
-                <img
-                        src="/icons/manage-booking.svg"
-                        alt="BookingHistory"
-                        class="icon-img"
-                />
-                <span class="sidebar-title fs-5" customcolor="black"
-                >Manage booking</span
-                >
-            </li>
+            <a th:href="@{/user/profile}">
+                <li class="bar-item rounded-top-4 bg-white bg-opacity-75">
+                    <img src="/icons/accountIcon.svg" alt="ProfileAccount" class="icon-img" />
+                    <span class="sidebar-title fs-5"><b>My account</b></span>
+                </li>
+            </a>
+            <a>
+                <li class="bar-item bg-white bg-opacity-75">
+                    <img
+                            src="/icons/history.png"
+                            alt="ProfileTransactionHistory"
+                            class="icon-img"
+                    />
+                    <span class="sidebar-title fs-5">Transaction History</span>
+                </li>
+            </a>
+            <a th:href="@{/user/coflight}">
+                <li class="bar-item bg-white bg-opacity-75">
+                    <img src="/icons/familyIcon.svg" alt="Co-flight members" class="icon-img" />
+                    <span class="sidebar-title fs-5">Co-flight members</span>
+                </li>
+            </a>
+
+            <a>
+                <li class="bar-item rounded-bottom bar-item bg-white bg-opacity-75">
+                    <img
+                            src="/icons/manage-booking.svg"
+                            alt="BookingHistory"
+                            class="icon-img"
+                    />
+                    <span class="sidebar-title fs-5" customcolor="black"
+                    >Manage booking</span
+                    >
+                </li>
+            </a>
         </ul>
     </div>
     <div class="info-container col-6 shadow-sm rounded rounded-lg">
@@ -119,17 +128,15 @@
             <form th:action="'/user/update'" th:object="${user}" method="post">
                 <div class="actual-info px-3 pb-3">
                     <div class="info-row d-flex flex-row">
-                        <p class="info-cate fs-5">Phone number</p>
-                        <input class="info form-control" type="text" th:field="*{phoneNumber}">
-                    </div>
-                    <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Last name</p>
                         <input class="info form-control" type="text" th:field="*{lastName}">
                     </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></small>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">First name</p>
                         <input class="info form-control" type="text" th:field="*{firstName}">
                     </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></small>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Gender</p>
                         <div class = "info">
@@ -147,22 +154,27 @@
                             </div>
                         </div>
                     </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></small>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Date of Birth</p>
                         <input type="date" class="info form-control" id="dateOfBirth" th:field="*{dateOfBirth}">
                     </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></small>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Address</p>
                         <input class="info form-control" type="text" th:field="*{address}">
                     </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></small>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Passport number</p>
                         <input class="info form-control" type="text" th:field="*{passportNumber}">
                     </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('passportNumber')}" th:errors="*{passportNumber}"></small>
                     <div class="info-row d-flex flex-row">
                         <p class="info-cate fs-5">Citizen ID</p>
                         <input class="info form-control" type="text" th:field="*{citizenID}">
                     </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('citizenID')}" th:errors="*{citizenID}"></small>
                 </div>
                 <div class = "d-flex flex-row align-items-center justify-content-center">
                     <button type="button" class="btn btn-secondary mx-2 mb-3" onclick="window.location.href='/user/profile'">Cancel</button>

@@ -1,5 +1,6 @@
 package SE2.flightBooking.model;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -11,6 +12,8 @@ public class UserDTO {
 
     private Integer id;
 
+    @NotBlank(message = "Password is mandatory")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
     @Size(max = 60, message = "First name must be at most 60 characters")
@@ -26,9 +29,12 @@ public class UserDTO {
     @Pattern(regexp = "Male|Female|Other", message = "Gender must be either Male or Female or Other")
     private String gender;
 
-    @Size(max = 100, message = "Address must be at most 70 characters")
+    @Size(max = 70, message = "Address must be at most 70 characters")
     private String address;
 
+    @NotBlank(message = "Phone number is mandatory")
+    @Size(max=20, message = "Phone number must be at most 20 characters")
+    @Pattern(regexp = "\\d{10,}", message = "Phone number must be at least 10 digits")
     private String phoneNumber;
 
     @Size(min = 10, max = 20, message = "Passport number must be at most 20 characters")

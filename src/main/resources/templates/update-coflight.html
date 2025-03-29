@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link href="/coflight.css" rel="stylesheet" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <header>
+    <nav class="navbar navbar-expand-xl px-5 navbar-light bg-light">
+      <a class="navbar-brand" href="/"
+        ><img src="/img/just-title.png" width="170px"
+      /></a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav d-flex justify-content-between w-100">
+          <div class="page-items d-flex">
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">Skyjoy</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">My Booking</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">Online Check-in</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fs-5" href="#">Flight Extras</a>
+            </li>
+          </div>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle fs-5"
+              href="#"
+              id="navbarDropdownMenuLink"
+              data-bs-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Account
+            </a>
+            <div
+              class="dropdown-menu dropdown-menu-end"
+              aria-labelledby="navbarDropdownMenuLink"
+            >
+              <a class="dropdown-item fs-5" href="/auth/login">Sign in</a>
+              <a class="dropdown-item fs-5" href="/auth/register">Sign up</a>
+              <a class="dropdown-item fs-5" href="/user/profile">Profile</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <body>
+    <div class="row not-nav m-5">
+        <div class="sidebar-container col-4 me-4">
+            <ul class="sidebar">
+                <a th:href="@{/user/profile}">
+                    <li class="bar-item rounded-top-4 bg-white bg-opacity-75">
+                        <img src="/icons/accountIcon.svg" alt="ProfileAccount" class="icon-img" />
+                        <span class="sidebar-title fs-5">My account</span>
+                    </li>
+                </a>
+                <a>
+                    <li class="bar-item bg-white bg-opacity-75">
+                        <img
+                                src="/icons/history.png"
+                                alt="ProfileTransactionHistory"
+                                class="icon-img"
+                        />
+                        <span class="sidebar-title fs-5">Transaction History</span>
+                    </li>
+                </a>
+                <a th:href="@{/user/coflight}">
+                    <li class="bar-item bg-white bg-opacity-75">
+                        <img src="/icons/familyIcon.svg" alt="Co-flight members" class="icon-img" />
+                        <span class="sidebar-title fs-5"><b>Co-flight members</b></span>
+                    </li>
+                </a>
+
+                <a>
+                    <li class="bar-item rounded-bottom bar-item bg-white bg-opacity-75">
+                        <img
+                                src="/icons/manage-booking.svg"
+                                alt="BookingHistory"
+                                class="icon-img"
+                        />
+                        <span class="sidebar-title fs-5" customcolor="black"
+                        >Manage booking</span
+                        >
+                    </li>
+                </a>
+            </ul>
+        </div>
+      <div class="info-container col-6">
+        <div class="info-title w-100 mx-4 mb-3">
+          <div class="d-flex flex-row justify-content-between">
+            <p class="text m-0 fs-3"><b>Co-flight members list (0/30)</b></p>
+          </div>
+          <p class="fs-5">
+            You can save information for a maximum of 30 members.
+          </p>
+        </div>
+
+        <div
+          class="w-100 mx-4 d-flex flex-column bg-white rounded rounded-md shadow-sm"
+        >
+
+            <form th:action="'/user/coflight/update'" class="d-flex flex-column" th:object="${coflightMember}" method="post">
+                <p class="align-self-center text p-2 fs-4"><b>Add a member to your list</b></p>
+                <div class="actual-info ps-3 pe-3 pb-3">
+                    <div class="info-row d-flex flex-row mb-2 align-items-center">
+                        <p class="info-cate fs-5 flex-1">First name</p>
+                        <input class="info form-control flex-5" type="text" th:field="*{firstName}">
+                        <small class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></small>
+                    </div>
+                    <div class="info-row d-flex flex-row mb-2 align-items-center">
+                        <p class="info-cate fs-5">Last name</p>
+                        <input class="info form-control" type="text" th:field="*{lastName}">
+                    </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></small>
+                    <div class="info-row d-flex flex-row mb-2 align-items-center">
+                        <p class="info-cate fs-5">Phone number</p>
+                        <input class="info form-control" type="text" th:field="*{phoneNumber}">
+                    </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></small>
+                    <div class="info-row d-flex flex-row mb-2 align-items-center">
+                        <p class="info-cate fs-5">Gender</p>
+                        <div class = "info">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" name="inlineRadioOptions" id="inlineRadio1" value="Male">
+                                <label class="form-check-label" for="inlineRadio1">Male</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" name="inlineRadioOptions" id="inlineRadio2" value="Female">
+                                <label class="form-check-label" for="inlineRadio2">Female</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" name="inlineRadioOptions" id="inlineRadio3" value="Other">
+                                <label class="form-check-label" for="inlineRadio2">Other</label>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></small>
+                    <div class="info-row d-flex flex-row mb-2 align-items-center">
+                        <p class="info-cate fs-5">Date of Birth</p>
+                        <input type="date" class="info form-control" id="dateOfBirth" th:field="*{dateOfBirth}">
+                    </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></small>
+                    <div class="info-row d-flex flex-row mb-2 align-items-center">
+                        <p class="info-cate fs-5">Passport number</p>
+                        <input class="info form-control" type="text" th:field="*{passportNumber}">
+                    </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('passportNumber')}" th:errors="*{passportNumber}"></small>
+                    <div class="info-row d-flex flex-row align-items-center">
+                        <p class="info-cate fs-5">Citizen ID</p>
+                        <input class="info form-control" type="text" th:field="*{citizenID}">
+                    </div>
+                    <small class="text-danger" th:if="${#fields.hasErrors('citizenID')}" th:errors="*{citizenID}"></small>
+                </div>
+                <div class = "align-self-center justify-self-center">
+                    <button type="button" class="btn btn-secondary mx-2 mb-3" onclick="window.location.href='/user/coflight'">Cancel</button>
+                    <button type="submit" class="btn btn-warning mx-2 mb-3"><b>Update</b></button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+    <script>
+        document.getElementById('dateOfBirth').max = new Date().toISOString().split('T')[0];
+    </script>
+  </body>
+</html>

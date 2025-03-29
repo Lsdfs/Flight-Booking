@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Entity
@@ -15,9 +16,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @OneToMany(mappedBy = "user")
+    private List<CoflightMember> coflightMembers;
 
     @NotBlank(message = "Phone number is mandatory")
-    @Pattern(regexp = "\\d{10,}", message = "Phone number must be at least 10 digits")
+    @Size(max=20, message = "Phone number must be at most 20 characters")
+    @Pattern(regexp = "\\d{10,}", message = "Phone number must be at least 10 digits, no character allowed")
     @Column(unique=true)
     private String phoneNumber;
 
@@ -26,7 +30,7 @@ public class User {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    @Size(max = 100, message = "Address must be at most 70 characters")
+    @Size(max = 70, message = "Address must be at most 70 characters")
     private String address;
 
     @Size(max = 60, message = "First name must be at most 60 characters")
@@ -35,10 +39,10 @@ public class User {
     @Size(max = 60, message = "Last name must be at most 60 characters")
     private String lastName;
 
-    @Size(min = 10, max = 20, message = "Passport number must be at most 20 characters")
+    @Pattern(regexp = "^$|.{9,20}", message = "Passport number must be between 9 and 20 characters or empty")
     private String passportNumber;
 
-    @Size(min = 8, max = 15, message = "Citizen ID must be at most 15 characters")
+    @Pattern(regexp = "^$|.{8,15}", message = "Citizen ID must be between 8 and 15 characters or empty")
     private String citizenID;
 
     @Past(message = "Date of birth must be a past date")
@@ -48,6 +52,28 @@ public class User {
 
     @Pattern(regexp = "Male|Female|Other", message = "Gender must be either Male or Female or Other")
     private String gender;
+
+
+    @NotBlank(message = "Gmail is mandatory")
+    @Column(unique=true)
+    private String gmail;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private RoleType role;
+
+    /// Contructor rỗng
+    public User() {
+    }
+
+    public void setCoflightMembers(List<CoflightMember> coflightMembers) {
+        this.coflightMembers = coflightMembers;
+    }
+
+    public List<CoflightMember> getCoflightMembers() {
+        return coflightMembers;
+    }
 
     public void setGender(String gender) {
         this.gender = gender;
@@ -80,19 +106,6 @@ public class User {
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
-    }
-
-    @NotBlank(message = "Gmail is mandatory")
-    @Column(unique=true)
-    private String gmail;
-
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private RoleType role;
-
-    /// Contructor rỗng
-    public User() {
     }
 
     public Integer getId() {
