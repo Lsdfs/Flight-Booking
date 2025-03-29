@@ -4,72 +4,74 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "flight")
+@Table(name = "flights")
 public class Flight {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "flight_number", nullable = false, unique = true)
-    private String flightNumber;
-
     @Column(nullable = false)
     private String departure;
-
+    
     @Column(nullable = false)
     private String destination;
 
     @Column(name = "departure_time", nullable = false)
     private LocalDateTime departureTime;
 
-    @Column(name = "arrival_time", nullable = false)
-    private LocalDateTime arrivalTime;
+    @Column(name = "return_time")
+    private LocalDateTime returnTime;
+    @Column(name = "available_seats", nullable = false)
+    private int availableSeats;
 
-    public Long getId() {
-        return id;
+    @Column(nullable = false)
+    private double price;
+
+    @Column(nullable = false)
+    private String airline;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "flight_type", nullable = false)
+    private FlightType flightType;
+    public enum FlightType {
+        ONE_WAY, ROUND_TRIP
     }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFlightNumber() {
-        return flightNumber;
-    }
-
-    public void setFlightNumber(String flightNumber) {
-        this.flightNumber = flightNumber;
-    }
-
-    public String getDeparture() {
-        return departure;
-    }
-
-    public void setDeparture(String departure) {
+    public Flight() {}
+    public Flight(String departure, String destination, LocalDateTime departureTime,
+                  LocalDateTime returnTime, int availableSeats, double price,
+                  String airline, FlightType flightType) {
         this.departure = departure;
-    }
-
-    public String getDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
         this.destination = destination;
-    }
-
-    public LocalDateTime getDepartureTime() {
-        return departureTime;
-    }
-
-    public void setDepartureTime(LocalDateTime departureTime) {
         this.departureTime = departureTime;
+        this.returnTime = returnTime;
+        this.availableSeats = availableSeats;
+        this.price = price;
+        this.airline = airline;
+        this.flightType = flightType;
     }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public LocalDateTime getArrivalTime() {
-        return arrivalTime;
-    }
+    public String getDeparture() { return departure; }
+    public void setDeparture(String departure) { this.departure = departure; }
 
-    public void setArrivalTime(LocalDateTime arrivalTime) {
-        this.arrivalTime = arrivalTime;
-    }
+    public String getDestination() { return destination; }
+    public void setDestination(String destination) { this.destination = destination; }
+
+    public LocalDateTime getDepartureTime() { return departureTime; }
+    public void setDepartureTime(LocalDateTime departureTime) { this.departureTime = departureTime; }
+
+    public LocalDateTime getReturnTime() { return returnTime; }
+    public void setReturnTime(LocalDateTime returnTime) { this.returnTime = returnTime; }
+
+    public int getAvailableSeats() { return availableSeats; }
+    public void setAvailableSeats(int availableSeats) { this.availableSeats = availableSeats; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    public String getAirline() { return airline; }
+    public void setAirline(String airline) { this.airline = airline; }
+
+    public FlightType getFlightType() { return flightType; }
+    public void setFlightType(FlightType flightType) { this.flightType = flightType; }
 }

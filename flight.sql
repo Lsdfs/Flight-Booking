@@ -1,16 +1,4 @@
-DROP DATABASE IF EXISTS airline_booking;
-CREATE DATABASE airline_booking;
-USE airline_booking;
-
-CREATE TABLE flight (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    flight_number VARCHAR(20) NOT NULL UNIQUE,
-    departure VARCHAR(100) NOT NULL,
-    destination VARCHAR(100) NOT NULL,
-    departure_time DATETIME NOT NULL,
-    arrival_time DATETIME NOT NULL
-);
-
+use  flightreservation;
 CREATE TABLE booking (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     booking_code VARCHAR(20) NOT NULL UNIQUE,
@@ -22,8 +10,8 @@ CREATE TABLE booking (
     total_price DECIMAL(10,2) NOT NULL,
     status ENUM('PENDING', 'CONFIRMED', 'CANCELLED') DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (flight_id) REFERENCES flight(id) ON DELETE CASCADE,
-    FOREIGN KEY (return_flight_id) REFERENCES flight(id) ON DELETE SET NULL
+    FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE CASCADE,
+    FOREIGN KEY (return_flight_id) REFERENCES flights(id) ON DELETE SET NULL
 );
 
 CREATE TABLE seat (
@@ -37,7 +25,7 @@ CREATE TABLE seat (
     price DECIMAL(10,2) NOT NULL,
     image VARCHAR(255),
     booking_id BIGINT NULL,
-    FOREIGN KEY (flight_id) REFERENCES flight(id) ON DELETE CASCADE,
+    FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE CASCADE,
     FOREIGN KEY (booking_id) REFERENCES booking(id) ON DELETE SET NULL
 );
 
@@ -77,10 +65,6 @@ CREATE TABLE booking_baggage (
     FOREIGN KEY (baggage_id) REFERENCES baggage(id) ON DELETE CASCADE
 );
 
-INSERT INTO flight (flight_number, departure, destination, departure_time, arrival_time) VALUES
-('VN123', 'Hanoi', 'Ho Chi Minh City', '2025-03-01 08:00:00', '2025-03-01 10:00:00'),
-('VN456', 'Ho Chi Minh City', 'Da Nang', '2025-03-01 12:00:00', '2025-03-01 14:00:00'),
-('VN789', 'Da Nang', 'Hanoi', '2025-03-02 15:00:00', '2025-03-02 17:00:00');
 
 INSERT INTO seat (flight_id, seat_number, row_id, column_letter, seat_class, status, price, image) VALUES
 (1, '1A', 1, 'A', 'PREMIUM', 'AVAILABLE', 200.00, NULL),
@@ -101,3 +85,4 @@ INSERT INTO baggage (weight, price, image) VALUES
 (30, 30.00, 'baggage.png');
 
 
+select*from seat;

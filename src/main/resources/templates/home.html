@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="background-image: url('[[@{/images/background.webp}]]');
+             background-size: cover;
+             background-position: center;
+             background-repeat: no-repeat;
+             background-attachment: fixed;
+             font-family: 'Inter', sans-serif;
+             height: 100vh;
+             overflow: hidden;">
+<!--div for under_head contains search-box-->
+<div class="under-head">
+    <img th:src="@{/images/under-head.png}" alt="under_head">
+    <div class="search-box">
+        <form id="search-form" action="/flight/search" method="get">
+            <!--Header for Search with info-->
+            <div class="hear-search"></div>
+
+            <!-- Choose type of flight -->
+            <div class="trip-type">
+                <input type="radio" id="return-trip" name="ticketType" value="round-trip" checked>
+                <label for="return-trip">Return</label>
+
+                <input type="radio" id="one-way" name="ticketType" value="one-way">
+                <label for="one-way">One-way</label>
+            </div>
+            <div class="from">
+                <!--Choose departure -->
+                <label for="from">From</label>
+                <select id="from" name="departure">
+                    <option value="" disabled selected>Select departure city</option>
+                    <option th:each="city : ${departure}" th:value="${city}" th:text="${city}"></option>
+                </select>
+                <!--Choose departureTime-->
+                <label for="departure">Departure Date</label>
+                <input type="date" id="departure" name="departureTime" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
+            </div>
+            <div class="to">
+                <!--Choose destination-->
+                <label for="to">To</label>
+                <select id="to" name="destination">
+                    <option value="" disabled selected>Select destination city</option>
+                    <option th:each="city : ${destination}" th:value="${city}" th:text="${city}"></option>
+                </select>
+                <!--Show returnTime if Return type-->
+                <label for="return">Return Date</label>
+                <input type="date" id="return" name="returnTime" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
+            </div>
+            <!-- Number of passenger -->
+            <label for="passengers">Passengers</label>
+            <input type="number" id="passengers" name="passengers" min="1" value="1">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</div>
+
+<header class="header-container">
+    <div class="header-left">
+        <img th:src="@{/images/logo.webp}" alt="Vietjet Air" class="logo">
+    </div>
+    <div class="header-right">
+        <div class="user-info">
+            <a href="/support">
+                <img th:src="@{/images/support_icon.png}" alt="Support-icon" class="support">
+                <span class="support-text">Support</span>
+            </a>
+            <a href="/account">
+                <img th:src="@{/images/avatar icon.png}" alt="Avatar_user" class="avatar">
+                <span class="user-name" th:text="${username}">NguyenVanA</span>
+            </a>
+        </div>
+        <nav>
+            <a href="/skyjoy">Skyjoy</a>
+            <a href="/my-booking">My Booking</a>
+            <a href="/check-in">Online Check-in</a>
+            <a href="/flight-extras">Flight Extras</a>
+        </nav>
+    </div>
+</header>
+<section></section>
+</body>
+</html>
