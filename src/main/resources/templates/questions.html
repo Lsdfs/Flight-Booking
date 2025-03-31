@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách câu hỏi</title>
+  <style>
+        body { font-family: Arial, sans-serif; background-color: #f8f9fa; }
+        .container { width: 60%; margin: auto; }
+
+        .question-container {
+            margin-bottom: 10px;
+            background: white; padding: 10px; border-radius: 5px;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-header {
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; padding: 10px;
+        }
+
+        .answer {
+            display: none; padding: 10px; font-style: italic; font-weight: 600; color: #000000;
+        }
+
+        .title {
+            display: flex; align-items: center; gap: 20px;
+            color: #333; font-weight: 700; padding-top: 20px;
+        }
+
+        .question-number {
+            color: white; width: 24px; height: 24px; display: flex;
+            font-size: 14px; background: #CA161C; align-items: center;
+            border-radius: 50%; justify-content: center; font-weight: bold;
+        }
+
+        .toggle-symbol { font-size: 18px; font-weight: bold; }
+  </style>
+
+  <script>
+    function toggleAnswer(id, symbolId) {
+        var ans = document.getElementById(id);
+        var symbol = document.getElementById(symbolId);
+        var isVisible = ans.style.display === 'block';
+
+        // Đóng tất cả câu trả lời và đặt lại dấu '+'
+        document.querySelectorAll('.answer').forEach(function(answer) {
+            answer.style.display = 'none';
+        });
+        document.querySelectorAll('.toggle-symbol').forEach(function(sym) {
+            sym.textContent = '+';
+        });
+
+        // Nếu câu hỏi đang mở, chỉ đóng nó mà không mở lại
+        if (!isVisible) {
+            ans.style.display = 'block';
+            symbol.textContent = '-';
+        }
+    }
+  </script>
+
+</head>
+<body  th:style="'background: url(' + @{/images/backgroundDesktop.png} + ') no-repeat center center/cover;'">
+<div class="container">
+  <div class="title">
+    <a href="javascript:void(0);" onclick="history.back()"
+       style="text-decoration: none; font-size: 24px; color: #333; font-weight: bold;">
+      &lt;
+    </a>
+    <h2 th:text="${category.name}"></h2>
+  </div>
+
+  <div class="box">
+    <div th:each="question, iterStat : ${questions}" class="question-container">
+      <div class="question-header" th:onclick="|toggleAnswer('ans${question.id}', 'symbol${question.id}')|">
+        <span style="display: flex; align-items: center; gap: 10px;">
+          <span class="question-number" th:text="|${iterStat.count}.|"></span>
+          <span style="color: #000000; font-weight: 600;" th:text="${question.question}"></span>
+        </span>
+        <span class="toggle-symbol" th:id="|symbol${question.id}|">+</span>
+      </div>
+      <div class="answer" th:id="|ans${question.id}|" th:text="${question.answer}"></div>
+    </div>
+  </div>
+
+</div>
+<th:block th:replace="~{chatbox}"></th:block>
+
+</body>
+</html>
