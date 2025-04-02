@@ -21,13 +21,11 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
     @Query("SELECT f FROM Flight f WHERE f.departure = :departure " +
             "AND f.destination = :destination " +
             "AND f.flightType = :flightType " +
-            "AND f.availableSeats >= :availableSeats " +
-            "AND f.departureTime >= :currentTime")
+            "AND f.availableSeats >= :availableSeats " )
     List<Flight> findFlightsByDepartureDestinationAndType(
             @Param("departure") String departure,
             @Param("destination") String destination,
             @Param("flightType") Flight.FlightType flightType,
-            @Param("availableSeats") int availableSeats,
-            @Param("currentTime") LocalDateTime currentTime);
+            @Param("availableSeats") int availableSeats);
 }
 
