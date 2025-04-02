@@ -1,0 +1,104 @@
+
+#home{
+    min-height: 100vh;
+}
+.header-container {
+    font-family: Arial, Helvetica, sans-serif;
+    height: 90px;
+    background-color:  rgba(90, 90, 90, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+.header-left .logo {
+    height: 30px;
+    width: auto;
+    align-items:center;
+}
+.header-right {
+    display: flex;
+    flex-direction: column;
+    margin-right: 50px;
+}
+.user-info {
+    display: flex;
+    justify-content: space-between;
+    align-self: flex-end;
+    gap: 15px;
+    margin-bottom: 1px;
+}
+.user-info .support,
+.user-info .avatar {
+    height: 24px;
+    width: 24px;
+    object-fit: cover;
+}
+
+.support-text, .user-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+}
+
+.header-right nav {
+    display: flex;
+    gap: 15px;
+}
+.header-right nav a {
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 20px;
+    transition: color 0.3s ease-in-out;
+}
+.header-right nav a:hover {
+    color: #e60000;
+}
+.user-info a {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.2s ease-in-out;
+}
+.user-info a:hover {
+    transform: scale(1.05);
+}
+.under-head img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.under-head {
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 510px;
+
+}
+.search-box{
+    position: absolute;
+    bottom: 0;
+    right: 100px;
+    background-color: #DD4F47;
+    border-radius: 8px;
+    z-index: 2;
+}
+.search-box #search-form {
+
+}
+.hidden {
+    display: none;
+}
