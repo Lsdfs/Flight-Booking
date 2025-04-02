@@ -40,6 +40,13 @@ public class Booking {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+
+    @Column(name = "departure_time")
+    private LocalDateTime departureTime;
+
+    @Column(name = "return_time")
+    private LocalDateTime returnTime;
+
     @OneToOne(mappedBy = "booking")
     private Seat seat;
 
@@ -48,7 +55,9 @@ public class Booking {
 
     @OneToOne(mappedBy = "booking")
     private Baggage baggage;
+    private Integer passengerCount;
 
+    // Getters và Setters
     public Long getId() {
         return id;
     }
@@ -129,6 +138,23 @@ public class Booking {
         this.createdAt = createdAt;
     }
 
+    // Getters và Setters cho departureTime và returnTime
+    public LocalDateTime getDepartureTime() {
+        return departureTime;
+    }
+
+    public void setDepartureTime(LocalDateTime departureTime) {
+        this.departureTime = departureTime;
+    }
+
+    public LocalDateTime getReturnTime() {
+        return returnTime;
+    }
+
+    public void setReturnTime(LocalDateTime returnTime) {
+        this.returnTime = returnTime;
+    }
+
     public Seat getSeat() {
         return seat;
     }
@@ -151,6 +177,14 @@ public class Booking {
 
     public void setBaggage(Baggage baggage) {
         this.baggage = baggage;
+    }
+
+    public void setPassengerCount(Integer passengerCount) {
+        this.passengerCount = passengerCount;
+    }
+
+    public Integer getPassengerCount() {
+        return passengerCount;
     }
 
     public enum Status { PENDING, CONFIRMED, CANCELLED }
