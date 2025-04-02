@@ -5,8 +5,258 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Flight</title>
     <link rel="stylesheet" href="/static/css/searchFlight.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .flight-list {
+            width: 65%;
+        }
+        .price-summary {
+            width: 30%;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .price-summary h3 {
+            margin-top: 0;
+            color: #ff6200;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .total-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff6200;
+        }
+        .booked-flight {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
-<h1>Welcome to search flight!</h1>
+<h1>Search Results</h1>
+<!--Return -->
+<a href="/flight/" onclick="return confirm('Are you sure you want to go back? Other options will be lost.');">
+    <button>Return</button>
+</a>
+<div id="error" class="error" th:text="${error}"></div>
+<div>
+    <p><strong>Departure:</strong> <span th:text="${departure}"></span></p>
+    <p><strong>Destination:</strong> <span th:text="${destination}"></span></p>
+    <p><strong>Ticket Type:</strong> <span th:text="${ticketType}"></span></p>
+    <p><strong>Passengers:</strong> <span th:text="${passengers}"></span></p>
+    <p><strong>Number of selected ticket</strong> <span id="bookedCount" th:text="${bookedCount != null ? bookedCount : 0}"></span></p>
+    <p><strong>Selected Departure Date:</strong>
+        <span th:text="${departureTime != null ? departureTime : '-'}"></span>
+    </p>
+    <p th:if="${ticketType == 'round-trip'}">
+        <strong>Selected Return Date:</strong>
+        <span th:text="${returnTime != null ? returnTime : '-'}"></span>
+    </p>
+</div>
+
+<div class="container">
+    <!--Departure Flights Part-->
+    <div class="flight-list">
+        <h2>Departure Flights</h2>
+        <div th:each="entry : ${departureFlightsByTimeFrame}">
+            <h3 th:text="${entry.key}"></h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Airline</th>
+                    <th>Departure Time</th>
+                    <th>Arrival Time</th>
+                    <th>Price</th>
+                    <th>Available Seats</th>
+                    <th>Select</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="flight : ${entry.value}"
+                    th:if="${#temporals.format(flight.departureTime, 'yyyy-MM-dd') == departureTime}">
+                    <td th:text="${flight.airline}"></td>
+                    <td th:text="${flight.departureTime != null ? #temporals.format(flight.departureTime, 'dd-MM-yyyy HH:mm') : '-'}"></td>
+                    <td th:text="${flight.departureTime != null ? #temporals.format(flight.departureTime.plusHours(2), 'dd-MM-yyyy HH:mm') : '-'}"></td>
+                    <td th:text="${flight.price} + ' VNĐ'"></td>
+                    <td th:id="'seats-' + ${flight.id}" th:text="${flight.availableSeats}"></td>
+                    <td>
+                        <form class="book-form" method="post">
+                            <input type="hidden" name="flightId" th:value="${flight.id}" />
+                            <input type="hidden" name="departureTime" th:value="${departureTime}" />
+                            <input type="hidden" name="returnTime" th:value="${ticketType == 'round-trip' ? returnTime : ''}" />
+                            <input type="hidden" name="passengers" th:value="${passengers}" />
+                            <input type="hidden" name="ticketType" th:value="${ticketType}" />
+                            <button type="submit" th:disabled="${flight.availableSeats == 0}">Book</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--Return Flights Part-->
+        <div th:if="${ticketType == 'round-trip'}">
+            <h2>Return Flights</h2>
+            <div th:each="entry : ${returnFlightsByTimeFrame}">
+                <h3 th:text="${entry.key}"></h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Airline</th>
+                        <th>Return Departure Time</th>
+                        <th>Return Arrival Time</th>
+                        <th>Price</th>
+                        <th>Available Seats</th>
+                        <th>Select</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="flight : ${entry.value}"
+                        th:if="${#temporals.format(flight.departureTime, 'yyyy-MM-dd') == returnTime}">
+                        <td th:text="${flight.airline}"></td>
+                        <td th:text="${flight.departureTime != null ? #temporals.format(flight.departureTime, 'dd-MM-yyyy HH:mm') : '-'}"></td>
+                        <td th:text="${flight.departureTime != null ? #temporals.format(flight.departureTime.plusHours(2), 'dd-MM-yyyy HH:mm') : '-'}"></td>
+                        <td th:text="${flight.price} + ' VNĐ'"></td>
+                        <td th:id="'seats-' + ${flight.id}" th:text="${flight.availableSeats}"></td>
+                        <td>
+                            <form class="book-form" method="post">
+                                <input type="hidden" name="flightId" th:value="${flight.id}" />
+                                <input type="hidden" name="departureTime" th:value="${departureTime}" />
+                                <input type="hidden" name="returnTime" th:value="${returnTime}" />
+                                <input type="hidden" name="passengers" th:value="${passengers}" />
+                                <input type="hidden" name="ticketType" th:value="${ticketType}" />
+                                <button type="submit" th:disabled="${flight.availableSeats == 0}">Book</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tổng hợp giá -->
+    <div class="price-summary">
+        <h3>Summary Price</h3>
+        <div id="priceDetails">
+            <p><strong>Number of ticket:</strong> <span id="bookedCountDisplay" th:text="${bookedCount != null ? bookedCount : 0}"></span></p>
+            <p><strong>Total price:</strong> <span id="totalPrice" class="total-price">0 VNĐ</span></p>
+            <div id="bookedFlights"></div>
+        </div>
+        <form action="/flight/next" method="post">
+            <input type="hidden" name="passengers" th:value="${passengers}" />
+            <input type="hidden" name="ticketType" th:value="${ticketType}" />
+            <button type="submit" id="nextButton" th:disabled="${bookedCount == null || bookedCount lt adjustedPassengers}">Next</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        var totalPrice = 0;
+
+
+        $('.book-form').on('submit', function(e) {
+            e.preventDefault();
+            var form = $(this);
+
+            $.ajax({
+                url: '/flight/book',
+                type: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Update the number of seat.
+                        var flightId = form.find('input[name="flightId"]').val();
+                        var seatsElement = $('#seats-' + flightId);
+                        var newSeats = parseInt(seatsElement.text()) - 1;
+                        seatsElement.text(newSeats);
+
+                        // Update selected ticket number.
+                        var bookedCount = response.bookedCount;
+                        $('#bookedCount').text(bookedCount);
+                        $('#bookedCountDisplay').text(bookedCount);
+
+
+                        totalPrice += response.price;
+                        $('#totalPrice').text(totalPrice + ' VNĐ');
+
+
+                        $('#bookedFlights').append(
+                            '<div class="booked-flight" id="booked-' + flightId + '">' +
+                            response.airline + ' - ' + response.departureTime +
+                            ' <button onclick="cancelFlight(' + flightId + ', ' + response.price + ')">Hủy</button>' +
+                            '</div>'
+                        );
+
+
+                        var passengers = parseInt($('input[name="passengers"]').val());
+                        var ticketType = $('input[name="ticketType"]').val();
+                        var requiredTickets = ticketType === 'round-trip' ? passengers * 2 : passengers;
+                        $('#nextButton').prop('disabled', bookedCount < requiredTickets);
+
+                        $('#error').text('');
+                    } else {
+                        $('#error').text(response.error);
+                    }
+                },
+                error: function() {
+                    $('#error').text('Đã xảy ra lỗi khi đặt vé.');
+                }
+            });
+        });
+
+        // Hàm hủy vé
+        window.cancelFlight = function(flightId, price) {
+            $.ajax({
+                url: '/flight/cancel',
+                type: 'POST',
+                data: { flightId: flightId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Update number of seat.
+                        var seatsElement = $('#seats-' + flightId);
+                        var newSeats = parseInt(seatsElement.text()) + 1;
+                        seatsElement.text(newSeats);
+
+                        // Update selected ticket.
+                        var bookedCount = response.bookedCount;
+                        $('#bookedCount').text(bookedCount);
+                        $('#bookedCountDisplay').text(bookedCount);
+
+                        // Decrease the total of price.
+                        totalPrice -= price;
+                        $('#totalPrice').text(totalPrice + ' VNĐ');
+
+                        // Delete flight from list.
+                        $('#booked-' + flightId).remove();
+
+                        // Update status "Next" button.
+                        var passengers = parseInt($('input[name="passengers"]').val());
+                        var ticketType = $('input[name="ticketType"]').val();
+                        var requiredTickets = ticketType === 'round-trip' ? passengers * 2 : passengers;
+                        $('#nextButton').prop('disabled', bookedCount < requiredTickets);
+
+                        $('#error').text('');
+                    } else {
+                        $('#error').text(response.error);
+                    }
+                },
+                error: function() {
+                    $('#error').text('An error occurred while processing the ticket!');
+                }
+            });
+        };
+    });
+</script>
+
 </body>
 </html>
