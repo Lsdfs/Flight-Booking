@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,7 +25,6 @@ public class User {
     @Pattern(regexp = "\\d{10,}", message = "Phone number must be at least 10 digits, no character allowed")
     @Column(unique=true)
     private String phoneNumber;
-
 
     @NotBlank(message = "Password is mandatory")
     @Size(min = 6, message = "Password must be at least 6 characters")
@@ -62,6 +62,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private RoleType role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Booking> bookings = new ArrayList<>();
 
     /// Contructor rỗng
     public User() {
@@ -170,5 +173,13 @@ public class User {
 
     public void setGmail(String gmail) {
         this.gmail = gmail;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

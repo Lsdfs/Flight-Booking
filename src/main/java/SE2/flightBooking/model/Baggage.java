@@ -9,17 +9,19 @@ public class Baggage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private int weight;
+    @Column(name = "weight", nullable = false)
+    private double weight;
 
-    @Column(nullable = false)
+    @Column(name = "price", nullable = false)
     private double price;
 
+    @Column(name = "stock", nullable = false)
+    private int stock = 100;
+
+    @Column(name = "image")
     private String image;
 
-    @OneToOne
-    @JoinColumn(name = "booking_id")
-    private Booking booking;
+    public Baggage() {}
 
     public Long getId() {
         return id;
@@ -29,11 +31,11 @@ public class Baggage {
         this.id = id;
     }
 
-    public int getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 
@@ -45,19 +47,19 @@ public class Baggage {
         this.price = price;
     }
 
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
     public String getImage() {
         return image;
     }
 
     public void setImage(String image) {
         this.image = image;
-    }
-
-    public Booking getBooking() {
-        return booking;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
     }
 }

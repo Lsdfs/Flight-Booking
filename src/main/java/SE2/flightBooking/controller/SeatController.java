@@ -1,64 +1,134 @@
 package SE2.flightBooking.controller;
 
-import SE2.flightBooking.model.*;
-import SE2.flightBooking.repository.*;
+import SE2.flightBooking.model.Booking;
+import SE2.flightBooking.model.Flight;
+import SE2.flightBooking.model.Seat;
+import SE2.flightBooking.repository.BookingRepository;
+import SE2.flightBooking.repository.FlightRepository;
+import SE2.flightBooking.service.SeatService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/seat")
 public class SeatController {
-    private final BookingRepository bookingRepository;
-    private final SeatRepository seatRepository;
 
-    public SeatController(BookingRepository bookingRepository, SeatRepository seatRepository) {
-        this.bookingRepository = bookingRepository;
-        this.seatRepository = seatRepository;
-    }
+    @Autowired
+    private SeatService seatService;
 
-    @GetMapping("/seats")
-    public String getSeats(Model model) {
-        List<Seat> seats = seatRepository.findAll();
-        model.addAttribute("seats", seats);
-        return "option/fragments";
-    }
+    @Autowired
+    private BookingRepository bookingRepository;
 
-    @PostMapping("/select")
-    public String selectSeat(@RequestParam Long bookingId, @RequestParam Long seatId, @RequestParam boolean applyToReturn, Model model) {
+    @Autowired
+    private FlightRepository flightRepository;
+
+    @GetMapping("/select")
+    public String selectSeats(@RequestParam Long bookingId, @RequestParam Long flightId,
+                              @RequestParam String applyToReturnTrip, Model model) {
         Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
-        Optional<Seat> seatOpt = seatRepository.findById(seatId);
+        Optional<Flight> flightOpt = flightRepository.findById(flightId);
 
-        if (bookingOpt.isEmpty() || seatOpt.isEmpty()) {
-            model.addAttribute("error", "Booking or Seat not found");
-            return "redirect:/booking/" + bookingId;
+        if (bookingOpt.isEmpty() || flightOpt.isEmpty()) {
+            model.addAttribute("error", "Booking or flight not found.");
+            return "error/notFoundError";
         }
 
         Booking booking = bookingOpt.get();
-        Seat seat = seatOpt.get();
-        if (seat.getStatus() != Seat.Status.AVAILABLE) {
-            model.addAttribute("error", "This seat has been selected");
-            return "redirect:/booking/" + bookingId;
-        }
-        seat.setBooking(booking);
-        seat.setStatus(Seat.Status.OCCUPIED);
-        booking.setSeat(seat);
+        Flight departFlight = flightOpt.get();
+        List<Seat> departSeats = seatService.getAvailableSeatsForFlight(departFlight);
+        List<Long> selectedDepartSeats = new ArrayList<>();
+        List<Seat> returnSeats = new ArrayList<>();
+        List<Long> selectedReturnSeats = new ArrayList<>();
+        String passengerName = booking.getUser().getLastName() + " " + booking.getUser().getFirstName();
 
-        if (applyToReturn && booking.getReturnFlightId() != null) {
-            Optional<Seat> returnSeatOpt = seatRepository.findById(seatId);
-            if (returnSeatOpt.isPresent()) {
-                Seat returnSeat = returnSeatOpt.get();
-                returnSeat.setStatus(Seat.Status.OCCUPIED);
-                seatRepository.save(returnSeat);
+        if ("yes".equals(applyToReturnTrip) && booking.getFlights().size() > 1) {
+            Long returnFlightId = booking.getFlights().get(1).getId();
+            Optional<Flight> returnFlightOpt = flightRepository.findById(returnFlightId);
+            if (returnFlightOpt.isPresent()) {
+                returnSeats = seatService.getAvailableSeatsForFlight(returnFlightOpt.get());
             }
         }
 
-        seatRepository.save(seat);
+        model.addAttribute("bookingId", bookingId);
+        model.addAttribute("booking", booking);
+        model.addAttribute("departFlight", departFlight);
+        model.addAttribute("departSeats", departSeats);
+        model.addAttribute("selectedDepartSeats", selectedDepartSeats);
+        model.addAttribute("returnSeats", returnSeats);
+        model.addAttribute("selectedReturnSeats", selectedReturnSeats);
+        model.addAttribute("applyToReturnTrip", applyToReturnTrip);
+        model.addAttribute("passengerName", passengerName);
+
+        return "option/seat";
+    }
+
+    @PostMapping("/save")
+    public String saveSeats(@RequestParam Long bookingId,
+                            @RequestParam Long flightId,
+                            @RequestParam String applyToReturnTrip,
+                            @RequestParam(required = false) List<Long> departSeatIds,
+                            @RequestParam(required = false) List<Long> returnSeatIds,
+                            Model model) {
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+        Optional<Flight> flightOpt = flightRepository.findById(flightId);
+
+        if (bookingOpt.isEmpty() || flightOpt.isEmpty()) {
+            return "redirect:/error?message=Booking or flight not found.";
+        }
+
+        Booking booking = bookingOpt.get();
+        Flight departFlight = flightOpt.get();
+
+        if (departSeatIds != null && !departSeatIds.isEmpty()) {
+            for (Long seatId : departSeatIds) {
+                Optional<Seat> seatOpt = seatService.findById(seatId);
+                if (seatOpt.isPresent()) {
+                    Seat seat = seatOpt.get();
+                    seatService.assignSeatToBooking(seat);
+                    booking.addSeat(seat);
+                }
+            }
+        }
+
+        if ("yes".equals(applyToReturnTrip)) {
+            if (booking.getFlights().size() <= 1) {
+                model.addAttribute("error", "Cannot apply seats to return trip: No return flight found.");
+                model.addAttribute("bookingId", bookingId);
+                model.addAttribute("booking", booking);
+                model.addAttribute("departFlight", departFlight);
+                model.addAttribute("departSeats", seatService.getAvailableSeatsForFlight(departFlight));
+                model.addAttribute("selectedDepartSeats", departSeatIds != null ? departSeatIds : new ArrayList<>());
+                model.addAttribute("returnSeats", new ArrayList<>());
+                model.addAttribute("selectedReturnSeats", new ArrayList<>());
+                model.addAttribute("applyToReturnTrip", applyToReturnTrip);
+                return "option/seat";
+            }
+
+            Long returnFlightId = booking.getFlights().get(1).getId();
+            Optional<Flight> returnFlightOpt = flightRepository.findById(returnFlightId);
+            if (returnFlightOpt.isPresent() && returnSeatIds != null && !returnSeatIds.isEmpty()) {
+                Flight returnFlight = returnFlightOpt.get();
+                List<Seat> availableReturnSeats = seatService.getAvailableSeatsForFlight(returnFlight);
+                for (Long seatId : returnSeatIds) {
+                    Optional<Seat> seatOpt = seatService.findById(seatId);
+                    if (seatOpt.isPresent() && availableReturnSeats.contains(seatOpt.get())) {
+                        Seat seat = seatOpt.get();
+                        seatService.assignSeatToBooking(seat);
+                        booking.addSeat(seat);
+                    }
+                }
+            }
+        }
+
+        booking.calculateTotalPrice();
         bookingRepository.save(booking);
-        if (seat.getPrice() > 0) return "redirect:/payment?bookingId=" + bookingId;
-        return "redirect:/booking/" + bookingId;
+
+        return "redirect:/booking/services?bookingId=" + bookingId;
     }
 }

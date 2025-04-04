@@ -1,58 +1,61 @@
 package SE2.flightBooking.controller;
 
-import SE2.flightBooking.model.*;
-import SE2.flightBooking.repository.*;
+import SE2.flightBooking.model.Booking;
+import SE2.flightBooking.repository.BookingRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/booking")
 public class BookingController {
-    private final BookingRepository bookingRepository;
-    private final SeatRepository seatRepository;
-    private final MealRepository mealRepository;
-    private final BaggageRepository baggageRepository;
 
-    public BookingController(BookingRepository bookingRepository, SeatRepository seatRepository,
-                             MealRepository mealRepository, BaggageRepository baggageRepository) {
-        this.bookingRepository = bookingRepository;
-        this.seatRepository = seatRepository;
-        this.mealRepository = mealRepository;
-        this.baggageRepository = baggageRepository;
-    }
+    @Autowired
+    private BookingRepository bookingRepository;
 
-    @GetMapping("/{bookingId}")
-    public String showBookingOptions(@PathVariable Long bookingId, Model model) {
+    @GetMapping("/services")
+    public String showServices(@RequestParam Long bookingId, Model model) {
         Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
         if (bookingOpt.isEmpty()) {
-            model.addAttribute("error", "Booking ID not found.");
-            return "error/NotFoundError";
+            model.addAttribute("error", "Booking not found.");
+            return "error/notFoundError";
         }
+
         Booking booking = bookingOpt.get();
-        model.addAttribute("seats", seatRepository.findByFlightIdAndStatus(booking.getFlightId(), Seat.Status.AVAILABLE));
-        model.addAttribute("meals", mealRepository.findAll());
-        model.addAttribute("baggages", baggageRepository.findAll());
-        model.addAttribute("bookingId", bookingId);
-        model.addAttribute("isRoundTrip", booking.getReturnFlightId() != null);
+        model.addAttribute("booking", booking);
         return "option/option";
     }
 
-    @GetMapping("/services")
-    public String showServicesPage() {
-        return "option/services";
-    }
-
-    @PostMapping("/services")
-    public String validateBooking(@RequestParam String bookingCode, Model model) {
-        Optional<Booking> bookingOpt = bookingRepository.findByBookingCode(bookingCode);
+    @GetMapping("/payment")
+    public String showPayment(@RequestParam Long bookingId, Model model) {
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
         if (bookingOpt.isEmpty()) {
-            model.addAttribute("error", "Not found active trip");
-            return "option/services";
+            model.addAttribute("error", "Booking not found.");
+            return "error/notFoundError";
         }
-        return "redirect:/booking/" + bookingOpt.get().getId();
+
+        Booking booking = bookingOpt.get();
+        model.addAttribute("booking", booking);
+        return "payment";
     }
 
+    @PostMapping("/confirm")
+    public String confirmBooking(@RequestParam Long bookingId, @RequestParam String cardNumber, @RequestParam String cardHolderName, @RequestParam String expiryDate, @RequestParam String cvv, Model model) {
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+        if (bookingOpt.isEmpty()) {
+            model.addAttribute("error", "Booking not found.");
+            return "error/notFoundError";
+        }
 
+        Booking booking = bookingOpt.get();
+        booking.setStatus(Booking.BookingStatus.CONFIRMED);
+        bookingRepository.save(booking);
+
+        model.addAttribute("message", "Booking confirmed successfully!");
+        model.addAttribute("booking", booking);
+        return "confirmation";
+    }
 }

@@ -5,12 +5,14 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "seat")
 public class Seat {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "flight_id", nullable = false)
-    private Long flightId;
+    @ManyToOne
+    @JoinColumn(name = "flight_id", nullable = false)
+    private Flight flight;
 
     @Column(name = "seat_number", nullable = false)
     private String seatNumber;
@@ -18,25 +20,43 @@ public class Seat {
     @Column(name = "row_id", nullable = false)
     private int rowId;
 
-    @Column(name = "column_letter", nullable = false)
-    private char columnLetter;
+    @Column(name = "column_letter", nullable = false, length = 1)
+    private String columnLetter;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "seat_class", nullable = false)
     private SeatClass seatClass;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status = Status.AVAILABLE;
+    @Column(name = "status", nullable = false)
+    private SeatStatus status = SeatStatus.AVAILABLE;
 
-    @Column(nullable = false)
+    @Column(name = "price", nullable = false)
     private double price;
 
+    @Column(name = "image")
     private String image;
 
-    @OneToOne
-    @JoinColumn(name = "booking_id")
-    private Booking booking;
+    public enum SeatClass {
+        PREMIUM, STANDARD, EXTRA_LEGROOM, FRONT_ROW
+    }
+
+    public enum SeatStatus {
+        AVAILABLE, OCCUPIED, SELECTING
+    }
+
+    public Seat() {
+
+    }
+
+    public Seat(Flight flight, String seatNumber, int rowId, String columnLetter, SeatClass seatClass, double price) {
+        this.flight = flight;
+        this.seatNumber = seatNumber;
+        this.rowId = rowId;
+        this.columnLetter = columnLetter;
+        this.seatClass = seatClass;
+        this.price = price;
+    }
 
     public Long getId() {
         return id;
@@ -46,12 +66,12 @@ public class Seat {
         this.id = id;
     }
 
-    public Long getFlightId() {
-        return flightId;
+    public Flight getFlight() {
+        return flight;
     }
 
-    public void setFlightId(Long flightId) {
-        this.flightId = flightId;
+    public void setFlight(Flight flight) {
+        this.flight = flight;
     }
 
     public String getSeatNumber() {
@@ -70,11 +90,11 @@ public class Seat {
         this.rowId = rowId;
     }
 
-    public char getColumnLetter() {
+    public String getColumnLetter() {
         return columnLetter;
     }
 
-    public void setColumnLetter(char columnLetter) {
+    public void setColumnLetter(String columnLetter) {
         this.columnLetter = columnLetter;
     }
 
@@ -86,11 +106,11 @@ public class Seat {
         this.seatClass = seatClass;
     }
 
-    public Status getStatus() {
+    public SeatStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(SeatStatus status) {
         this.status = status;
     }
 
@@ -109,15 +129,4 @@ public class Seat {
     public void setImage(String image) {
         this.image = image;
     }
-
-    public Booking getBooking() {
-        return booking;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
-    }
-
-    public enum SeatClass { PREMIUM, STANDARD, EXTRA_LEGROOM, FRONT_ROW }
-    public enum Status { AVAILABLE, OCCUPIED, SELECTING }
 }
