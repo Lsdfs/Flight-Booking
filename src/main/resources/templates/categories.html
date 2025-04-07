@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Câu hỏi thường gặp</title>
+  <style>
+        body { font-weight: 700; font-family: KoHo, sans-serif; text-align: center; scroll-behavior: smooth; }
+        .container { width: 80%; margin: auto; }
+        .grid { display: grid; gap: 24px; justify-content: center;grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .box { flex-direction: column; width: 100%; border: 0.5px solid #CA161C33; cursor: pointer; display: flex ; background: #FEFAFA; box-shadow: 0px 3px 12px 0px rgba(0, 31, 62, 0.08); min-height: 139px; align-items: center; border-radius: 8px; justify-content: center; }
+        .box:hover { outline: 3px solid #CA161C; border: 0.5px solid #CA161C33; box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1); border-radius: 8px; }
+        .icon { width: 34.62px; height: 34.62px; max-width: 34.62px; object-fit: contain; margin-bottom: 11.54px; }
+    </style>
+</head>
+<body  th:style="'background: url(' + @{/images/backgroundDesktop.png} + ') no-repeat center center/cover;'">
+<div class="container">
+  <h2>Câu hỏi thường gặp</h2>
+  <div class="grid">
+    <div class="box" th:each="category : ${categories}">
+      <img th:src="@{/images/faq.png}" alt="icon" class="icon">
+      <a th:href="@{/faq/questions/{categoryId}(categoryId=${category.id})}"
+         th:text="${category.name}" style="text-decoration:none; color: #000000">
+      </a>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{chatbox}"></th:block>
+
+</body>
+</html>
