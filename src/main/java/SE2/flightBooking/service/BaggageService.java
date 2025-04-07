@@ -1,8 +1,6 @@
 package SE2.flightBooking.service;
 
-import SE2.flightBooking.model.Booking;
-import SE2.flightBooking.model.BookingBaggage;
-import SE2.flightBooking.model.Baggage;
+import SE2.flightBooking.model.*;
 import SE2.flightBooking.repository.BaggageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,22 +21,28 @@ public class BaggageService {
 
     @Transactional
     public void addBaggageToBooking(Booking booking, Baggage baggage, Long flightId, int quantity) {
-        if (booking == null || baggage == null) {
-            throw new IllegalArgumentException("Booking and Baggage cannot be null.");
+        if (booking == null || baggage == null || flightId == null) {
+            throw new IllegalArgumentException("Booking, baggage, or flightId cannot be null.");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive.");
         }
         if (baggage.getStock() < quantity) {
-            throw new IllegalStateException("Not found baggage.");
+            throw new IllegalStateException("Insufficient stock for baggage: " + baggage.getWeight());
         }
+
         baggage.setStock(baggage.getStock() - quantity);
         baggageRepository.save(baggage);
-
         booking.addBaggage(baggage, flightId, quantity);
     }
 
     @Transactional
     public void removeBaggageFromBooking(Booking booking, BookingBaggage bookingBaggage) {
         if (booking == null || bookingBaggage == null) {
-            throw new IllegalArgumentException("Booking and Baggage cannot be null.");
+            throw new IllegalArgumentException("Booking or BookingBaggage cannot be null.");
+        }
+        if (!booking.getBookingBaggage().contains(bookingBaggage)) {
+            throw new IllegalStateException("BookingBaggage does not belong to this booking.");
         }
 
         Baggage baggage = bookingBaggage.getBaggage();
