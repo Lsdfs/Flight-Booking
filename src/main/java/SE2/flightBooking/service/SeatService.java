@@ -23,20 +23,29 @@ public class SeatService {
     }
 
     @Transactional
-    public void assignSeatToBooking(Seat seat) {
-        if (seat == null) {
-            throw new IllegalArgumentException("Seat cannot be null.");
+    public void assignSeatToBooking(Booking booking, Seat seat) {
+        if (booking == null || seat == null) {
+            throw new IllegalArgumentException("Booking or seat cannot be null.");
+        }
+        if (seat.getStatus() != Seat.SeatStatus.AVAILABLE) {
+            throw new IllegalStateException("Seat is not available for assignment.");
         }
         seat.setStatus(Seat.SeatStatus.OCCUPIED);
+        booking.addSeat(seat); // Gán ghế vào booking
         seatRepository.save(seat);
     }
 
     @Transactional
     public void releaseSeat(Booking booking, Seat seat) {
-        if (seat == null || seat.getStatus() != Seat.SeatStatus.OCCUPIED) {
-            throw new IllegalArgumentException("Seat cannot be null.");
+        if (booking == null || seat == null) {
+            throw new IllegalArgumentException("Booking or seat cannot be null.");
         }
-
+        if (seat.getStatus() != Seat.SeatStatus.OCCUPIED) {
+            throw new IllegalStateException("Seat is not occupied.");
+        }
+        if (!booking.getSeats().contains(seat)) {
+            throw new IllegalStateException("Seat does not belong to this booking.");
+        }
         booking.getSeats().remove(seat);
         seat.setStatus(Seat.SeatStatus.AVAILABLE);
         seatRepository.save(seat);

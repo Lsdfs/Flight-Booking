@@ -12,6 +12,9 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "reservation_code", nullable = false)
+    private String reservationCode;
+
     @Column(name = "booking_date", nullable = false)
     private LocalDateTime bookingDate;
 
@@ -66,6 +69,14 @@ public class Booking {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getReservationCode() {
+        return reservationCode;
+    }
+
+    public void setReservationCode(String reservationCode) {
+        this.reservationCode = reservationCode;
     }
 
     public LocalDateTime getBookingDate() {

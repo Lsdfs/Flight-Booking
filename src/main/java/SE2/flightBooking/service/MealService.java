@@ -1,8 +1,6 @@
 package SE2.flightBooking.service;
 
-import SE2.flightBooking.model.Booking;
-import SE2.flightBooking.model.BookingMeal;
-import SE2.flightBooking.model.Meal;
+import SE2.flightBooking.model.*;
 import SE2.flightBooking.repository.MealRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,27 +21,33 @@ public class MealService {
 
     @Transactional
     public void addMealToBooking(Booking booking, Meal meal, Long flightId, int quantity) {
-        if (meal == null) {
-            throw new IllegalArgumentException("Meal cannot be null.");
+        if (booking == null || meal == null || flightId == null) {
+            throw new IllegalArgumentException("Booking, meal, or flightId cannot be null.");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive.");
         }
         if (meal.getStock() < quantity) {
-            throw new IllegalStateException("Not found meals.");
+            throw new IllegalStateException("Insufficient stock for meal: " + meal.getName());
         }
+
         meal.setStock(meal.getStock() - quantity);
         mealRepository.save(meal);
-
         booking.addMeal(meal, flightId, quantity);
     }
 
     @Transactional
     public void removeMealFromBooking(Booking booking, BookingMeal bookingMeal) {
-        if (bookingMeal == null || booking == null) {
+        if (booking == null || bookingMeal == null) {
             throw new IllegalArgumentException("Booking or BookingMeal cannot be null.");
         }
+        if (!booking.getBookingMeals().contains(bookingMeal)) {
+            throw new IllegalStateException("BookingMeal does not belong to this booking.");
+        }
+
         Meal meal = bookingMeal.getMeal();
         meal.setStock(meal.getStock() + bookingMeal.getQuantity());
         mealRepository.save(meal);
-
         booking.getBookingMeals().remove(bookingMeal);
     }
 

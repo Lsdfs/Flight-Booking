@@ -15,6 +15,7 @@ CREATE TABLE if not exists booking (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     booking_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     passenger_count INT NOT NULL,
+    reservation_code INT NOT NULL,
     total_price DOUBLE NOT NULL,
     status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'PAID') NOT NULL DEFAULT 'PENDING',
     user_id BIGINT NOT NULL,
