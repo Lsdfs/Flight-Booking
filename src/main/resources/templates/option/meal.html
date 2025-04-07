@@ -153,7 +153,7 @@
                             <span th:id="'depart-quantity-' + ${meal.id}" class="quantity">0</span>
                             <input type="hidden" th:name="'departMeals[' + ${meal.id} + ']'"
                                    th:id="'depart-' + ${meal.id}" value="0"/>
-                            <button type="button" th:onclick="'updateQuantity(\'depart-' + ${meal.id} + '\', 1)'">+</button>
+                            <button type="button" th:onclick="'updateQuantity(\'depart-' + ${meal.id} + '\', -1)'">-</button>
                         </div>
                     </div>
                 </div>
@@ -161,7 +161,7 @@
         </div>
 
         <div id="returnMeal" class="hidden" th:if="${returnFlight != null}">
-            <div class="passenger-info" th:if="${returnFlight != null}">
+            <div class="passenger-info">
                 <p th:text="${passengerName}"></p>
                 <p th:text="${returnFlight.departure} + ' - ' + ${returnFlight.destination}"></p>
             </div>
@@ -172,8 +172,7 @@
             </div>
             <div th:unless="${#lists.isEmpty(mealOptions)}">
                 <div th:each="meal : ${mealOptions}" class="meal-option">
-                    <img th:src="@{'image/' + ${meal.image}}" class="meal-image"
-                         th:alt="${meal.name}"/>
+                    <img th:src="@{'image/' + ${meal.image}}" class="meal-image" th:alt="${meal.name}"/>
 
                     <div class="meal-details">
                         <h4 th:text="${meal.name}"></h4>
@@ -204,7 +203,7 @@
         const input = document.getElementById(inputId);
         const quantityDisplay = document.getElementById(inputId.replace(/(depart|return)-/, '$1-quantity-'));
         let quantity = parseInt(input.value) + change;
-        quantity = Math.max(0, quantity);
+        quantity = Math.max(0, quantity); // Prevent negative quantities
         input.value = quantity.toString();
         quantityDisplay.textContent = quantity.toString();
     }
@@ -239,7 +238,7 @@
             return;
         }
 
-        const returnFlightExists = /*[(${returnFlight != null})]*/ false;
+        const returnFlightExists = document.getElementById('returnMeal').style.display !== 'none';
         const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
 
         if (applyToReturnTrip === 'yes' && returnFlightExists) {

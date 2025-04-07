@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>Choose Your Preferred Seat</title>
+    <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf != null}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf != null}"/>
     <style>
         .modal {
             position: fixed;
@@ -37,11 +39,25 @@
             padding: 10px 20px;
             cursor: pointer;
             border-bottom: 2px solid transparent;
+            position: relative;
         }
 
         .tab.active {
             border-bottom: 2px solid #ff0000;
             font-weight: bold;
+        }
+
+        .tab[data-selection-count]:not([data-selection-count="0"])::after {
+            content: attr(data-selection-count);
+            background: #ff0000;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
         }
 
         .passenger-info {
@@ -157,13 +173,23 @@
             cursor: pointer;
         }
 
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
         button.no-thanks {
             background: #ffc107;
             color: black;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             opacity: 0.9;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -177,54 +203,21 @@
 <div th:fragment="seatModal" id="seatModal" class="modal">
     <button class="close-btn" onclick="closeModal('seatModal')">X</button>
     <h2>Choose Your Preferred Seat</h2>
+    <div th:if="${error != null}" th:text="${error}" class="error-message"></div>
     <form id="seatForm" th:action="@{/seat/save}" method="post">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
         <input type="hidden" name="bookingId" th:value="${bookingId}"/>
-        <input type="hidden" name="flightId" th:value="${departFlight.id}"/>
+        <input type="hidden" name="flightId" th:value="${departFlight?.id}"/>
         <input type="hidden" id="applyToReturnTrip" name="applyToReturnTrip" th:value="${applyToReturnTrip}"/>
         <div class="tab-container" id="seatTabs">
-            <div class="tab active" onclick="changeTab('seat', 'depart')">Depart trip</div>
-            <div class="tab" id="returnSeatTab" onclick="changeTab('seat', 'return')">Return trip</div>
+            <div class="tab active" onclick="changeTab('seat', 'depart')" data-selection-count="0">Depart trip</div>
+            <div class="tab" id="returnSeatTab" onclick="changeTab('seat', 'return')" data-selection-count="0">Return trip</div>
         </div>
 
         <div id="departSeat">
             <div class="passenger-info">
-                <p th:text="${passengerName}"></p>
-                <p th:text="${departFlight.departure} + ' - ' + ${departFlight.destination}"></p>
-            </div>
-            <div class="priority-info">
-                <p>Your ticket class gets priority to choose Premium seat for free.</p>
-            </div>
-            <div class="seat-labels">
-                <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span>
-            </div>
-            <div th:each="seat : ${departSeats}"
-                 th:classappend="'seat ' +
-                    (${seat.seatClass.name() == 'PREMIUM'} ? 'premium' :
-                    (${seat.seatClass.name() == 'STANDARD'} ? 'standard' :
-                    (${seat.seatClass.name() == 'EXTRA_LEGROOM'} ? 'extra-legroom' : 'front-row')))
-                    + (${seat.status.name() == 'OCCUPIED'} ? ' occupied' : '')
-                    + (${#lists.contains(selectedDepartSeats, seat.id)} ? ' selecting' : '')"
-
-                 th:onclick="${seat.status.name() == 'OCCUPIED'} ? '' : 'toggleSeat(\'depart\', ' + ${seat.id} + ')'"
-
-                 th:text="${#strings.endsWith(seat.seatNumber, '1') || #strings.endsWith(seat.seatNumber, '2')}
-                            ? ${#strings.substring(seat.seatNumber, 1)} : ''">
-            </div>
-            <div class="seat-legend">
-                <div class="legend-item"><div style="background: #ff0000;"></div><span>Premium seat</span></div>
-                <div class="legend-item"><div style="background: #28a745;"></div><span>Standard seat</span></div>
-                <div class="legend-item"><div style="background: #00b7eb;"></div><span>Extra legroom seat</span></div>
-                <div class="legend-item"><div style="background: #6f42c1;"></div><span>Front row seat</span></div>
-                <div class="legend-item"><div style="background: #ffc107;"></div><span>Selecting seat</span></div>
-                <div class="legend-item"><div style="background: #ccc;"></div><span>Occupied seat</span></div>
-            </div>
-            <div id="departSeatInputs"></div>
-        </div>
-
-        <div id="returnSeat" class="hidden">
-            <div class="passenger-info">
-                <p th:text="${passengerName}"></p>
-                <p th:if="${#lists.size(booking.flights) > 1}" th:text="${booking.flights[1].departure} + ' - ' + ${booking.flights[1].destination}"></p>
+                <p th:text="${passengerName != null ? passengerName : 'Unknown Passenger'}"></p>
+                <p th:text="${departFlight?.departure} + ' - ' + ${departFlight?.destination}"></p>
             </div>
             <div class="priority-info">
                 <p>Your ticket class gets priority to choose Premium seat for free.</p>
@@ -233,18 +226,15 @@
                 <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span>
             </div>
             <div class="seat-map">
-                <div th:each="seat : ${returnSeats}"
+                <div th:each="seat : ${departSeats}"
                      th:classappend="'seat ' +
-                    (${seat.seatClass.name() == 'PREMIUM'} ? 'premium' :
-                    (${seat.seatClass.name() == 'STANDARD'} ? 'standard' :
-                    (${seat.seatClass.name() == 'EXTRA_LEGROOM'} ? 'extra-legroom' : 'front-row')))
-                    + (${seat.status.name() == 'OCCUPIED'} ? ' occupied' : '')
-                    + (${#lists.contains(selectedReturnSeats, seat.id)} ? ' selecting' : '')"
-
-                     th:onclick="${seat.status.name() == 'OCCUPIED'} ? '' : 'toggleSeat(\'depart\', ' + ${seat.id} + ')'"
-
-                     th:text="${#strings.endsWith(seat.seatNumber, '1') || #strings.endsWith(seat.seatNumber, '2')}
-                            ? ${#strings.substring(seat.seatNumber, 1)} : ''">
+                        (${seat?.seatClass?.toString() == 'PREMIUM'} ? 'premium' :
+                        (${seat?.seatClass?.toString() == 'STANDARD'} ? 'standard' :
+                        (${seat?.seatClass?.toString() == 'EXTRA_LEGROOM'} ? 'extra-legroom' : 'front-row')))
+                        + (${seat?.status?.toString() == 'OCCUPIED'} ? ' occupied' : '')
+                        + (${#lists.contains(selectedDepartSeats, seat?.id)} ? ' selecting' : '')"
+                     th:onclick="${seat?.status?.toString() == 'OCCUPIED'} ? '' : 'toggleSeat(\'depart\', ' + ${seat?.id} + ')'"
+                     th:text="${#strings.endsWith(seat?.seatNumber, '1') || #strings.endsWith(seat?.seatNumber, '2')} ? ${#strings.substring(seat?.seatNumber, 0, #strings.length(seat?.seatNumber) - 1)} : ''">
                 </div>
             </div>
             <div class="seat-legend">
@@ -255,11 +245,43 @@
                 <div class="legend-item"><div style="background: #ffc107;"></div><span>Selecting seat</span></div>
                 <div class="legend-item"><div style="background: #ccc;"></div><span>Occupied seat</span></div>
             </div>
-
-            <div id="returnSeatInputs"></div>
+            <div id="departSeatInputs">
+                <input th:each="seatId : ${selectedDepartSeats}" type="hidden" name="departSeatIds" th:value="${seatId}"/>
+            </div>
         </div>
 
-        <button type="button" onclick="showApplyReturnPopup()">Confirm</button>
+        <div id="returnSeat" class="hidden">
+            <div class="passenger-info">
+                <p th:text="${passengerName != null ? passengerName : 'Unknown Passenger'}"></p>
+                <p th:if="${not #lists.isEmpty(returnSeats)}"
+                   th:text="${returnSeats[0]?.flight?.departure} + ' - ' + ${returnSeats[0]?.flight?.destination}"></p>
+            </div>
+            <div class="seat-map">
+                <div th:each="seat : ${returnSeats}"
+                     th:classappend="'seat ' +
+                        (${seat?.seatClass?.toString() == 'PREMIUM'} ? 'premium' :
+                        (${seat?.seatClass?.toString() == 'STANDARD'} ? 'standard' :
+                        (${seat?.seatClass?.toString() == 'EXTRA_LEGROOM'} ? 'extra-legroom' : 'front-row')))
+                        + (${seat?.status?.toString() == 'OCCUPIED'} ? ' occupied' : '')
+                        + (${#lists.contains(selectedReturnSeats, seat?.id)} ? ' selecting' : '')"
+                     th:onclick="${seat?.status?.toString() == 'OCCUPIED'} ? '' : 'toggleSeat(\'return\', ' + ${seat?.id} + ')'"
+                     th:text="${seat?.seatNumber}">
+                </div>
+            </div>
+            <div class="seat-legend">
+                <div class="legend-item"><div style="background: #ff0000;"></div><span>Premium seat</span></div>
+                <div class="legend-item"><div style="background: #28a745;"></div><span>Standard seat</span></div>
+                <div class="legend-item"><div style="background: #00b7eb;"></div><span>Extra legroom seat</span></div>
+                <div class="legend-item"><div style="background: #6f42c1;"></div><span>Front row seat</span></div>
+                <div class="legend-item"><div style="background: #ffc107;"></div><span>Selecting seat</span></div>
+                <div class="legend-item"><div style="background: #ccc;"></div><span>Occupied seat</span></div>
+            </div>
+            <div id="returnSeatInputs">
+                <input th:each="seatId : ${selectedReturnSeats}" type="hidden" name="returnSeatIds" th:value="${seatId}"/>
+            </div>
+        </div>
+
+        <button type="button" id="confirmButton" onclick="showApplyReturnPopup()">Confirm</button>
         <button type="submit" class="no-thanks" onclick="skipSelection()">No, thanks</button>
     </form>
 </div>
@@ -269,16 +291,21 @@
     let selectedReturnSeats = new Set();
 
     document.addEventListener('DOMContentLoaded', function() {
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
+        const applyToReturnTrip = document.getElementById('applyToReturnTrip')?.value;
         if (applyToReturnTrip !== 'yes') {
             document.getElementById('returnSeatTab').style.display = 'none';
             document.getElementById('returnSeat').style.display = 'none';
         }
 
-        const departSeats = /*[[${selectedDepartSeats}]]*/ [];
-        const returnSeats = /*[[${selectedReturnSeats}]]*/ [];
-        departSeats.forEach(seatId => toggleSeat('depart', seatId, true));
-        returnSeats.forEach(seatId => toggleSeat('return', seatId, true));
+        document.querySelectorAll('#departSeatInputs input').forEach(input => {
+            selectedDepartSeats.add(input.value);
+        });
+
+        document.querySelectorAll('#returnSeatInputs input').forEach(input => {
+            selectedReturnSeats.add(input.value);
+        });
+
+        updateSelectionCounters();
     });
 
     function changeTab(type, tab) {
@@ -300,16 +327,22 @@
         }
     }
 
-    function toggleSeat(tab, seatId, initial = false) {
+    let autoSaveTimeout;
+    function toggleSeat(tab, seatId) {
         const seatElement = document.querySelector(`#${tab}Seat .seat[onclick*="${seatId}"]`);
+        if (!seatElement) return;
+
         const inputsContainer = document.getElementById(`${tab}SeatInputs`);
-        let seatSet = (tab === 'depart') ? selectedDepartSeats : selectedReturnSeats;
-        const inputName = (tab === 'depart') ? 'departSeatIds' : 'returnSeatIds';
+        const seatSet = tab === 'depart' ? selectedDepartSeats : selectedReturnSeats;
+        const inputName = tab === 'depart' ? 'departSeatIds' : 'returnSeatIds';
 
         if (seatSet.has(seatId)) {
             seatSet.delete(seatId);
             seatElement.classList.remove('selecting');
-            inputsContainer.querySelector(`input[value="${seatId}"]`).remove();
+            const inputToRemove = inputsContainer.querySelector(`input[value="${seatId}"]`);
+            if (inputToRemove) {
+                inputsContainer.removeChild(inputToRemove);
+            }
         } else {
             seatSet.add(seatId);
             seatElement.classList.add('selecting');
@@ -319,6 +352,69 @@
             input.value = seatId;
             inputsContainer.appendChild(input);
         }
+
+        updateSelectionCounters();
+
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            autoSaveSelections(Array.from(selectedDepartSeats), Array.from(selectedReturnSeats));
+        }, 1000);
+    }
+
+    function autoSaveSelections(departSeatIds, returnSeatIds) {
+        const bookingId = document.querySelector('input[name="bookingId"]')?.value;
+        if (!bookingId) {
+            console.error('Booking ID not found for auto-save');
+            return;
+        }
+
+        fetch('/seat/autosave', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content
+            },
+            body: JSON.stringify({
+                bookingId: bookingId,
+                departSeatIds: departSeatIds,
+                returnSeatIds: returnSeatIds
+            })
+        }).then(response => {
+            if (!response.ok) {
+                return response.text().then(errorMessage => {
+                    throw new Error(errorMessage);
+                });
+            }
+            return response.text();
+        }).then(message => {
+            console.log(message);
+            const errorDiv = document.querySelector('.error-message');
+            if (errorDiv) {
+                errorDiv.textContent = '';
+            }
+        }).catch(error => {
+            console.error('Auto-save failed:', error.message);
+            const errorDiv = document.querySelector('.error-message');
+            if (errorDiv) {
+                errorDiv.textContent = error.message;
+            } else {
+                const modal = document.getElementById('seatModal');
+                const errorElement = document.createElement('div');
+                errorElement.className = 'error-message';
+                errorElement.textContent = error.message;
+                modal.insertBefore(errorElement, modal.firstChild);
+            }
+        })
+    }
+
+    function updateSelectionCounters() {
+        const departTab = document.querySelector('#seatTabs .tab:nth-child(1)');
+        const returnTab = document.querySelector('#seatTabs .tab:nth-child(2)');
+        departTab.dataset.selectionCount = selectedDepartSeats.size;
+        returnTab.dataset.selectionCount = selectedReturnSeats.size;
+
+        const confirmButton = document.getElementById('confirmButton');
+        confirmButton.disabled = selectedDepartSeats.size === 0;
     }
 
     function showApplyReturnPopup() {
@@ -327,7 +423,7 @@
             return;
         }
 
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
+        const applyToReturnTrip = document.getElementById('applyToReturnTrip')?.value;
         if (applyToReturnTrip === 'yes') {
             document.getElementById('applyReturnPopup').classList.remove('hidden');
         } else {
@@ -338,7 +434,8 @@
     function applyToReturnTrip(apply) {
         document.getElementById('applyReturnPopup').classList.add('hidden');
         if (apply) {
-            selectedReturnSeats = new Set(selectedDepartSeats);
+            selectedReturnSeats.clear();
+            selectedDepartSeats.forEach(seatId => selectedReturnSeats.add(seatId));
             const returnInputsContainer = document.getElementById('returnSeatInputs');
             returnInputsContainer.innerHTML = '';
             selectedReturnSeats.forEach(seatId => {
@@ -351,15 +448,14 @@
                 if (seatElement) seatElement.classList.add('selecting');
             });
             changeTab('seat', 'return');
-        } else {
-            changeTab('seat', 'return');
+            updateSelectionCounters();
         }
         submitForm(apply);
     }
 
     function submitForm(applyToReturn) {
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
-        if (applyToReturnTrip === 'yes' && selectedReturnSeats.size === 0) {
+        const applyToReturnTrip = document.getElementById('applyToReturnTrip')?.value;
+        if (applyToReturnTrip === 'yes' && applyToReturn && selectedReturnSeats.size === 0) {
             alert("Please select at least one seat for Return trip before confirming.");
             return;
         }
@@ -372,11 +468,12 @@
         document.querySelectorAll('.seat.selecting').forEach(seat => seat.classList.remove('selecting'));
         document.getElementById('departSeatInputs').innerHTML = '';
         document.getElementById('returnSeatInputs').innerHTML = '';
+        updateSelectionCounters();
         document.getElementById('seatForm').submit();
     }
 
     function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
+        document.getElementById(modalId)?.classList.add('hidden');
     }
 </script>
 </body>

@@ -97,7 +97,7 @@ public class BookingService {
             return Optional.empty();
         }
         return bookingRepository.findByReservationCodeAndUserLastNameAndUserFirstName(
-                reservationCode, lastName, firstName);
+                reservationCode.trim(), lastName.trim(), firstName.trim());
     }
 
     @Transactional
