@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Co-Flight Members</title>
+    <link href="check-in.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .members-container {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .member-list {
+            max-height: 500px; /* Adjust as needed for ~30 members */
+            overflow-y: auto;
+            padding-right: 15px; /* Add padding for scrollbar */
+            margin-bottom: 1.5rem;
+        }
+        .member-card {
+             /* Light grey background for each member */
+            border-radius: 0.375rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+            border: 0.05rem solid #5b6064;
+        }
+         .member-card:last-child {    
+             margin-bottom: 0;
+        }
+        .member-details p {
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
+            color: #171819;
+        }
+        .member-details strong {
+            color: #212529;
+        }
+        .member-name {
+            font-size: 1.25rem !important;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .edit-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between; /* Pushes buttons to ends */
+            padding: 0 1rem; /* Add some padding */
+            margin-top: 1.5rem;
+        }
+        .btn-custom-yellow {
+            background-color: #ffc107; /* Bootstrap yellow */
+            border-color: #ffc107;
+            color: #000; /* Black text */
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
+        }
+        .btn-custom-yellow:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+            color: #000;
+        }
+        /* Basic responsive adjustments */
+        @media (max-width: 576px) {
+            .members-container {
+                padding: 1rem;
+            }
+            .action-buttons {
+                 flex-direction: column; /* Stack buttons on small screens */
+                 gap: 0.5rem; /* Add space between stacked buttons */
+            }
+             .btn-custom-yellow {
+                 width: 100%; /* Make buttons full width */
+            }
+        }
+
+        /* Ensure navbar elements align correctly */
+        .navbar .page-items {
+            margin-right: auto; /* Pushes account dropdown to the right */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+  <nav class="navbar navbar-expand-xl px-5 navbar-light bg-light">
+    <a class="navbar-brand" href="/">
+        <img src="/img/just-title.png" width="170px" alt="Brand Logo"/>
+    </a>
+    <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav d-flex justify-content-between w-100">
+        <div class="page-items d-flex flex-grow-1"> <li class="nav-item">
+            <a class="nav-link fs-5" href="#">Skyjoy</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fs-5" href="#">My Booking</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fs-5" aria-current="page" href="#">Online Check-in</a> </li>
+          <li class="nav-item">
+            <a class="nav-link fs-5" href="#">Flight Extras</a>
+          </li>
+        </div>
+        <li class="nav-item dropdown">
+          <a
+                  class="nav-link dropdown-toggle fs-5"
+                  href="#"
+                  id="navbarDropdownMenuLink"
+                  data-bs-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+          >
+            Account
+          </a>
+          <div
+                  class="dropdown-menu dropdown-menu-end"
+                  aria-labelledby="navbarDropdownMenuLink"
+          >
+            <a class="dropdown-item fs-5" href="/auth/login">Sign in</a>
+            <a class="dropdown-item fs-5" href="/auth/register">Sign up</a>
+            <a class="dropdown-item fs-5" href="/user/profile">Profile</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main class="container my-4 d-flex flex-column">
+    <h2 class="align-self-start text-center mb-3">Edit Co-Flight Members Details</h2>
+    <div class="members-container">
+        <div class="member-list">
+            <div class="member-card">
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 member-details">
+                        <p class="member-name">Nguyen Van A</p>
+                        <hr/>
+                        <p><strong>Gender:</strong> Male</p>
+                        <p><strong>Passenger:</strong> Adult</p>
+                        <p><strong>Date-Of-Birth:</strong> 10/10/1995</p>
+                        <p><strong>Passport Number:</strong> none</p>
+                        <p><strong>Citizen ID:</strong> XXXX-XXXX-XX</p>
+                        <p><strong>Seat:</strong> 43A</p>
+                        <a href="#" class="edit-link">Edit details</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="member-card">
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 member-details">
+                        <p class="member-name">Nguyen Van A</p>
+                        <hr/>
+                        <p><strong>Gender:</strong> Male</p>
+                        <p><strong>Passenger:</strong> Adult</p>
+                        <p><strong>Date-Of-Birth:</strong> 10/10/1995</p>
+                        <p><strong>Passport Number:</strong> none</p>
+                        <p><strong>Citizen ID:</strong> XXXX-XXXX-XX</p>
+                        <p><strong>Seat:</strong> 43A</p>
+                        <a href="#" class="edit-link">Edit details</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="member-card">
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 member-details">
+                        <p class="member-name">Nguyen Van A</p>
+                        <hr/>
+                        <p><strong>Gender:</strong> Male</p>
+                        <p><strong>Passenger:</strong> Adult</p>
+                        <p><strong>Date-Of-Birth:</strong> 10/10/1995</p>
+                        <p><strong>Passport Number:</strong> none</p>
+                        <p><strong>Citizen ID:</strong> XXXX-XXXX-XX</p>
+                        <p><strong>Seat:</strong> 43A</p>
+                        <a href="#" class="edit-link">Edit details</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="member-card">
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 member-details">
+                        <p class="member-name">Nguyen Van A</p>
+                        <hr/>
+                        <p><strong>Gender:</strong> Male</p>
+                        <p><strong>Passenger:</strong> Adult</p>
+                        <p><strong>Date-Of-Birth:</strong> 10/10/1995</p>
+                        <p><strong>Passport Number:</strong> none</p>
+                        <p><strong>Citizen ID:</strong> XXXX-XXXX-XX</p>
+                        <p><strong>Seat:</strong> 43A</p>
+                        <a href="#" class="edit-link">Edit details</a>
+                    </div>
+                </div>
+            </div>
+            
+            </div>
+        <div class="action-buttons">
+            <button type="button" class="btn btn-custom-yellow">Go back</button>
+            <button type="button" class="btn btn-custom-yellow">Continue</button>
+        </div>
+        </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+</body>
+</html>

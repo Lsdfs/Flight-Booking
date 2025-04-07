@@ -47,7 +47,7 @@ public class Booking {
     private List<BookingBaggage> bookingBaggage = new ArrayList<>();
 
     public enum BookingStatus {
-        PENDING, CONFIRMED, CANCELLED, PAID
+        PENDING, CONFIRMED, CANCELLED, PAID, NOTCHECKEDIN, CHECKEDIN, FLIGHTDONE
     }
 
     public Booking() {
