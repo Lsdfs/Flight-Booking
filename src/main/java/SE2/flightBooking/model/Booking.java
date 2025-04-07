@@ -156,6 +156,7 @@ public class Booking {
     }
 
     public void addSeat(Seat seat) {
+        seat.setBooking(this);
         this.seats.add(seat);
     }
 

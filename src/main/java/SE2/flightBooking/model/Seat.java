@@ -23,6 +23,12 @@ public class Seat {
     @Column(name = "column_letter", nullable = false, length = 1)
     private String columnLetter;
 
+    @ManyToOne
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
+
+
+
     @Enumerated(EnumType.STRING)
     @Column(name = "seat_class", nullable = false)
     private SeatClass seatClass;
@@ -128,5 +134,13 @@ public class Seat {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public Booking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 }
