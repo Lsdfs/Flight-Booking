@@ -31,7 +31,7 @@ public class Flight {
     @Column(nullable = false)
     private String airline;
 
-    @OneToMany(mappedBy = "flight")
+    @ManyToMany(mappedBy = "flights")
     private List<Booking> bookings = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
