@@ -1,0 +1,65 @@
+[33mcommit e8943887c238b470e063ab751fb5e56d00abe74a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: unknown <duc30102004@gmail.com>
+Date:   Wed Mar 26 20:14:53 2025 +0700
+
+    Updated logout
+
+[33mcommit cd42fa2c4d36f6159c39c59316f4b7db00716266[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Mon Mar 24 18:09:39 2025 +0700
+
+    removed age from user as it is a derived attribute
+
+[33mcommit 9064e8a2e6e8da0678cc815442db752b383f9c1c[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Mon Mar 24 15:43:38 2025 +0700
+
+    fix some UI related stuff
+
+[33mcommit bb71a319dfddb886754a2ea5f91773683da27819[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Mon Mar 24 15:31:07 2025 +0700
+
+    fix minor issues
+
+[33mcommit 3d6bd40da3b7d1a46205e7766f0971a793db5422[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Mon Mar 24 15:07:55 2025 +0700
+
+    fix date of birth issue
+
+[33mcommit 9ce201b042db7233aa8fa21b481f3cd99ef2faa7[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Mon Mar 24 14:38:08 2025 +0700
+
+    fix main page
+
+[33mcommit 05a3370fcfe31380a5daa23e8c2868e55f1250a4[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Mon Mar 24 14:15:48 2025 +0700
+
+    added an update profile page, fix some model issues
+
+[33mcommit 57d6910058732aec18e83b54f47adc8713036b0d[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Mon Mar 24 08:20:00 2025 +0700
+
+    fixed icons not displaying properly and some minor bugs
+
+[33mcommit 9f471a7e129cb39d8c99dcc6f1341e8035f1c561[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Sun Mar 23 20:58:22 2025 +0700
+
+    fixed user controller class and added css styling for profile
+
+[33mcommit 7a0f6b144b8c41e7449e02ee669c8e647b69b608[m
+Author: Tuan Hoang <hoangngoctuan2611@gmail.com>
+Date:   Sun Mar 23 20:37:49 2025 +0700
+
+    Added account information viewing
+
+[33mcommit 46b3ab95cc1374c7fc4a7f766d3d616b66a65d19[m
+Author: unknown <duc30102004@gmail.com>
+Date:   Fri Mar 21 18:54:50 2025 +0700
+
+    First commit

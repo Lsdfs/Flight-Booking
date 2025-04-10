@@ -59,6 +59,4 @@ public class BookingMeal {
         this.meal = meal;
         this.quantity = quantity;
     }
-
-
 }

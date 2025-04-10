@@ -53,6 +53,4 @@ public class BookingController {
         }
         return "redirect:/booking/" + bookingOpt.get().getId();
     }
-
-
 }
