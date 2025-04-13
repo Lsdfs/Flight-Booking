@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Danh sách câu hỏi</title>
   <style>
-        body { font-family: Arial, sans-serif; background-color: #f8f9fa; }
+        body { font-family: Arial, sans-serif; background-color: #f8f9fa; min-height: 100vh;}
         .container { width: 60%; margin: auto; }
 
         .question-container {
@@ -59,7 +59,7 @@
   </script>
 
 </head>
-<body  th:style="'background: url(' + @{/images/backgroundDesktop.png} + ') no-repeat center center/cover;'">
+<body th:style="'background: url(' + @{/images/backgroundDesktop.png} + ') no-repeat center center/cover;'">
 <div class="container">
   <div class="title">
     <a href="javascript:void(0);" onclick="history.back()"
@@ -68,8 +68,6 @@
     </a>
     <h2 th:text="${category.name}"></h2>
   </div>
-
-  <div class="box">
     <div th:each="question, iterStat : ${questions}" class="question-container">
       <div class="question-header" th:onclick="|toggleAnswer('ans${question.id}', 'symbol${question.id}')|">
         <span style="display: flex; align-items: center; gap: 10px;">
@@ -80,7 +78,6 @@
       </div>
       <div class="answer" th:id="|ans${question.id}|" th:text="${question.answer}"></div>
     </div>
-  </div>
 
 </div>
 <th:block th:replace="~{chatbox}"></th:block>
