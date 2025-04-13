@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <title>Vietjet Air</title>
+    <title>BUY BAGGAGE, MEALS, SEAT AND MORE...</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,7 +71,7 @@
         <h2>BUY BAGGAGE, MEALS, SEAT AND MORE...</h2>
         <p>Explore Vietjet's Skyshop store to buy more baggage, meals, seats and more ... Your flight will be comfortable, and surprisingly enjoyable.</p>
         <div th:if="${error}" class="error-message" th:text="${error}"></div>
-        <form th:action="@{/booking/services}" method="post">
+        <form th:action="@{/booking/services}" method="get">
             <label for="reservationCode">Reservation Code:</label>
             <input type="text" id="reservationCode" name="reservationCode" required>
 

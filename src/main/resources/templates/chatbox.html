@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbox với Shadow DOM</title>
+</head>
+<body>
+<div id="chatbox-container"></div>
+
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let container = document.getElementById("chatbox-container");
+
+            // Tạo Shadow DOM
+            let shadow = container.attachShadow({ mode: "open" });
+
+            // Tạo wrapper chứa toàn bộ HTML + CSS
+            let wrapper = document.createElement("div");
+            wrapper.innerHTML = `
+                <style>
+                    :host {
+                        all: unset;
+                    }
+                    #chatbox {
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        width: 320px;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                        font-family: Arial, sans-serif;
+                        background: white;
+                        overflow: hidden;
+                        z-index: 9999;
+                    }
+                    #chatbox-header {
+                        display: flex;
+                        align-items: center;
+                        background-color: #E44D3A;
+                        color: white;
+                        padding: 10px;
+                        border-radius: 10px 10px 0 0;
+                        font-weight: bold;
+                        cursor: pointer;
+                    }
+                    #chatbox-logo {
+                        width: 40px;
+                        height: 40px;
+                        margin-right: 10px;
+                        border-radius: 50%;
+                    }
+                    #chatbox-content {
+                        display: none;
+                        padding: 10px;
+                        border-top: 1px solid #ccc;
+                    }
+                    #chatbox-messages {
+                        display: flex;
+                        flex-direction: column;
+                        height: 250px;
+                        overflow-y: auto;
+                        padding: 10px;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    .chat-message {
+                        display: flex;
+                        flex-direction: column;
+                        padding: 8px;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                        max-width: 80%;
+                        word-wrap: break-word;
+                        margin-bottom: 8px;
+                    }
+                    .user-message {
+                        align-self: flex-end;
+                        background-color: rgb(218, 74, 56);
+                        color: white;
+                        padding: 8px 12px;
+                        border-radius: 15px;
+                        max-width: 70%;
+                        display: inline-block;
+                        box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 5px;
+                    }
+                    .bot-message {
+                        align-self: flex-start;
+                        background-color: #F1F1F1;
+                        padding: 8px 12px;
+                        border-radius: 15px;
+                        max-width: 70%;
+                        display: inline-block;
+                        box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 5px;
+                    }
+                    #chatbox-input {
+                        display: flex;
+                        padding: 8px;
+                        border-top: 1px solid #ddd;
+                    }
+                    #userQuestion {
+                        flex: 1;
+                        padding: 6px;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                    }
+                    #askBtn {
+                        margin-left: 5px;
+                        background: #e53935;
+                        color: white;
+                        border: none;
+                        padding: 6px 10px;
+                        cursor: pointer;
+                        border-radius: 4px;
+                    }
+                </style>
+
+                <div id="chatbox">
+                    <div id="chatbox-header">
+                        <img src="/images/chatbot.png" alt="Live Chat" id="chatbox-logo">
+                        <span>Chat với chúng tôi</span>
+                    </div>
+                    <div id="chatbox-content">
+                        <div id="chatbox-messages"></div>
+                        <div id="chatbox-input">
+                            <input type="text" id="userQuestion" placeholder="Nhập câu hỏi...">
+                            <button id="askBtn">Hỏi</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Thêm vào shadow DOM
+            shadow.appendChild(wrapper);
+
+            // Gán các phần tử sau khi nội dung đã được thêm vào
+            let chatboxHeader = shadow.querySelector("#chatbox-header");
+            let chatboxContent = shadow.querySelector("#chatbox-content");
+            let userQuestion = shadow.querySelector("#userQuestion");
+            let askBtn = shadow.querySelector("#askBtn");
+            let chatboxMessages = shadow.querySelector("#chatbox-messages");
+
+            // Gửi câu hỏi
+            function sendQuestion() {
+                let question = userQuestion.value.trim();
+                if (question === "") return;
+
+                appendMessage("Bạn", question, "user-message");
+
+                fetch(`/api/chatbox/ask?question=${encodeURIComponent(question)}`)
+                    .then(response => response.text())
+                    .then(answer => appendMessage("Bot", answer, "bot-message"))
+                    .catch(error => appendMessage("Bot", "Lỗi máy chủ. Vui lòng thử lại sau!", "bot-message"));
+
+                userQuestion.value = "";
+            }
+
+            askBtn.addEventListener("click", sendQuestion);
+            userQuestion.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") sendQuestion();
+            });
+
+            chatboxHeader.addEventListener("click", function () {
+                chatboxContent.style.display = chatboxContent.style.display === "none" ? "block" : "none";
+            });
+
+            // Hiển thị tin nhắn
+            function appendMessage(sender, message, className) {
+                let messageElement = document.createElement("div");
+
+                if (className === "bot-message") {
+                    messageElement.innerHTML = `
+                        <div style="display: flex; flex-direction: row; align-items: flex-start;">
+                            <img src="/images/chatbot.png" alt="Bot" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 8px;">
+                            <div class="chat-message ${className}" style="display: flex; align-items: flex-start;">
+                                <p style="text-align: left;">${message}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    messageElement.classList.add("chat-message", className);
+                    messageElement.innerHTML = message;
+                }
+
+                chatboxMessages.appendChild(messageElement);
+                chatboxMessages.scrollTop = chatboxMessages.scrollHeight;
+            }
+
+            // Tin nhắn chào mừng
+            appendMessage("Bot", "✈️ VietjetAir xin kính chào quý khách 😍!!!", "bot-message");
+            appendMessage("Bot", "Mình là trợ lý ảo Ana, rất vui được trò chuyện với bạn. Bạn cần tư vấn về vấn đề gì ạ 🧐🥰", "bot-message");
+        });
+    </script>
+</body>
+</html>

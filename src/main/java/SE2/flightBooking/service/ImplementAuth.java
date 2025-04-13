@@ -21,6 +21,16 @@ public class ImplementAuth implements AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Override
+    public boolean existsByEmail(String email) {
+        return userRepo.existsByGmail(email);
+    }
+
+    @Override
+    public boolean existsByPhoneNumber(String phoneNumber) {
+        return userRepo.existsByPhoneNumber(phoneNumber);
+    }
+
+    @Override
     public User registerUser(UserDTO userRegistrationDTO) {
 
         User user = new User();

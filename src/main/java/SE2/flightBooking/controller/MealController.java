@@ -1,64 +1,154 @@
 package SE2.flightBooking.controller;
 
 import SE2.flightBooking.model.*;
-import SE2.flightBooking.repository.*;
+import SE2.flightBooking.repository.BookingRepository;
+import SE2.flightBooking.repository.FlightRepository;
+import SE2.flightBooking.service.MealService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/meal")
 public class MealController {
-    private final BookingRepository bookingRepository;
-    private final MealRepository mealRepository;
 
-    public MealController(BookingRepository bookingRepository, MealRepository mealRepository) {
-        this.bookingRepository = bookingRepository;
-        this.mealRepository = mealRepository;
-    }
+    @Autowired
+    private MealService mealService;
 
-    @GetMapping("/meals")
-    public String getMeals(Model model) {
-        List<Meal> meals = mealRepository.findAll();
-        model.addAttribute("meals", meals);
-        return "option/fragments";
-    }
+    @Autowired
+    private BookingRepository bookingRepository;
 
-    @PostMapping("/select")
-    public String selectMeal(@RequestParam Long bookingId, @RequestParam Long mealId, @RequestParam int quantity,
-                             @RequestParam boolean applyToReturn, Model model) {
+    @Autowired
+    private FlightRepository flightRepository;
+
+    @GetMapping("/select")
+    public String selectMeals(@RequestParam Long bookingId, @RequestParam Long flightId,
+                              @RequestParam String applyToReturnTrip, Model model) {
         Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
-        Optional<Meal> mealOpt = mealRepository.findById(mealId);
+        Optional<Flight> flightOpt = flightRepository.findById(flightId);
 
-        if (bookingOpt.isEmpty() || mealOpt.isEmpty()) {
-            model.addAttribute("error", "Booking or Meal not found");
-            return "redirect:/booking/" + bookingId;
+        if (bookingOpt.isEmpty() || flightOpt.isEmpty()) {
+            model.addAttribute("error", "Booking or flight not found.");
+            return "error/notFoundError";
         }
 
         Booking booking = bookingOpt.get();
-        Meal meal = mealOpt.get();
-        if (meal.getStock() < quantity) {
-            model.addAttribute("error", "Meal is out of stock");
-            return "redirect:/booking/" + bookingId;
-        }
-        booking.addMeal(meal, quantity);
-        meal.setStock(meal.getStock() - quantity);
+        Flight departFlight = flightOpt.get();
+        List<Meal> mealOptions = mealService.getAllMeals();
+        List<Long> selectedDepartMeals = new ArrayList<>();
+        Flight returnFlight = null;
+        List<Long> selectedReturnMeals = new ArrayList<>();
+        String passengerName = booking.getUser() != null
+                ? booking.getUser().getLastName() + " " + booking.getUser().getFirstName()
+                : "Unknown Passenger";
 
-        if (applyToReturn && booking.getReturnFlightId() != null) {
-            Optional<Booking> returnTripOpt = bookingRepository.findById(booking.getReturnFlightId());
-            if (returnTripOpt.isPresent()) {
-                Booking returnTrip = returnTripOpt.get();
-                returnTrip.addMeal(meal, quantity);
-                bookingRepository.save(returnTrip);
+        if ("yes".equals(applyToReturnTrip) && booking.getFlights().size() > 1) {
+            Long returnFlightId = booking.getFlights().get(1).getId();
+            Optional<Flight> returnFlightOpt = flightRepository.findById(returnFlightId);
+            if (returnFlightOpt.isPresent()) {
+                returnFlight = returnFlightOpt.get();
+            } else {
+                model.addAttribute("warning", "Return flight not found.");
             }
         }
 
-        mealRepository.save(meal);
-        bookingRepository.save(booking);
-        if (meal.getPrice() > 0) return "redirect:/payment?bookingId=" + bookingId;
-        return "redirect:/booking/" + bookingId;
+        model.addAttribute("bookingId", bookingId);
+        model.addAttribute("booking", booking);
+        model.addAttribute("departFlight", departFlight);
+        model.addAttribute("returnFlight", returnFlight);
+        model.addAttribute("mealOptions", mealOptions);
+        model.addAttribute("selectedDepartMeals", selectedDepartMeals);
+        model.addAttribute("selectedReturnMeals", selectedReturnMeals);
+        model.addAttribute("applyToReturnTrip", applyToReturnTrip);
+        model.addAttribute("passengerName", passengerName);
+
+        return "option/meal";
+    }
+
+    @PostMapping("/save")
+    @Transactional
+    public String saveMeals(@RequestParam Long bookingId,
+                            @RequestParam Long flightId,
+                            @RequestParam String applyToReturnTrip,
+                            @RequestParam(required = false) List<Long> departMealIds,
+                            @RequestParam(required = false) List<Long> returnMealIds,
+                            @RequestParam(defaultValue = "1") int quantity,
+                            Model model) {
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+        Optional<Flight> flightOpt = flightRepository.findById(flightId);
+
+        if (bookingOpt.isEmpty() || flightOpt.isEmpty()) {
+            return "redirect:/error?message=Booking or flight not found.";
+        }
+
+        Booking booking = bookingOpt.get();
+        Flight departFlight = flightOpt.get();
+
+        try {
+            if (departMealIds != null && !departMealIds.isEmpty()) {
+                for (Long mealId : departMealIds) {
+                    Optional<Meal> mealOpt = mealService.findById(mealId);
+                    if (mealOpt.isEmpty()) {
+                        model.addAttribute("error", "Meal with ID " + mealId + " not found.");
+                        return prepareMealSelectionModel(model, booking, departFlight, applyToReturnTrip, departMealIds, returnMealIds);
+                    }
+                    Meal meal = mealOpt.get();
+                    mealService.addMealToBooking(booking, meal, flightId, quantity);
+                }
+            }
+
+            if ("yes".equals(applyToReturnTrip)) {
+                if (booking.getFlights().size() <= 1) {
+                    model.addAttribute("error", "Cannot apply meals to return trip: No return flight found.");
+                    return prepareMealSelectionModel(model, booking, departFlight, applyToReturnTrip, departMealIds, returnMealIds);
+                }
+
+                Long returnFlightId = booking.getFlights().get(1).getId();
+                Optional<Flight> returnFlightOpt = flightRepository.findById(returnFlightId);
+                if (returnFlightOpt.isEmpty()) {
+                    model.addAttribute("error", "Return flight not found.");
+                    return prepareMealSelectionModel(model, booking, departFlight, applyToReturnTrip, departMealIds, returnMealIds);
+                }
+
+                if (returnMealIds != null && !returnMealIds.isEmpty()) {
+                    for (Long mealId : returnMealIds) {
+                        Optional<Meal> mealOpt = mealService.findById(mealId);
+                        if (mealOpt.isEmpty()) {
+                            model.addAttribute("error", "Meal with ID " + mealId + " not found.");
+                            return prepareMealSelectionModel(model, booking, departFlight, applyToReturnTrip, departMealIds, returnMealIds);
+                        }
+                        Meal meal = mealOpt.get();
+                        mealService.addMealToBooking(booking, meal, returnFlightId, quantity);
+                    }
+                }
+            }
+
+            booking.calculateTotalPrice();
+            bookingRepository.save(booking);
+            return "redirect:/booking/services?bookingId=" + bookingId;
+
+        } catch (IllegalStateException e) {
+            model.addAttribute("error", e.getMessage());
+            return prepareMealSelectionModel(model, booking, departFlight, applyToReturnTrip, departMealIds, returnMealIds);
+        }
+    }
+
+    private String prepareMealSelectionModel(Model model, Booking booking, Flight departFlight,
+                                             String applyToReturnTrip, List<Long> departMealIds, List<Long> returnMealIds) {
+        model.addAttribute("bookingId", booking.getId());
+        model.addAttribute("booking", booking);
+        model.addAttribute("departFlight", departFlight);
+        model.addAttribute("returnFlight", null);
+        model.addAttribute("mealOptions", mealService.getAllMeals());
+        model.addAttribute("selectedDepartMeals", departMealIds != null ? departMealIds : new ArrayList<>());
+        model.addAttribute("selectedReturnMeals", returnMealIds != null ? returnMealIds : new ArrayList<>());
+        model.addAttribute("applyToReturnTrip", applyToReturnTrip);
+        return "option/meal";
     }
 }

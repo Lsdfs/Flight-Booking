@@ -12,52 +12,57 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "booking_code", nullable = false, unique = true)
-    private String bookingCode;
+    @Column(name = "reservation_code", nullable = false)
+    private String reservationCode;
 
-    @Column(name = "passenger_name", nullable = false)
-    private String passengerName;
+    @Column(name = "booking_date", nullable = false)
+    private LocalDateTime bookingDate;
 
-    @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String phone;
-
-    @Column(name = "flight_id", nullable = false)
-    private Long flightId;
-
-    @Column(name = "return_flight_id")
-    private Long returnFlightId;
+    @Column(name = "passenger_count", nullable = false)
+    private int passengerCount;
 
     @Column(name = "total_price", nullable = false)
     private double totalPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status = Status.PENDING;
+    @Column(name = "status", nullable = false)
+    private BookingStatus status;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @ManyToMany
+    @JoinTable(
+            name = "booking_flights",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "flight_id")
+    )
+    private List<Flight> flights = new ArrayList<>();
 
-
-    @Column(name = "departure_time")
-    private LocalDateTime departureTime;
-
-    @Column(name = "return_time")
-    private LocalDateTime returnTime;
-
-    @OneToOne(mappedBy = "booking")
-    private Seat seat;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookingMeal> meals = new ArrayList<>();
+    private List<Seat> seats = new ArrayList<>();
 
-    @OneToOne(mappedBy = "booking")
-    private Baggage baggage;
-    private Integer passengerCount;
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingMeal> bookingMeals = new ArrayList<>();
 
-    // Getters và Setters
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingBaggage> bookingBaggage = new ArrayList<>();
+
+    public enum BookingStatus {
+        PENDING, CONFIRMED, CANCELLED, PAID, NOTCHECKEDIN, CHECKEDIN, FLIGHTDONE
+    }
+
+    public Booking() {
+        this.bookingDate = LocalDateTime.now();
+        this.status = BookingStatus.PENDING;
+    }
+
+    public Booking(int passengerCount) {
+        this();
+        this.passengerCount = passengerCount;
+    }
+
     public Long getId() {
         return id;
     }
@@ -66,52 +71,28 @@ public class Booking {
         this.id = id;
     }
 
-    public String getBookingCode() {
-        return bookingCode;
+    public String getReservationCode() {
+        return reservationCode;
     }
 
-    public void setBookingCode(String bookingCode) {
-        this.bookingCode = bookingCode;
+    public void setReservationCode(String reservationCode) {
+        this.reservationCode = reservationCode;
     }
 
-    public String getPassengerName() {
-        return passengerName;
+    public LocalDateTime getBookingDate() {
+        return bookingDate;
     }
 
-    public void setPassengerName(String passengerName) {
-        this.passengerName = passengerName;
+    public void setBookingDate(LocalDateTime bookingDate) {
+        this.bookingDate = bookingDate;
     }
 
-    public String getEmail() {
-        return email;
+    public int getPassengerCount() {
+        return passengerCount;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Long getFlightId() {
-        return flightId;
-    }
-
-    public void setFlightId(Long flightId) {
-        this.flightId = flightId;
-    }
-
-    public Long getReturnFlightId() {
-        return returnFlightId;
-    }
-
-    public void setReturnFlightId(Long returnFlightId) {
-        this.returnFlightId = returnFlightId;
+    public void setPassengerCount(int passengerCount) {
+        this.passengerCount = passengerCount;
     }
 
     public double getTotalPrice() {
@@ -122,74 +103,82 @@ public class Booking {
         this.totalPrice = totalPrice;
     }
 
-    public Status getStatus() {
+    public BookingStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(BookingStatus status) {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public List<Flight> getFlights() {
+        return flights;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setFlights(List<Flight> flights) {
+        this.flights = flights;
     }
 
-    // Getters và Setters cho departureTime và returnTime
-    public LocalDateTime getDepartureTime() {
-        return departureTime;
+    public User getUser() {
+        return user;
     }
 
-    public void setDepartureTime(LocalDateTime departureTime) {
-        this.departureTime = departureTime;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public LocalDateTime getReturnTime() {
-        return returnTime;
+    public List<Seat> getSeats() {
+        return seats;
     }
 
-    public void setReturnTime(LocalDateTime returnTime) {
-        this.returnTime = returnTime;
+    public void setSeats(List<Seat> seats) {
+        this.seats = seats;
     }
 
-    public Seat getSeat() {
-        return seat;
+    public List<BookingMeal> getBookingMeals() {
+        return bookingMeals;
     }
 
-    public void setSeat(Seat seat) {
-        this.seat = seat;
+    public void setBookingMeals(List<BookingMeal> bookingMeals) {
+        this.bookingMeals = bookingMeals;
     }
 
-    public List<BookingMeal> getMeals() {
-        return meals;
+    public List<BookingBaggage> getBookingBaggage() {
+        return bookingBaggage;
     }
 
-    public void setMeals(List<BookingMeal> meals) {
-        this.meals = meals;
+    public void setBookingBaggage(List<BookingBaggage> bookingBaggage) {
+        this.bookingBaggage = bookingBaggage;
     }
 
-    public Baggage getBaggage() {
-        return baggage;
+    public void addFlight(Flight flight) {
+        this.flights.add(flight);
     }
 
-    public void setBaggage(Baggage baggage) {
-        this.baggage = baggage;
+    public void addSeat(Seat seat) {
+        seat.setBooking(this);
+        this.seats.add(seat);
     }
 
-    public void setPassengerCount(Integer passengerCount) {
-        this.passengerCount = passengerCount;
+    public void addMeal(Meal meal, Long flightId, int quantity) {
+        BookingMeal bookingMeal = new BookingMeal(this, meal, flightId, quantity);
+        this.bookingMeals.add(bookingMeal);
     }
 
-    public Integer getPassengerCount() {
-        return passengerCount;
+    public void addBaggage(Baggage baggage, Long flightId, int quantity) {
+        BookingBaggage bookingBaggage = new BookingBaggage(this, baggage, flightId, quantity);
+        this.bookingBaggage.add(bookingBaggage);
     }
 
-    public enum Status { PENDING, CONFIRMED, CANCELLED }
-
-    public void addMeal(Meal meal, int quantity) {
-        this.meals.add(new BookingMeal(this, meal, quantity));
+    public void calculateTotalPrice() {
+        double flightTotal = flights.stream().mapToDouble(Flight::getPrice).sum();
+        double seatTotal = seats.stream().mapToDouble(Seat::getPrice).sum();
+        double mealTotal = bookingMeals.stream()
+                .mapToDouble(bm -> bm.getMeal().getPrice() * bm.getQuantity())
+                .sum();
+        double baggageTotal = bookingBaggage.stream()
+                .mapToDouble(bl -> bl.getBaggage().getPrice() * bl.getQuantity())
+                .sum();
+        this.totalPrice = flightTotal + seatTotal + mealTotal + baggageTotal;
     }
 }

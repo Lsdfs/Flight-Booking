@@ -9,18 +9,22 @@ public class Meal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description")
     private String description;
 
-    @Column(nullable = false)
+    @Column(name = "price", nullable = false)
     private double price;
 
-    @Column(nullable = false)
+    @Column(name = "stock", nullable = false)
     private int stock = 100;
 
+    @Column(name = "image")
     private String image;
+
+    public Meal() {}
 
     public Long getId() {
         return id;

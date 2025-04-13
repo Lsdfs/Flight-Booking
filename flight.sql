@@ -12,19 +12,24 @@ CREATE TABLE if not exists  flights (
     flight_type VARCHAR(255) NOT NULL
 );
 CREATE TABLE if not exists booking (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    booking_code VARCHAR(20) NOT NULL UNIQUE,
-    passenger_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
-    flight_id BIGINT NOT NULL,
-    return_flight_id BIGINT NULL,
-    total_price DECIMAL(10,2) NOT NULL,
-    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED') DEFAULT 'PENDING',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE CASCADE,
-    FOREIGN KEY (return_flight_id) REFERENCES flights(id) ON DELETE SET NULL
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    booking_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    passenger_count INT NOT NULL,
+    reservation_code INT NOT NULL,
+    total_price DOUBLE NOT NULL,
+    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'PAID') NOT NULL DEFAULT 'PENDING',
+    user_id BIGINT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
+
+CREATE TABLE booking_flights (
+    booking_id BIGINT NOT NULL,
+    flight_id BIGINT NOT NULL,
+    PRIMARY KEY (booking_id, flight_id),
+    FOREIGN KEY (booking_id) REFERENCES booking(id) ON DELETE CASCADE,
+    FOREIGN KEY (flight_id) REFERENCES flight(id) ON DELETE CASCADE
+);
+
 CREATE TABLE if not exists seat (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     flight_id BIGINT NOT NULL,

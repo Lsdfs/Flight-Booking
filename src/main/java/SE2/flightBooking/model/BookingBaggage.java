@@ -3,8 +3,8 @@ package SE2.flightBooking.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "booking_meal")
-public class BookingMeal {
+@Table(name = "booking_baggage")
+public class BookingBaggage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,8 +15,8 @@ public class BookingMeal {
     private Booking booking;
 
     @ManyToOne
-    @JoinColumn(name = "meal_id")
-    private Meal meal;
+    @JoinColumn(name = "baggage_id")
+    private Baggage baggage;
 
     @Column(name = "flight_id")
     private Long flightId;
@@ -24,11 +24,11 @@ public class BookingMeal {
     @Column(name = "quantity", nullable = false)
     private int quantity = 1;
 
-    public BookingMeal() {}
+    public BookingBaggage() {}
 
-    public BookingMeal(Booking booking, Meal meal, Long flightId, int quantity) {
+    public BookingBaggage(Booking booking, Baggage baggage, Long flightId, int quantity) {
         this.booking = booking;
-        this.meal = meal;
+        this.baggage = baggage;
         this.flightId = flightId;
         this.quantity = quantity;
     }
@@ -49,12 +49,12 @@ public class BookingMeal {
         this.booking = booking;
     }
 
-    public Meal getMeal() {
-        return meal;
+    public Baggage getBaggage() {
+        return baggage;
     }
 
-    public void setMeal(Meal meal) {
-        this.meal = meal;
+    public void setBaggage(Baggage baggage) {
+        this.baggage = baggage;
     }
 
     public Long getFlightId() {

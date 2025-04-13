@@ -2,6 +2,8 @@ package SE2.flightBooking.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "flights")
@@ -28,6 +30,9 @@ public class Flight {
 
     @Column(nullable = false)
     private String airline;
+
+    @ManyToMany(mappedBy = "flights")
+    private List<Booking> bookings = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "flight_type", nullable = false)
@@ -68,6 +73,14 @@ public class Flight {
 
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
+    }
 
     public String getAirline() { return airline; }
     public void setAirline(String airline) { this.airline = airline; }

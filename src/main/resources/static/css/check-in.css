@@ -1,0 +1,9 @@
+body {
+  min-height: 100vh;
+  background-size: auto, cover, cover;
+  background-image: url(/img/footer-pattern.webp),
+    url(/img/sub-background-desktop.webp), url(/img/backgroundDesktop.webp);
+  background-repeat: no-repeat;
+  background-position: right bottom, left top, right bottom;
+  background-attachment: fixed;
+}
