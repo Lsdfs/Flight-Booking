@@ -38,7 +38,7 @@ public class SecurityImpl {
                 )
                 .formLogin(
                         form -> form.loginPage("/auth/login")
-                                .defaultSuccessUrl("/", true)
+                                .defaultSuccessUrl("/flight", true)
                                 .usernameParameter("phoneNumber")
                                 .passwordParameter("password")
                                 .permitAll()
