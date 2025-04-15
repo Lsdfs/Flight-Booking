@@ -2,7 +2,10 @@ package SE2.flightBooking.controller;
 
 import SE2.flightBooking.dto.request.InitPaymentRequest;
 import SE2.flightBooking.dto.response.InitPaymentResponse;
-import SE2.flightBooking.service.paymentService.FlightService;
+import SE2.flightBooking.model.Payment;
+import SE2.flightBooking.model.User;
+import SE2.flightBooking.repository.PaymentRepository;
+import SE2.flightBooking.repository.UserRepo;
 import SE2.flightBooking.service.paymentService.PaymentService;
 import SE2.flightBooking.service.paymentService.VNPayService;
 import SE2.flightBooking.model.Booking;
@@ -11,12 +14,9 @@ import SE2.flightBooking.repository.BookingRepository;
 import SE2.flightBooking.repository.FlightRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 
 import java.time.LocalDate;
@@ -25,12 +25,14 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.http.ResponseEntity;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.view.RedirectView;
 
 
 @Controller
@@ -50,15 +52,18 @@ public class FlightController {
     private PaymentService paymentService;
 
     @Autowired
-    private FlightService bookingPriceService;
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private UserRepo userRepository;
+
+
 
     private static final Logger log = LoggerFactory.getLogger(FlightController.class);
 
-
-
     // Trang chủ tại /flight
     @GetMapping("/")
-    public String home(Model model) {
+    public String home( Model model) {
         List<String> departures = flightRepository.findAll()
                 .stream()
                 .map(Flight::getDeparture)
@@ -308,52 +313,77 @@ public class FlightController {
     }
 
     @PostMapping("/next")
-    @ResponseBody
-    public InitPaymentResponse proceedToPayment(@RequestParam(required = false) Long departureBookedId,
-                                                @RequestParam(required = false) Long returnBookedId,
-                                                @RequestParam(name = "passengers", required = false) Integer passengers,
-                                                @RequestParam String ticketType) {
+    public String proceedToPayment(@SessionAttribute(required = false) List<Long> departureBookedIds,
+                                   @SessionAttribute(required = false) List<Long> returnBookedIds,
+                                   @RequestParam Integer passengers,
+                                   @RequestParam String ticketType,
+                                   Model model) {
+        if (departureBookedIds == null) departureBookedIds = new ArrayList<>();
+        if (returnBookedIds == null) returnBookedIds = new ArrayList<>();
 
-        boolean isRoundTrip = "round-trip".equals(ticketType);
-        int requiredBookings = isRoundTrip ? 2 : 1;
-        int currentBookings = 0;
-
-        if (departureBookedId != null) currentBookings++;
-        if (returnBookedId != null) currentBookings++;
+        int requiredBookings = "round-trip".equals(ticketType) ? passengers * 2 : passengers;
+        int currentBookings = departureBookedIds.size() + returnBookedIds.size();
 
         if (currentBookings < requiredBookings) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "You should select " + requiredBookings + " ticket(s). Right now it's just " +
-                            currentBookings + " ticket(s) selected.");
+            model.addAttribute("error", "You should select " + requiredBookings + " ticket. Right now it's just " +
+                    currentBookings + " ticket(s) that selected.");
+            return "searchFlight";
         }
 
         Booking booking = new Booking();
         booking.setPassengerCount(passengers);
+        bookingRepository.save(booking);
 
+        HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
+        session.removeAttribute("departureBookedIds");
+        session.removeAttribute("returnBookedIds");
 
-        Flight departureFlight = departureBookedId == null ? null :
-                flightRepository.findById(departureBookedId).orElse(null);
+        return "booking/payment";
+    }
+    @ModelAttribute("payment")
+    public Payment getPayment() {
+        return new Payment();
+    }
+    @GetMapping("/payment")
+    public String showPaymentForm(Model model) {
+        model.addAttribute("payment", new Payment());
+        return "payment"; // The name of your HTML template
+    }
+    @PostMapping("/payment")
+    public String submitPassenger(@ModelAttribute Payment payment, HttpSession session) {
+        Booking booking = (Booking) session.getAttribute("currentBooking");
+        if (booking != null) {
+            payment.setReservationCode(booking.getReservationCode());
+        } else {
+            // Handle error: no booking found in session
+            log.warn("No booking found in session.");
+            return "redirect:/flight/payment"; // or some error page
+        }
 
-        Flight returnFlight = returnBookedId == null ? null :
-                flightRepository.findById(returnBookedId).orElse(null);
+        paymentRepository.save(payment);
+        log.info("Redirecting to /flight/vnpay_ipn");
+        return "redirect:/flight/vnpay_ipn";
+    }
 
-        bookingPriceService.calculateTotalPrice(booking, departureFlight, returnFlight);
+    @GetMapping("/vnpay_ipn")
+    @ResponseBody
+    public RedirectView paying(HttpSession session, @ModelAttribute InitPaymentRequest request) {
+
+        Booking booking = (Booking) session.getAttribute("currentBooking");
 
         InitPaymentRequest initPaymentRequest = InitPaymentRequest.builder()
                 .userId(booking.getId())
-                .amount((long) booking.getTotalPrice())
-                .txnRef(String.valueOf(booking.getBookingCode()))
+                .amount((long) booking.getTotalPrice()) // Adjust according to how you calculate total price
+                .txnRef(String.valueOf(request.getTxnRef()))
                 .ipAddress("127.0.0.1")
                 .build();
 
         InitPaymentResponse initPaymentResponse = paymentService.init(initPaymentRequest);
 
         log.info("[request_id={}] user_name={} created booking_id={} successfully",
-                "reservationid", booking.getPassengerName(), booking.getId());
-
-        return initPaymentResponse;
+                booking.getReservationCode(), booking.getUser(), booking.getId());
+        return new RedirectView(initPaymentResponse.getVnpUrl());
     }
-
 
 
     private String getTimeFrame(LocalTime time) {
