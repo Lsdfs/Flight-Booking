@@ -249,7 +249,7 @@ body {
                     <label class="form-label" for="password">Password*</label>
                     <input type="password" id="password" class="form-input" th:field="*{password}"
                            required minlength="8" maxlength="30"
-                           pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+<!--                           pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"-->
                            oninput="validatePassword()">
 
                     <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
