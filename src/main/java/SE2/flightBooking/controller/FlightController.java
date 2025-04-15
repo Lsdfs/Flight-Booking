@@ -1,16 +1,23 @@
 package SE2.flightBooking.controller;
 
+import SE2.flightBooking.dto.request.InitPaymentRequest;
+import SE2.flightBooking.dto.response.InitPaymentResponse;
+import SE2.flightBooking.model.Payment;
+import SE2.flightBooking.model.User;
+import SE2.flightBooking.repository.*;
+import SE2.flightBooking.service.AuthService;
+import SE2.flightBooking.service.paymentService.PaymentService;
+import SE2.flightBooking.service.paymentService.VNPayService;
 import SE2.flightBooking.model.Booking;
 import SE2.flightBooking.model.Flight;
-import SE2.flightBooking.repository.BookingRepository;
-import SE2.flightBooking.repository.FlightRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,6 +25,15 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.view.RedirectView;
+
 
 @Controller
 @RequestMapping("/flight")
@@ -29,9 +45,32 @@ public class FlightController {
     @Autowired
     private BookingRepository bookingRepository;
 
+    @Autowired
+    private VNPayService vnPayService;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private UserRepo userRepository;
+
+    private final AuthService authService;
+    private final UserRepo userRepo;
+
+    // Constructor injection
+    public FlightController(AuthService authService, UserRepo userRepo, CoflightRepo coflightRepo) {
+        this.authService = authService;
+        this.userRepo = userRepo;
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(FlightController.class);
+
     // Trang chủ tại /flight
     @GetMapping("/")
-    public String home(Model model) {
+    public String home( Model model) {
         List<String> departures = flightRepository.findAll()
                 .stream()
                 .map(Flight::getDeparture)
@@ -59,8 +98,12 @@ public class FlightController {
                                 @RequestParam(required = false) String departureTime,
                                 @RequestParam(required = false) String returnTime,
                                 @RequestParam(required = false) Integer passengers,
+                                @AuthenticationPrincipal UserDetails authenticatedUser,
                                 HttpSession session,
                                 Model model) {
+        if (authenticatedUser == null) {
+            return "redirect:/auth/login";
+        }
         // Reset booked lists after returning home.
         session.removeAttribute("departureBookedIds");
         session.removeAttribute("returnBookedIds");
@@ -73,7 +116,7 @@ public class FlightController {
         }
 
         if (departure.equals(destination)) {
-            model.addAttribute("error", "Điểm đi và điểm đến không được trùng nhau.");
+            model.addAttribute("errorDate", "Departure and destination not allow the same city. Please try again!");
             return "home";
         }
 
@@ -285,6 +328,7 @@ public class FlightController {
                                    @SessionAttribute(required = false) List<Long> returnBookedIds,
                                    @RequestParam Integer passengers,
                                    @RequestParam String ticketType,
+                                   @AuthenticationPrincipal UserDetails authenticatedUser,
                                    Model model) {
         if (departureBookedIds == null) departureBookedIds = new ArrayList<>();
         if (returnBookedIds == null) returnBookedIds = new ArrayList<>();
@@ -297,17 +341,79 @@ public class FlightController {
                     currentBookings + " ticket(s) that selected.");
             return "searchFlight";
         }
+        User user = null;
+        if(authenticatedUser!=null){
+            String phoneNumber = authenticatedUser.getUsername();
+            user = userRepo.findByPhoneNumber(phoneNumber);
+        }else{
+            return "redirect:/auth/login";
+        }
 
+        if (user == null) {
+            return "error"; // Show an error page if the user is not found
+        }
         Booking booking = new Booking();
+        booking.setUser(user);
         booking.setPassengerCount(passengers);
+        String code = randomString(10);
+        while(!bookingRepository.findByReservationCode(code).isEmpty()){
+            code = randomString(10);
+        }
+
+        booking.setReservationCode(code);
         bookingRepository.save(booking);
 
         HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
         session.removeAttribute("departureBookedIds");
         session.removeAttribute("returnBookedIds");
 
-        return "redirect:/payment?bookingId=" + booking.getId();
+        return "booking/payment";
     }
+    @ModelAttribute("payment")
+    public Payment getPayment() {
+        return new Payment();
+    }
+    @GetMapping("/payment")
+    public String showPaymentForm(Model model) {
+        model.addAttribute("payment", new Payment());
+        return "payment"; // The name of your HTML template
+    }
+    @PostMapping("/payment")
+    public String submitPassenger(@ModelAttribute Payment payment, HttpSession session) {
+        Booking booking = (Booking) session.getAttribute("currentBooking");
+        if (booking != null) {
+            payment.setReservationCode(booking.getReservationCode());
+        } else {
+            // Handle error: no booking found in session
+            log.warn("No booking found in session.");
+            return "redirect:/flight/payment"; // or some error page
+        }
+
+        paymentRepository.save(payment);
+        log.info("Redirecting to /flight/vnpay_ipn");
+        return "redirect:/flight/vnpay_ipn";
+    }
+
+    @GetMapping("/vnpay_ipn")
+    @ResponseBody
+    public RedirectView paying(HttpSession session, @ModelAttribute InitPaymentRequest request) {
+
+        Booking booking = (Booking) session.getAttribute("currentBooking");
+
+        InitPaymentRequest initPaymentRequest = InitPaymentRequest.builder()
+                .userId(booking.getId())
+                .amount((long) booking.getTotalPrice()) // Adjust according to how you calculate total price
+                .txnRef(String.valueOf(request.getTxnRef()))
+                .ipAddress("127.0.0.1")
+                .build();
+
+        InitPaymentResponse initPaymentResponse = paymentService.init(initPaymentRequest);
+
+        log.info("[request_id={}] user_name={} created booking_id={} successfully",
+                booking.getReservationCode(), booking.getUser(), booking.getId());
+        return new RedirectView(initPaymentResponse.getVnpUrl());
+    }
+
 
     private String getTimeFrame(LocalTime time) {
         int hour = time.getHour();
@@ -315,5 +421,18 @@ public class FlightController {
         if (hour < 12) return "Morning (08:00 - 11:59)";
         if (hour < 18) return "Afternoon (12:00 - 17:59)";
         return "Evening (18:00 - 23:59)";
+    }
+
+    protected String randomString(int length) {
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder salt = new StringBuilder();
+        Random rnd = new Random();
+        while (salt.length() < length) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        String saltStr = salt.toString();
+        return saltStr;
+
     }
 }

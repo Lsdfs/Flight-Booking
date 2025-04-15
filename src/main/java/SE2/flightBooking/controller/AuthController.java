@@ -6,8 +6,10 @@ import SE2.flightBooking.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @GetMapping("/register")
     private String registerPage (Model model){
 
@@ -29,11 +34,30 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@Valid @ModelAttribute UserDTO userRegistrationDTO) {
-        authService.registerUser(userRegistrationDTO);
-        return "login";
-    }
+    public String registerUser(@Valid @ModelAttribute("userDTO") UserDTO userRegistrationDTO,
+                               BindingResult result,
+                               Model model) {
 
+
+        if (result.hasErrors()) {
+            return "register";
+        }
+
+
+        if (authService.existsByEmail(userRegistrationDTO.getGmail())) {
+            model.addAttribute("emailError", "Email existed, please use another one");
+            return "register";
+        }
+
+
+        if (authService.existsByPhoneNumber(userRegistrationDTO.getPhoneNumber())) {
+            model.addAttribute("phoneError", "Phone number existed, please use another one");
+            return "register";
+        }
+
+        authService.registerUser(userRegistrationDTO);
+        return "redirect:/auth/login?registerSuccess";
+    }
 
     @GetMapping("/login")
     public String showLogin() {
@@ -46,7 +70,7 @@ public class AuthController {
             User user = (User) authService.loadUserByUsername(userDTO.getPhoneNumber());
 
             if (user != null) {
-                return "redirect:/"; // If login successfully
+                return "redirect:/";
             }
 
         } catch (UsernameNotFoundException e) {
@@ -54,7 +78,5 @@ public class AuthController {
         }
         return "login";
     }
-
-
 
 }

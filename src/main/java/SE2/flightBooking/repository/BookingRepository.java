@@ -23,4 +23,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("lastName") String lastName,
             @Param("firstName") String firstName
     );
+
+    List<Booking> findByReservationCode(String reservationCode);
 }

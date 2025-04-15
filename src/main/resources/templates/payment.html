@@ -1,10 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html >
+<meta charset="UTF-8">
+<html xmlns:th="http://www.thymeleaf.org" >
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Passenger Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4fb;
+        }
+        .form-container {
+            width: 600px;
+            margin: 30px auto;
+            padding: 25px;
+            background-color: #ffffff;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #e32526;
+        }
+
+        .radio-group, .checkbox-group {
+            margin-top: 10px;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .submit-btn {
+            background-color: #e32526;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #c41e21;
+        }
+        .input-line {
+            all: unset; /* Reset all default styles */
+            border-bottom: 1px solid #ccc;
+            padding: 8px 4px;
+            width: 100%;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: transparent;
+        }
+
+        .input-line:focus {
+            border-bottom: 2px solid #e60000; /* Red underline when focused */
+        }
+
+
+    </style>
 </head>
 <body>
+<div class="form-container">
+    <form th:action="@{/passenger/submit}" th:object="${payment}" method="post">
 
+        <div class="form-section">
+            <div class="radio-group">
+                <label><input type="radio" th:field="*{gender}" value="Nam" /> Nam</label>
+                <label><input type="radio" th:field="*{gender}" value="Nữ" /> Nữ</label>
+                <label><input type="radio" th:field="*{gender}" value="Khác" /> Khác</label>
+            </div>
+        </div>
+
+        <input type="text" name="lastName" placeholder="Họ" class="input-line" required>
+        <input type="text" name="firstName" placeholder="Tên đệm & tên" class="input-line" required>
+        <input type="date" name="dob" class="input-line" required>
+        <input type="tel" name="phone" placeholder="Số điện thoại" class="input-line" required>
+        <input type="email" name="email" placeholder="Email" class="input-line" required>
+        <input type="text" name="identity" placeholder="CCCD / Passport" class="input-line" required>
+        <input type="text" name="currentLocation" placeholder="Nơi ở hiện tại" class="input-line" required>
+
+        <button class="submit-btn" type="submit">Đi tiếp</button>
+    </form>
+</div>
 </body>
 </html>
