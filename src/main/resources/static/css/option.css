@@ -1,0 +1,94 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-size: cover, cover, cover;
+    background-image:
+            url('//footer-pattern.webp'),
+            url('//sub-background-desktop.webp'),
+            url('//backgroundDesktop.webp');
+    background-repeat: no-repeat;
+    background-position: right bottom, left top, right bottom;
+    background-attachment: fixed;
+}
+
+.header {
+    background-color: #CB161D;
+    color: white;
+    padding: 10px;
+    text-align: left;
+}
+.header h1 {
+    margin: 0;
+    display: inline;
+}
+.trip-info {
+    background-color: #ffca28;
+    padding: 10px;
+    text-align: left;
+}
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+.options {
+    width: 60%;
+}
+.options h3 {
+    color: #388e3c;
+}
+.option-card {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.option-card img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+.option-card select, .option-card input {
+    margin-left: 10px;
+}
+.booking-info {
+    width: 35%;
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+}
+.booking-info h3 {
+    background-color: #CB161D;
+    color: white;
+    padding: 10px;
+    margin: -15px -15px 15px -15px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.booking-info .trip {
+    margin-bottom: 15px;
+}
+.booking-info .trip h4 {
+    margin: 0;
+    color: #0288d1;
+}
+.booking-info .trip p {
+    margin: 5px 0;
+}
+.details-btn {
+    background-color: #ffca28;
+    color: black;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    float: right;
+}

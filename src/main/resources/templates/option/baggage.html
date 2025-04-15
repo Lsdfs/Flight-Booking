@@ -1,148 +1,30 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Select Luggage</title>
+    <title>Select Additional Baggage</title>
+    <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf != null}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf != null}"/>
+    <link rel="stylesheet" th:href="@{/css/baggage.css}">
     <style>
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 500px;
-            max-width: 90%;
-        }
 
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .tab-container {
-            display: flex;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-            border-bottom: 2px solid #ff0000;
-            font-weight: bold;
-        }
-
-        .passenger-info {
-            background: #ff0000;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .free-baggage-info {
-            color: green;
-            margin-bottom: 10px;
-        }
-
-        .baggage-option {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-        }
-
-        .baggage-option img {
-            width: 50px;
-            height: 50px;
-        }
-
-        .baggage-option .quantity-controls {
-            display: flex;
-            align-items: center;
-        }
-
-        .baggage-option .quantity-controls button {
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1001;
-        }
-
-        .popup button {
-            margin: 0 10px;
-            padding: 5px 10px;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            background: #ff0000;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button.no-thanks {
-            background: #ffc107;
-            color: black;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
     </style>
 </head>
 <body>
 <div id="applyReturnPopup" class="popup hidden">
-    <p>Do you want to apply this selection for the return trip?</p>
+    <p>Do you want to apply this baggage selection for the return trip?</p>
     <button onclick="applyToReturnTrip(true)">Yes</button>
     <button onclick="applyToReturnTrip(false)">No</button>
 </div>
 
 <div th:fragment="baggageModal" id="baggageModal" class="modal">
-    <button class="close-btn" onclick="closeModal('baggageModal')">X</button>
-    <h2>Select Luggage</h2>
+    <div class="head-container">
+        <h2 class="head-content">Select luggage</h2>
+    </div>
+
+    <div id="errorMessage" class="error-message" th:text="${error}"></div>
     <form id="baggageForm" th:action="@{/baggage/save}" method="post">
         <input type="hidden" name="bookingId" th:value="${bookingId}"/>
-        <input type="hidden" name="flightId" th:value="${departFlight.id}"/>
+        <input type="hidden" name="flightId" th:value="${departFlight?.id}"/>
         <input type="hidden" id="applyToReturnTrip" name="applyToReturnTrip" th:value="${applyToReturnTrip}"/>
         <div class="tab-container" id="baggageTabs">
             <div class="tab active" onclick="changeTab('baggage', 'depart')">Depart trip</div>
@@ -151,28 +33,32 @@
 
         <div id="departBaggage">
             <div class="passenger-info">
-                <p th:text="${passengerName}"></p>
-                <p th:text="${departFlight.departure} + ' - ' + ${departFlight.destination}"></p>
+                <p th:text="${passengerName != null ? passengerName : 'Unknown Passenger'}"></p>
+                <p th:text="${departFlight?.departure} + ' - ' + ${departFlight?.destination}"></p>
             </div>
+
             <div class="free-baggage-info">
-                <p>Your ticket class includes 10 kilograms of free baggage.</p>
+                <p th:text="'Your ticket class (' + ${departFlight?.ticketClass?.name} + ') includes ' + ${departFlight?.ticketClass?.freeBaggageWeight * booking.passengerCount} + ' kg of free Standard baggage. Additional fees may apply for excess weight or Extra baggage.'"></p>
             </div>
-            <h3>Select additional baggage</h3>
+            <h3>Add more baggage</h3>
             <div th:if="${#lists.isEmpty(baggageOptions)}">
-                <p>No baggage options available.</p>
+                <p class="not-found-mes">No baggage options available.</p>
             </div>
             <div th:unless="${#lists.isEmpty(baggageOptions)}">
                 <div th:each="baggage : ${baggageOptions}" class="baggage-option">
                     <div>
-                        <img src="/image/baggage.png" alt="Suitcase"/>
-                        <span th:text="${baggage.weight + ' kg package'}"></span>
+                        <img src="/image/baggage.png" alt="Baggage"/>
+                        <span th:text="${baggage.weight + ' kg (' + baggage.category + ')'}"></span>
                     </div>
                     <div>
-                        <span th:text="${#numbers.formatInteger(baggage.price, 0, 'COMMA') + ' VND'}"></span>
+                        <span th:classappend="${baggage.category != 'Standard'} ? 'baggage-price' : ''"
+                              th:text="${'Price per kg: ' + #numbers.formatInteger(baggage.pricePerKg, 0, 'COMMA') + ' VND'}"></span>
                         <div class="quantity-controls">
                             <button type="button" th:onclick="'updateQuantity(\'depart-' + ${baggage.id} + '\', -1)'">-</button>
-                            <span th:id="'depart-quantity-' + ${baggage.id}" class="quantity">0</span>
-                            <input type="hidden" th:name="'departBaggage[' + ${baggage.id} + ']'" th:id="'depart-' + ${baggage.id}" value="0"/>
+                            <span th:id="'depart-quantity-' + ${baggage.id}" class="quantity"
+                                  th:text="${selectedDepartBaggage[baggage.id] ?: 0}"></span>
+                            <input type="hidden" th:name="'departBaggage[' + ${baggage.id} + ']'" th:id="'depart-' + ${baggage.id}"
+                                   th:value="${selectedDepartBaggage[baggage.id] ?: 0}"/>
                             <button type="button" th:onclick="'updateQuantity(\'depart-' + ${baggage.id} + '\', 1)'">+</button>
                         </div>
                     </div>
@@ -180,30 +66,33 @@
             </div>
         </div>
 
-        <div id="returnBaggage" class="hidden">
+        <div id="returnBaggage" class="hidden" th:if="${returnFlight != null}">
             <div class="passenger-info">
-                <p th:text="${passengerName}"></p>
-                <p th:if="${#lists.size(booking.flights) > 1}" th:text="${booking.flights[1].departure} + ' - ' + ${booking.flights[1].destination}"></p>
+                <p th:text="${passengerName != null ? passengerName : 'Unknown Passenger'}"></p>
+                <p th:text="${returnFlight?.departure} + ' - ' + ${returnFlight?.destination}"></p>
             </div>
             <div class="free-baggage-info">
-                <p>Your ticket class includes 10 kilograms of free baggage.</p>
+                <p th:text="'Your ticket class (' + ${returnFlight?.ticketClass?.name} + ') includes ' + ${returnFlight?.ticketClass?.freeBaggageWeight * booking.passengerCount} + ' kg of free Standard baggage. Additional fees may apply for excess weight or Extra baggage.'"></p>
             </div>
-            <h3>Select additional baggage</h3>
+            <h3>Add more baggage</h3>
             <div th:if="${#lists.isEmpty(baggageOptions)}">
                 <p>No baggage options available.</p>
             </div>
             <div th:unless="${#lists.isEmpty(baggageOptions)}">
                 <div th:each="baggage : ${baggageOptions}" class="baggage-option">
                     <div>
-                        <img src="/image/baggage.png" alt="Suitcase"/>
-                        <span th:text="${baggage.weight + ' kg package'}"></span>
+                        <img src="/image/baggage.png" alt="Baggage"/>
+                        <span th:text="${baggage.weight + ' kg (' + baggage.category + ')'}"></span>
                     </div>
                     <div>
-                        <span th:text="${#numbers.formatInteger(baggage.price, 0, 'COMMA') + ' VND'}"></span>
+                        <span th:classappend="${baggage.category != 'Standard'} ? 'baggage-price' : ''"
+                              th:text="${'Price per kg: ' + #numbers.formatInteger(baggage.pricePerKg, 0, 'COMMA') + ' VND'}"></span>
                         <div class="quantity-controls">
                             <button type="button" th:onclick="'updateQuantity(\'return-' + ${baggage.id} + '\', -1)'">-</button>
-                            <span th:id="'return-quantity-' + ${baggage.id}" class="quantity">0</span>
-                            <input type="hidden" th:name="'returnBaggage[' + ${baggage.id} + ']'" th:id="'return-' + ${baggage.id}" value="0"/>
+                            <span th:id="'return-quantity-' + ${baggage.id}" class="quantity"
+                                  th:text="${selectedReturnBaggage[baggage.id] ?: 0}"></span>
+                            <input type="hidden" th:name="'returnBaggage[' + ${baggage.id} + ']'" th:id="'return-' + ${baggage.id}"
+                                   th:value="${selectedReturnBaggage[baggage.id] ?: 0}"/>
                             <button type="button" th:onclick="'updateQuantity(\'return-' + ${baggage.id} + '\', 1)'">+</button>
                         </div>
                     </div>
@@ -211,12 +100,56 @@
             </div>
         </div>
 
-        <button type="button" onclick="showApplyReturnPopup()">Confirm</button>
-        <button type="submit" class="no-thanks" onclick="skipSelection()">No, thanks</button>
+        <div class="button-bottom">
+            <button type="button" onclick="showApplyReturnPopup()">Confirm</button>
+            <button type="submit" class="no-thanks" onclick="skipSelection()">No, thanks</button>
+        </div>
+
     </form>
 </div>
 
 <script>
+    let selectedDepartBaggage = {};
+    let selectedReturnBaggage = {};
+
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('baggageModal');
+        const applyReturnPopup = document.getElementById('applyReturnPopup');
+
+        if (modal && !modal.contains(event.target) && !applyReturnPopup.contains(event.target) && !modal.classList.contains('hidden')) {
+            closeModal('baggageModal');
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('quantity-btn')) {
+            const direction = e.target.dataset.direction;
+            const baggageId = e.target.dataset.baggageId;
+            const tab = e.target.dataset.tab;
+            updateQuantity(tab, baggageId, direction === 'plus' ? 1 : -1);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const applyToReturnTrip = document.getElementById('applyToReturnTrip')?.value;
+        const returnFlightExists = /*[[${returnFlight != null}]]*/ false;
+
+        if (applyToReturnTrip !== 'yes' || !returnFlightExists) {
+            document.getElementById('returnBaggageTab').style.display = 'none';
+            document.getElementById('returnBaggage').style.display = 'none';
+        }
+
+        document.querySelectorAll('#departBaggage input[type="hidden"]').forEach(input => {
+            const baggageId = input.id.split('-')[1];
+            selectedDepartBaggage[baggageId] = parseInt(input.value) || 0;
+        });
+
+        document.querySelectorAll('#returnBaggage input[type="hidden"]').forEach(input => {
+            const baggageId = input.id.split('-')[1];
+            selectedReturnBaggage[baggageId] = parseInt(input.value) || 0;
+        });
+    });
+
     function changeTab(type, tab) {
         const returnBaggageTab = document.getElementById('returnBaggageTab');
         if (tab === 'return' && returnBaggageTab.style.display === 'none') {
@@ -236,101 +169,165 @@
         }
     }
 
-    function updateQuantity(inputId, change) {
-        const input = document.getElementById(inputId);
-        const quantityDisplay = document.getElementById(inputId.replace('depart-', 'depart-quantity-').replace('return-', 'return-quantity-'));
-        let quantity = parseInt(input.value) + change;
-        if (quantity < 0) quantity = 0;
-        input.value = quantity;
-        quantityDisplay.textContent = quantity;
+    let autoSaveTimeout;
+    function updateQuantity(inputId, delta) {
+        const [tab, baggageId] = inputId.split('-');
+        const selectedBaggage = tab === 'depart' ? selectedDepartBaggage : selectedReturnBaggage;
+        const quantityElement = document.getElementById(`${tab}-quantity-${baggageId}`);
+        const inputElement = document.getElementById(inputId);
+
+        let currentQuantity = parseInt(quantityElement.textContent) || 0;
+        currentQuantity = Math.max(0, currentQuantity + delta);
+        selectedBaggage[baggageId] = currentQuantity;
+
+        quantityElement.textContent = currentQuantity.toString();
+        inputElement.value = currentQuantity.toString();
+
+        clearError();
+
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            autoSaveSelections();
+        }, 1000);
     }
 
-    function showApplyReturnPopup() {
-        let hasSelection = false;
-        const departInputs = document.querySelectorAll('input[name^="departBaggage"]');
-        departInputs.forEach(input => {
-            if (parseInt(input.value) > 0) {
-                hasSelection = true;
-            }
-        });
-
-        if (!hasSelection) {
-            alert("Please select at least one baggage option for Depart trip before confirming.");
+    function autoSaveSelections() {
+        const bookingId = document.querySelector('input[name="bookingId"]')?.value;
+        if (!bookingId) {
+            console.error('Booking ID not found for auto-save');
             return;
         }
 
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
-        if (applyToReturnTrip === 'yes') {
+        fetch('/baggage/autosave', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content
+            },
+            body: JSON.stringify({
+                bookingId: bookingId,
+                departBaggage: selectedDepartBaggage,
+                returnBaggage: selectedReturnBaggage
+            })
+        }).then(response => {
+            if (!response.ok) {
+                return response.text().then(errorMessage => {
+                    throw new Error(errorMessage);
+                });
+            }
+            return response.text();
+        }).then(message => {
+            console.log(message);
+            clearError();
+        }).catch(error => {
+            console.error('Auto-save failed:', error.message);
+            displayError(error.message);
+        });
+    }
+
+    function showApplyReturnPopup() {
+        const returnBaggageDiv = document.getElementById('returnBaggage');
+        const applyToReturnTrip = document.getElementById('applyToReturnTrip')?.value;
+
+        if (returnBaggageDiv && !returnBaggageDiv.classList.contains('hidden')
+            && applyToReturnTrip === 'yes') {
             document.getElementById('applyReturnPopup').classList.remove('hidden');
+            document.getElementById('applyReturnPopup').style.zIndex = '1000';
         } else {
             submitForm(false);
         }
     }
 
+    function getBaggageIdFromInputId(inputId) {
+        const parts = inputId.split('-');
+        if (parts.length < 2) {
+            console.error(`Invalid input ID format: ${inputId}`);
+            return null;
+        }
+        return parts[1];
+    }
+
+    function prepareFormData() {
+        Object.entries(selectedDepartBaggage).forEach(([baggageId, quantity]) => {
+            const input = document.getElementById(`depart-${baggageId}`);
+            if (input) input.value = quantity.toString();
+        });
+
+        Object.entries(selectedReturnBaggage).forEach(([baggageId, quantity]) => {
+            const input = document.getElementById(`return-${baggageId}`);
+            if (input) input.value = quantity.toString();
+        });
+    }
+
+    function submitForm(applyToReturn) {
+        prepareFormData();
+        document.getElementById('baggageForm').submit();
+    }
+
     function applyToReturnTrip(apply) {
+
         document.getElementById('applyReturnPopup').classList.add('hidden');
         if (apply) {
-            const departInputs = document.querySelectorAll('input[name^="departBaggage"]');
-            departInputs.forEach(departInput => {
-                const baggageId = departInput.name.match(/\d+/)[0];
-                const returnInput = document.getElementById('return-' + baggageId);
-                const returnQuantityDisplay = document.getElementById('return-quantity-' + baggageId);
-                returnInput.value = departInput.value;
-                returnQuantityDisplay.textContent = departInput.value;
+            document.querySelectorAll('#returnBaggage input[type="hidden"]').forEach(input => {
+                input.value = "0";
+                const baggageId = getBaggageIdFromInputId(input.id);
+                if (baggageId) {
+                    document.getElementById(`return-quantity-${baggageId}`).textContent = "0";
+                }
             });
-            changeTab('baggage', 'return');
-        } else {
-            changeTab('baggage', 'return');
-            return;
+
+            selectedReturnBaggage = { ...selectedDepartBaggage };
+            Object.entries(selectedReturnBaggage).forEach(([baggageId, quantity]) => {
+                const returnInput = document.getElementById(`return-${baggageId}`);
+                const returnQuantity = document.getElementById(`return-quantity-${baggageId}`);
+                if (returnInput && returnQuantity) {
+                    returnInput.value = quantity.toString();
+                    returnQuantity.textContent = quantity.toString();
+                }
+            });
         }
         submitForm(apply);
     }
 
-    function submitForm(applyToReturn) {
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
-        if (applyToReturnTrip === 'yes') {
-            let hasReturnSelection = false;
-            const returnInputs = document.querySelectorAll('input[name^="returnBaggage"]');
-            returnInputs.forEach(input => {
-                if (parseInt(input.value) > 0) {
-                    hasReturnSelection = true;
-                }
-            });
-
-            if (!hasReturnSelection) {
-                alert("Please select at least one baggage option for Return trip before confirming.");
+    function skipSelection() {
+        document.querySelectorAll('#departBaggage input[type="hidden"]').forEach(input => {
+            const idParts = input.id.split('-');
+            if (idParts.length < 2) {
+                console.error(`Invalid input ID format: ${input.id}`);
                 return;
             }
-        }
-
-        document.getElementById('baggageForm').submit();
-    }
-
-    function skipSelection() {
-        const departInputs = document.querySelectorAll('input[name^="departBaggage"]');
-        const returnInputs = document.querySelectorAll('input[name^="returnBaggage"]');
-        departInputs.forEach(input => {
-            input.value = '0';
-            document.getElementById(input.id.replace('depart-', 'depart-quantity-')).textContent = '0';
+            const baggageId = idParts[1];
+            input.value = "0";
+            document.getElementById(`depart-quantity-${baggageId}`).textContent = "0";
         });
-        returnInputs.forEach(input => {
-            input.value = '0';
-            document.getElementById(input.id.replace('return-', 'return-quantity-')).textContent = '0';
+        document.querySelectorAll('#returnBaggage input[type="hidden"]').forEach(input => {
+            const idParts = input.id.split('-');
+            if (idParts.length < 2) {
+                console.error(`Invalid input ID format: ${input.id}`);
+                return;
+            }
+            const baggageId = idParts[1];
+            input.value = "0";
+            document.getElementById(`return-quantity-${baggageId}`).textContent = "0";
         });
+        selectedDepartBaggage = {};
+        selectedReturnBaggage = {};
         document.getElementById('baggageForm').submit();
     }
 
     function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
+        document.getElementById(modalId)?.classList.add('hidden');
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
-        if (applyToReturnTrip !== 'yes') {
-            document.getElementById('returnBaggageTab').style.display = 'none';
-            document.getElementById('returnBaggage').style.display = 'none';
-        }
-    });
+    function displayError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+    }
+
+    function clearError() {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = '';
+    }
 </script>
 </body>
 </html>

@@ -40,6 +40,11 @@ public class Flight {
     public enum FlightType {
         ONE_WAY, ROUND_TRIP
     }
+
+    @ManyToOne
+    @JoinColumn(name = "ticket_class_id")
+    private TicketClass ticketClass;
+
     public Flight() {}
     public Flight(String departure, String destination, LocalDateTime departureTime,
                   LocalDateTime returnTime, int availableSeats, double price,
@@ -87,4 +92,12 @@ public class Flight {
 
     public FlightType getFlightType() { return flightType; }
     public void setFlightType(FlightType flightType) { this.flightType = flightType; }
+
+    public TicketClass getTicketClass() {
+        return ticketClass;
+    }
+
+    public void setTicketClass(TicketClass ticketClass) {
+        this.ticketClass = ticketClass;
+    }
 }

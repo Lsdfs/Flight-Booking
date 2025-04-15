@@ -1,232 +1,258 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/option.css}">
     <title>Booking Options</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" href="/css/styles.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to bottom, #fdeff2, #d3c8f1);
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
 
-        h1 {
-            color: #d0021b;
-        }
-
-        .container {
-            width: 80%;
-            margin: 20px auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .option h2 {
-            font-size: 18px;
-            margin: 0;
-        }
-
-        .option button {
-            background: white;
-            color: black;
-            border: none;
-            padding: 10px 15px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .option button:hover {
-            background: #d0021b;
-            color: white;
-        }
-
-        #applyReturnPopup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            text-align: center;
-            display: none;
-        }
-
-        #applyReturnPopup.show {
-            display: block;
-        }
-
-        #applyReturnPopup button {
-            margin: 10px;
-            padding: 10px 15px;
-            border: none;
-            background: #d0021b;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #applyReturnPopup button:hover {
-            background: #a00216;
-        }
-
-        img {
-            display: block !important;
-            width: auto;
-            height: auto;
-        }
-
-        .modal {
-            display: none;
-        }
-
-        .modal.show {
-            display: block;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 600px;
-            max-width: 90%;
-        }
     </style>
 </head>
 <body>
-<h1>Select Your Option</h1>
-<div th:if="${error != null}" th:text="${error}" style="color: red;"></div>
+
+<div class="trip-info">
+    <span th:if="${isRoundTrip}">RETURN TRIP</span>
+    <span th:unless="${isRoundTrip}">ONE-WAY TRIP</span> | <span th:text="${booking.passengerCount} + ' adult'"></span>
+    <br>
+    <span>Departure point: <span th:text="${departFlight.departure}"></span></span>
+    →
+    <span>Destination: <span th:text="${departFlight.destination}"></span></span>
+</div>
 
 <div class="container">
-    <div class="option choose-seat">
-        <img th:src="@{/image/seat.png}" src="/image/seat.png" alt="seat img" />
-        <h2>Select your seat</h2>
-        <button onclick="openModal('seatModal')">></button>
+    <div class="options">
+        <h3>Don't forget to buy luggage, seats, meals and more...</h3>
+
+        <div class="option-card">
+            <div class="option-header" onclick="toggleOption('seat-options')">
+                <img src="/image/seat.png" alt="Seat Icon">
+                <strong>Choose your preferred seat</strong>
+            </div>
+            <div id="seat-options" class="option-details">
+                <label for="seatSelect">Select a seat:</label>
+                <select id="seatSelect" onchange="addSeat(bookingId, this.value)">
+                    <option value="">Select a seat</option>
+                    <option th:each="seat : ${availableDepartSeats}"
+                            th:value="${seat.id}"
+                            th:text="${seat.seatNumber} + ' (' + ${seat.seatClass} + ', ' + ${seat.price} + ' VND)'"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="option-card">
+            <div class="option-header" onclick="toggleOption('baggage-options')">
+                <img src="/image/baggage.png" alt="Luggage Icon">
+                <strong>Select luggage</strong>
+            </div>
+            <div id="baggage-options" class="option-details">
+                <label for="baggageSelect">Select baggage:</label>
+                <select id="baggageSelect">
+                    <option value="">Select baggage</option>
+                    <option th:each="baggage : ${baggageOptions}"
+                            th:value="${baggage.id}"
+                            th:text="|${baggage.weight} kg (${baggage.category}, ${baggage.pricePerKg * baggage.weight} VND)|"></option>
+                </select>
+                <label for="baggageQuantity">Quantity:</label>
+                <input type="number" id="baggageQuantity" min="1" value="1" style="width: 50px;">
+                <button onclick="addBaggage(bookingId, document.getElementById('baggageSelect').value, departFlightId, document.getElementById('baggageQuantity').value)">Add</button>
+            </div>
+        </div>
+
+        <div class="option-card">
+            <div class="option-header" onclick="toggleOption('meal-options')">
+                <img src="/image/meal.png" alt="Meal Icon">
+                <strong>Select meal</strong>
+            </div>
+            <div id="meal-options" class="option-details">
+                <label for="mealSelect">Select a meal:</label>
+                <select id="mealSelect">
+                    <option value="">Select a meal</option>
+                    <option th:each="meal : ${mealOptions}"
+                            th:value="${meal.id}"
+                            th:text="${meal.name} + ' (' + ${meal.category} + ', ' + ${meal.price} + ' VND)'">
+                    </option>
+                </select>
+                <label for="mealQuantity">Quantity:</label>
+                <input type="number" id="mealQuantity" min="1" value="1" style="width: 50px;">
+                <button onclick="addMeal(bookingId, document.getElementById('mealSelect').value, departFlightId, document.getElementById('mealQuantity').value)">Add</button>
+            </div>
+        </div>
     </div>
-    <div class="option choose-meal">
-        <img th:src="@{/image/meal.png}" src="/image/meal.png" alt="meal img" />
-        <h2>Select your meal</h2>
-        <button onclick="openModal('mealModal')">></button>
-    </div>
-    <div class="option choose-baggage">
-        <img th:src="@{/image/baggage.png}" src="/image/baggage.png" alt="baggage img" />
-        <h2>Select your baggage</h2>
-        <button onclick="openModal('baggageModal')">></button>
+
+    <div class="booking-info">
+        <h3>Booking information</h3>
+        <button class="details-btn" onclick="toggleOption('booking-details')">Details</button>
+
+        <div id="booking-details" class="option-details">
+            <div class="trip">
+                <h4>Departure trip</h4>
+                <p>Ticket price: <span th:text="${#numbers.formatInteger(departFlight.price, 0, 'COMMA')} + ' VND'"></span></p>
+                <p>Taxes and fees: <span th:text="${#numbers.formatInteger(departFlight.price * 0.2, 0, 'COMMA')} + ' VND'"></span></p>
+                <p>Services: <span id="services-cost-depart" th:text="${#numbers.formatInteger(booking.getAdditionalCost(), 0, 'COMMA')} + ' VND'"></span></p>
+                <p><strong>Total: <span id="total-cost-depart" th:text="${#numbers.formatInteger(departFlight.price + (departFlight.price * 0.2) + booking.getAdditionalCost(), 0, 'COMMA')} + ' VND'"></span></strong></p>
+            </div>
+
+            <div class="trip" th:if="${isRoundTrip}">
+                <h4>Return trip</h4>
+                <p>Ticket price: <span th:text="${#numbers.formatInteger(returnFlight.price, 0, 'COMMA')} + ' VND'"></span></p>
+                <p>Taxes and fees: <span th:text="${#numbers.formatInteger(returnFlight.price * 0.2, 0, 'COMMA')} + ' VND'"></span></p>
+                <p>Services: <span id="services-cost-return" th:text="${#numbers.formatInteger(booking.getAdditionalCost(), 0, 'COMMA')} + ' VND'"></span></p>
+                <p><strong>Total: <span id="total-cost-return" th:text="${#numbers.formatInteger(returnFlight.price + (returnFlight.price * 0.2) + booking.getAdditionalCost(), 0, 'COMMA')} + ' VND'"></span></strong></p>
+            </div>
+        </div>
     </div>
 </div>
 
-<div th:replace="~{option/seat :: seatModal}" th:if="${booking != null}"></div>
-<div th:replace="~{option/meal :: mealModal}" th:if="${booking != null}"></div>
-<div th:replace="~{option/baggage :: baggageModal}" th:if="${booking != null}"></div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Store all necessary values from Thymeleaf in JavaScript variables
+    const bookingId = /*[[${bookingId}]]*/ 0;
+    const departFlightId = /*[[${booking.flights[0].id}]]*/ 0;
+    const returnFlightId = /*[[${isRoundTrip ? booking.flights[1].id : null}]]*/ null;
+    const departFlightPrice = /*[[${departFlight.price}]]*/ 0;
+    const returnFlightPrice = /*[[${isRoundTrip ? returnFlight.price : 0}]]*/ 0;
 
-<div id="applyReturnPopup">
-    <p>Do you want to apply this selection to the return trip?</p>
-    <button onclick="applyToReturnTrip(true)">Yes</button>
-    <button onclick="applyToReturnTrip(false)">No</button>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    const isRoundTrip = /*[[${booking != null && booking.flights != null && booking.flights.size() > 1}]]*/ false;
-    const bookingId = /*[[${booking != null ? booking.id : 0}]]*/ 0;
-    let currentService = '';
-
-    function openModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.add("show");
-            currentService = id.replace('Modal', '');
-            if (!isRoundTrip) {
-                let returnTab = document.getElementById(`return${currentService.charAt(0).toUpperCase() + currentService.slice(1)}Tab`);
-                if (returnTab) returnTab.classList.add("hidden");
-            }
-        }
-    }
-
-    function closeModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.remove("show");
-        }
-    }
-
-    function changeTab(service, trip) {
-        const departSection = document.getElementById(`departure${service.charAt(0).toUpperCase() + service.slice(1)}`);
-        const returnSection = document.getElementById(`return${service.charAt(0).toUpperCase() + service.slice(1)}`);
-        if (departSection && returnSection) {
-            departSection.classList.toggle("hidden", trip !== 'departure');
-            returnSection.classList.toggle("hidden", trip !== 'return');
-
-            let tabs = document.querySelectorAll(`#${service}Tabs .tab`);
-            tabs.forEach(tab => tab.classList.remove("active"));
-            const activeTab = document.querySelector(`#${service}Tabs .tab[onclick="changeTab('${service}', '${trip}')"]`);
-            if (activeTab) activeTab.classList.add("active");
-        }
-    }
-
-    function confirm(service) {
-        if (isRoundTrip) {
-            document.getElementById("applyReturnPopup").classList.add("show");
+    function toggleOption(optionId) {
+        const option = document.getElementById(optionId);
+        if (option.style.display === 'block') {
+            option.style.display = 'none';
         } else {
-            submitSelection(service);
+            option.style.display = 'block';
         }
     }
 
-    function applyToReturnTrip(apply) {
-        document.getElementById("applyReturnPopup").classList.remove("show");
-        if (!apply) {
-            changeTab(currentService, 'return');
-        } else {
-            submitSelection(currentService);
+    function updatePrices(serviceCost) {
+        // Convert serviceCost to a number to ensure proper calculation
+        serviceCost = parseFloat(serviceCost) || 0;
+
+        // Update departure flight costs
+        const departServicesCost = document.getElementById('services-cost-depart');
+        const departTotalCost = document.getElementById('total-cost-depart');
+        const departTaxes = departFlightPrice * 0.2;
+        const departTotal = departFlightPrice + departTaxes + serviceCost;
+
+        departServicesCost.textContent = serviceCost.toLocaleString() + ' VND';
+        departTotalCost.textContent = departTotal.toLocaleString() + ' VND';
+
+        // Update return flight costs if it exists
+        const returnServicesCost = document.getElementById('services-cost-return');
+        if (returnServicesCost) {
+            const returnTotalCost = document.getElementById('total-cost-return');
+            const returnTaxes = returnFlightPrice * 0.2;
+            const returnTotal = returnFlightPrice + returnTaxes + serviceCost;
+
+            returnServicesCost.textContent = serviceCost.toLocaleString() + ' VND';
+            returnTotalCost.textContent = returnTotal.toLocaleString() + ' VND';
         }
     }
 
-    function submitSelection(service) {
-        const idField = document.getElementById(`${service}Select`);
-        if (!idField) {
-            console.error(`Element with ID ${service}Select not found.`);
-            return;
-        }
-        const selectedId = idField.value;
-        const applyToReturn = !document.getElementById("applyReturnPopup").classList.contains("show");
-        let endpoint = `/booking/select-${service}`;
-        let params = `bookingId=${bookingId}&${service}Id=${selectedId}&applyToReturn=${applyToReturn}`;
-        if (service === 'meal') {
-            const quantityInput = document.getElementById('mealQuantity');
-            if (quantityInput) {
-                const quantity = quantityInput.value;
-                params += `&quantity=${quantity}`;
-            }
-        }
-        window.location.href = `${endpoint}?${params}`;
+    function addSeat(bookingIdVal, seatIdVal) {
+        if (!seatIdVal) return;
+
+        fetch('/seat/save-ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookingId: bookingIdVal,
+                seatId: seatIdVal
+            })
+        })
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(text) {
+                try {
+                    const data = JSON.parse(text);
+
+                    if (data && data.hasOwnProperty('additionalCost')) {
+                        updatePrices(data.additionalCost);
+                    } else {
+                        console.error('Response does not contain additionalCost:', data);
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON response:', error, 'Raw response:', text);
+                }
+            })
+            .catch(function(error) {
+                console.error('Network error:', error);
+            });
     }
 
-    function adjustQuantity(change) {
-        const qtyInput = document.getElementById('mealQuantity');
-        if (qtyInput) {
-            let currentQty = parseInt(qtyInput.value) || 0;
-            qtyInput.value = Math.max(0, currentQty + change);
-        }
+    function addMeal(bookingIdVal, mealIdVal, flightIdVal, quantityVal) {
+        if (!mealIdVal || quantityVal <= 0) return;
+
+        fetch('/meal/save-ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookingId: bookingIdVal,
+                mealId: mealIdVal,
+                flightId: flightIdVal,
+                quantity: quantityVal
+            })
+        })
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(text) {
+                try {
+                    const data = JSON.parse(text);
+
+                    if (data && data.hasOwnProperty('additionalCost')) {
+                        updatePrices(data.additionalCost);
+                    } else {
+                        console.error('Response does not contain additionalCost:', data);
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON response:', error, 'Raw response:', text);
+                }
+            })
+            .catch(function(error) {
+                console.error('Network error:', error);
+            });
     }
+
+    function addBaggage(bookingIdVal, baggageIdVal, flightIdVal, quantityVal) {
+        if (!baggageIdVal || quantityVal <= 0) return;
+
+        fetch('/baggage/save-ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookingId: bookingIdVal,
+                baggageId: baggageIdVal,
+                flightId: flightIdVal,
+                quantity: quantityVal
+            })
+        })
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(text) {
+                try {
+                    const data = JSON.parse(text);
+
+                    if (data && data.hasOwnProperty('additionalCost')) {
+                        updatePrices(data.additionalCost);
+                    } else {
+                        console.error('Response does not contain additionalCost:', data);
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON response:', error, 'Raw response:', text);
+                }
+            })
+            .catch(function(error) {
+                console.error('Network error:', error);
+            });
+    }
+    /*]]>*/
 </script>
 </body>
 </html>

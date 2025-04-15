@@ -12,14 +12,22 @@ public class Baggage {
     @Column(name = "weight", nullable = false)
     private double weight;
 
-    @Column(name = "price", nullable = false)
-    private double price;
+    @Column(name = "price_per_kg", nullable = false)
+    private double pricePerKg;
 
-    @Column(name = "stock", nullable = false)
-    private int stock = 100;
+    @Column(name = "category", nullable = false)
+    private String category;
 
     @Column(name = "image")
     private String image;
+
+    @ManyToOne
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
+
+    @ManyToOne
+    @JoinColumn(name = "flight_id")
+    private Flight flight;
 
     public Baggage() {}
 
@@ -39,20 +47,20 @@ public class Baggage {
         this.weight = weight;
     }
 
-    public double getPrice() {
-        return price;
+    public double getPricePerKg() {
+        return pricePerKg;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setPricePerKg(double pricePerKg) {
+        this.pricePerKg = pricePerKg;
     }
 
-    public int getStock() {
-        return stock;
+    public String getCategory() {
+        return category;
     }
 
-    public void setStock(int stock) {
-        this.stock = stock;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getImage() {
@@ -61,5 +69,21 @@ public class Baggage {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public Booking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
+    }
+
+    public Flight getFlight() {
+        return flight;
+    }
+
+    public void setFlight(Flight flight) {
+        this.flight = flight;
     }
 }

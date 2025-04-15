@@ -1,6 +1,8 @@
 package SE2.flightBooking.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "meal")
@@ -18,14 +20,25 @@ public class Meal {
     @Column(name = "price", nullable = false)
     private double price;
 
-    @Column(name = "stock", nullable = false)
-    private int stock = 100;
+    @Column(name = "category", nullable = false)
+    private String category;
 
     @Column(name = "image")
     private String image;
 
+    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingMeal> bookingMeals = new ArrayList<>();
+
     public Meal() {}
 
+    // Constructors
+    public Meal(String name, double price, String category) {
+        this.name = name;
+        this.price = price;
+        this.category = category;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -58,12 +71,12 @@ public class Meal {
         this.price = price;
     }
 
-    public int getStock() {
-        return stock;
+    public String getCategory() {
+        return category;
     }
 
-    public void setStock(int stock) {
-        this.stock = stock;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getImage() {
@@ -72,5 +85,23 @@ public class Meal {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public List<BookingMeal> getBookingMeals() {
+        return bookingMeals;
+    }
+
+    public void setBookingMeals(List<BookingMeal> bookingMeals) {
+        this.bookingMeals = bookingMeals;
+    }
+
+    public void addBookingMeal(BookingMeal bookingMeal) {
+        bookingMeals.add(bookingMeal);
+        bookingMeal.setMeal(this);
+    }
+
+    public void removeBookingMeal(BookingMeal bookingMeal) {
+        bookingMeals.remove(bookingMeal);
+        bookingMeal.setMeal(null);
     }
 }

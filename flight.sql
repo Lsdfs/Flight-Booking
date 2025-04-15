@@ -17,7 +17,7 @@ CREATE TABLE if not exists booking (
     passenger_count INT NOT NULL,
     reservation_code INT NOT NULL,
     total_price DOUBLE NOT NULL,
-    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'PAID') NOT NULL DEFAULT 'PENDING',
+    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'PAID', 'NOTCHECKEDIN', 'CHECKEDIN', 'FLIGHTDONE') NOT NULL DEFAULT 'PENDING',
     user_id BIGINT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );

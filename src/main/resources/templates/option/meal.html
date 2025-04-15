@@ -2,244 +2,227 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>Select Meal</title>
+    <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf != null}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf != null}"/>
+    <link rel="stylesheet" th:href="@{/css/meal.css}">
     <style>
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 500px;
-            max-width: 90%;
-        }
 
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .tab-container {
-            display: flex;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-            border-bottom: 2px solid #ff0000;
-            font-weight: bold;
-        }
-
-        .passenger-info {
-            background: #ff0000;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .meal-option {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-        }
-
-        .meal-option .meal-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .meal-option .meal-details {
-            flex-grow: 1;
-            padding: 0 15px;
-        }
-
-        .meal-option .quantity-controls {
-            display: flex;
-            align-items: center;
-        }
-
-        .meal-option .quantity-controls button {
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            background: #ff0000;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
+<div id="modalBackdrop" class="modal-backdrop hidden"></div>
+
 <div id="applyReturnPopup" class="popup hidden">
-    <p>Do you want to apply this selection for the return trip?</p>
+    <p>Do you want to apply this meal selection for the return trip?</p>
     <button onclick="applyToReturnTrip(true)">Yes</button>
     <button onclick="applyToReturnTrip(false)">No</button>
 </div>
 
 <div th:fragment="mealModal" id="mealModal" class="modal">
-    <button class="close-btn" onclick="closeModal('mealModal')">X</button>
-    <h2>Select Your Meal</h2>
+    <div class="head-container">
+        <h2 class="head-content">Select meal</h2>
+    </div>
+
+    <div id="errorMessage" class="error-message" th:text="${error}"></div>
     <form id="mealForm" th:action="@{/meal/save}" method="post">
         <input type="hidden" name="bookingId" th:value="${bookingId}"/>
-        <input type="hidden" name="flightId" th:value="${departFlight.id}"/>
+        <input type="hidden" name="flightId" th:value="${departFlight?.id}"/>
         <input type="hidden" id="applyToReturnTrip" name="applyToReturnTrip" th:value="${applyToReturnTrip}"/>
-
         <div class="tab-container" id="mealTabs">
             <div class="tab active" onclick="changeTab('meal', 'depart')">Depart trip</div>
             <div class="tab" id="returnMealTab" onclick="changeTab('meal', 'return')">Return trip</div>
         </div>
 
-        <div id="departMeal">
+        <div id="departMeals">
             <div class="passenger-info">
-                <p th:text="${passengerName}"></p>
-                <p th:text="${departFlight.departure} + ' - ' + ${departFlight.destination}"></p>
+                <p th:text="${passengerName != null ? passengerName : 'Unknown Passenger'}"></p>
+                <p th:text="${departFlight.departure} + ' - ' + ${departFlight.destination}"></p><p>a</p>
             </div>
-
-            <h3>Select your meal</h3>
+            <div class="free-meal-info">
+                <p th:text="'Your ticket class (' + ${departFlight.ticketClass.name} + ') includes ' + ${departFlight.ticketClass.freeMealQuantity * booking.passengerCount} + ' free Standard meals.'"></p>
+            </div>
+            <h3>Add more meals</h3>
             <div th:if="${#lists.isEmpty(mealOptions)}">
-                <p>No meal options available.</p>
+                <p class="not-found-mes">No meal options available.</p>
             </div>
             <div th:unless="${#lists.isEmpty(mealOptions)}">
-                <div th:each="meal : ${mealOptions}" class="meal-option">
-                    <img th:src="@{'image/' + ${meal.image}}" class="meal-image"
-                         th:alt="${meal.name}"/>
-
+                <div th:each="meal : ${mealOptions}" class="meal-card">
+                    <img th:src="${meal.image != null ? meal.image : '/images/default-meal.png'}" alt="Meal Image">
                     <div class="meal-details">
-                        <h4 th:text="${meal.name}"></h4>
-                        <p th:text="${meal.description}"></p>
+                        <strong th:text="${meal.name}"></strong><br>
+                        <span th:text="${meal.description}"></span><br>
+                        <span th:text="'Category: ' + ${meal.category}"></span><br>
+                        <span th:text="'Price: ' + ${#numbers.formatInteger(meal.price, 0, 'COMMA')} + ' VND'"></span>
                     </div>
-
-                    <div>
-                        <span th:text="${#numbers.formatDecimal(meal.price, 1, 2, 'COMMA') + ' VND'}"></span>
-                        <div class="quantity-controls">
-                            <button type="button" th:onclick="'updateQuantity(\'depart-' + ${meal.id} + '\', -1)'">-</button>
-                            <span th:id="'depart-quantity-' + ${meal.id}" class="quantity">0</span>
-                            <input type="hidden" th:name="'departMeals[' + ${meal.id} + ']'"
-                                   th:id="'depart-' + ${meal.id}" value="0"/>
-                            <button type="button" th:onclick="'updateQuantity(\'depart-' + ${meal.id} + '\', -1)'">-</button>
-                        </div>
+                    <div class="quantity-controls">
+                        <button type="button" th:onclick="'updateMealQuantity(\'depart-' + ${meal.id} + '\', -1)'">-</button>
+                        <span th:id="'depart-quantity-' + ${meal.id}" class="quantity"
+                              th:text="${selectedDepartMeals[meal.id] ?: 0}"></span>
+                        <input type="hidden" th:name="'departMeal[' + ${meal.id} + ']'" th:id="'depart-' + ${meal.id}"
+                               th:value="${selectedDepartMeals[meal.id] ?: 0}"/>
+                        <button type="button" th:onclick="'updateMealQuantity(\'depart-' + ${meal.id} + '\', 1)'">+</button>
                     </div>
+                    <span th:id="'meal-cost-preview-' + ${meal.id}" class="meal-cost-preview"
+                          th:attr="data-price=${meal.price}"></span>
                 </div>
             </div>
         </div>
 
-        <div id="returnMeal" class="hidden" th:if="${returnFlight != null}">
+        <div id="returnMeals" class="hidden" th:if="${returnFlight != null}">
             <div class="passenger-info">
-                <p th:text="${passengerName}"></p>
+                <p th:text="${passengerName != null ? passengerName : 'Unknown Passenger'}"></p>
                 <p th:text="${returnFlight.departure} + ' - ' + ${returnFlight.destination}"></p>
             </div>
-
-            <h3>Select your meal</h3>
+            <div class="free-meal-info">
+                <p th:text="'Your ticket class (' + ${returnFlight.ticketClass.name} + ') includes ' + ${returnFlight.ticketClass.freeMealQuantity * booking.passengerCount} + ' free Standard meals.'"></p>
+            </div>
+            <h3>Add more meals</h3>
             <div th:if="${#lists.isEmpty(mealOptions)}">
                 <p>No meal options available.</p>
             </div>
             <div th:unless="${#lists.isEmpty(mealOptions)}">
-                <div th:each="meal : ${mealOptions}" class="meal-option">
-                    <img th:src="@{'image/' + ${meal.image}}" class="meal-image" th:alt="${meal.name}"/>
-
+                <div th:each="meal : ${mealOptions}" class="meal-card">
+                    <img th:src="${meal.image != null ? meal.image : '/images/default-meal.png'}" alt="Meal Image">
                     <div class="meal-details">
-                        <h4 th:text="${meal.name}"></h4>
-                        <p th:text="${meal.description}"></p>
+                        <strong th:text="${meal.name}"></strong><br>
+                        <span th:text="${meal.description}"></span><br>
+                        <span th:text="'Category: ' + ${meal.category}"></span><br>
+                        <span th:text="'Price: ' + ${#numbers.formatInteger(meal.price, 0, 'COMMA')} + ' VND'"></span>
                     </div>
-
-                    <div>
-                        <span th:text="${#numbers.formatDecimal(meal.price, 1, 2, 'COMMA') + ' VND'}"></span>
-                        <div class="quantity-controls">
-                            <button type="button" th:onclick="'updateQuantity(\'return-' + ${meal.id} + '\', -1)'">-</button>
-                            <span th:id="'return-quantity-' + ${meal.id}" class="quantity">0</span>
-                            <input type="hidden" th:name="'returnMeals[' + ${meal.id} + ']'"
-                                   th:id="'return-' + ${meal.id}" value="0"/>
-                            <button type="button" th:onclick="'updateQuantity(\'return-' + ${meal.id} + '\', 1)'">+</button>
-                        </div>
+                    <div class="quantity-controls">
+                        <button type="button" th:onclick="'updateMealQuantity(\'return-' + ${meal.id} + '\', -1)'">-</button>
+                        <span th:id="'return-quantity-' + ${meal.id}" class="quantity"
+                              th:text="${selectedReturnMeals[meal.id] ?: 0}"></span>
+                        <input type="hidden" th:name="'returnMeal[' + ${meal.id} + ']'" th:id="'return-' + ${meal.id}"
+                               th:value="${selectedReturnMeals[meal.id] ?: 0}"/>
+                        <button type="button" th:onclick="'updateMealQuantity(\'return-' + ${meal.id} + '\', 1)'">+</button>
                     </div>
-                </div>
+                    <span th:id="'meal-cost-preview-' + ${meal.id}" class="meal-cost-preview"
+                          th:attr="data-price=${meal.price}"></span></div>
             </div>
         </div>
 
-        <button type="button" onclick="showApplyReturnPopup()">Confirm</button>
-        <button type="submit" class="no-thanks" onclick="skipSelection()">No, thanks</button>
+        <div class="button-bottom">
+            <button type="button" onclick="showApplyReturnPopup()">Confirm</button>
+            <button type="submit" class="no-thanks" onclick="skipSelection()">No, thanks</button>
+        </div>
     </form>
 </div>
 
 <script>
-    function updateQuantity(inputId, change) {
-        const input = document.getElementById(inputId);
-        const quantityDisplay = document.getElementById(inputId.replace(/(depart|return)-/, '$1-quantity-'));
-        let quantity = parseInt(input.value) + change;
-        quantity = Math.max(0, quantity); // Prevent negative quantities
-        input.value = quantity.toString();
-        quantityDisplay.textContent = quantity.toString();
-    }
+    let selectedDepartMeal = {};
+    let selectedReturnMeal = {};
+
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('mealModal');
+        const applyReturnPopup = document.getElementById('applyReturnPopup');
+
+        if (modal && !modal.contains(event.target) && !applyReturnPopup.contains(event.target) && !modal.classList.contains('hidden')) {
+            closeModal('mealModal');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const applyToReturnTrip = document.getElementById('applyToReturnTrip')?.value;
+        const returnFlightExists = /*[[${returnFlight != null}]]*/ false;
+
+        if (applyToReturnTrip !== 'yes' || !returnFlightExists) {
+            document.getElementById('returnMealTab').style.display = 'none';
+            document.getElementById('returnMeal').style.display = 'none';
+        }
+
+        document.querySelectorAll('#departMeal input[type="hidden"]').forEach(input => {
+            const mealId = input.id.split('-')[1];
+            selectedDepartMeal[mealId] = parseInt(input.value) || 0;
+        });
+
+        document.querySelectorAll('#returnMeal input[type="hidden"]').forEach(input => {
+            const mealId = input.id.split('-')[1];
+            selectedReturnMeal[mealId] = parseInt(input.value) || 0;
+        });
+    });
 
     function changeTab(type, tab) {
-        const returnTab = document.getElementById('return' + type.charAt(0).toUpperCase() + type.slice(1) + 'Tab');
-        if (tab === 'return' && returnTab.style.display === 'none') {
+        const returnMealTab = document.getElementById('returnMealTab');
+        if (tab === 'return' && returnMealTab.style.display === 'none') {
             return;
         }
 
         if (tab === 'depart') {
-            document.getElementById('depart' + type.charAt(0).toUpperCase() + type.slice(1)).classList.remove('hidden');
-            document.getElementById('return' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('hidden');
-            document.querySelector('#' + type + 'Tabs .tab:nth-child(1)').classList.add('active');
-            document.querySelector('#' + type + 'Tabs .tab:nth-child(2)').classList.remove('active');
+            document.getElementById('departMeal').classList.remove('hidden');
+            document.getElementById('returnMeal').classList.add('hidden');
+            document.querySelector('#mealTabs .tab:nth-child(1)').classList.add('active');
+            document.querySelector('#mealTabs .tab:nth-child(2)').classList.remove('active');
         } else {
-            document.getElementById('depart' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('hidden');
-            document.getElementById('return' + type.charAt(0).toUpperCase() + type.slice(1)).classList.remove('hidden');
-            document.querySelector('#' + type + 'Tabs .tab:nth-child(1)').classList.remove('active');
-            document.querySelector('#' + type + 'Tabs .tab:nth-child(2)').classList.add('active');
+            document.getElementById('departMeal').classList.add('hidden');
+            document.getElementById('returnMeal').classList.remove('hidden');
+            document.querySelector('#mealTabs .tab:nth-child(1)').classList.remove('active');
+            document.querySelector('#mealTabs .tab:nth-child(2)').classList.add('active');
         }
     }
 
-    function showApplyReturnPopup() {
-        let hasSelection = false;
-        document.querySelectorAll('input[name^="departMeals"]').forEach(input => {
-            if (parseInt(input.value) > 0) hasSelection = true;
-        });
+    let autoSaveTimeout;
+    function updateMealQuantity(inputId, delta) {
+        const [tab, mealId] = inputId.split('-');
+        const selectedMeal = tab === 'depart' ? selectedDepartMeal : selectedReturnMeal;
+        const quantityElement = document.getElementById(`${tab}-quantity-${mealId}`);
+        const inputElement = document.getElementById(inputId);
+        const pricePreview = document.getElementById(`meal-cost-preview-${mealId}`);
+        const price = parseInt(pricePreview?.getAttribute('data-price')) || 0;
 
-        if (!hasSelection) {
-            alert("Please select at least one meal for Depart trip before confirming.");
+        let currentQuantity = parseInt(quantityElement.textContent) || 0;
+        currentQuantity = Math.max(0, currentQuantity + delta);
+        selectedMeal[mealId] = currentQuantity;
+
+        quantityElement.textContent = currentQuantity.toString();
+        inputElement.value = currentQuantity.toString();
+
+        if (pricePreview) {
+            pricePreview.textContent = `${(price * currentQuantity).toLocaleString()} VND`;
+        }
+
+        clearError();
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(autoSaveSelections, 1000);
+    }
+
+    function autoSaveSelections() {
+        const bookingId = document.querySelector('input[name="bookingId"]')?.value;
+        if (!bookingId) {
+            console.error('Booking ID not found for auto-save');
             return;
         }
 
+        fetch('/meal/autosave', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content
+            },
+            body: JSON.stringify({
+                bookingId: bookingId,
+                departMeal: selectedDepartMeal,
+                returnMeal: selectedReturnMeal
+            })
+        }).then(response => {
+            if (!response.ok) {
+                return response.text().then(errorMessage => {
+                    throw new Error(errorMessage);
+                });
+            }
+            return response.text();
+        }).then(message => {
+            console.log(message);
+            clearError();
+        }).catch(error => {
+            console.error('Auto-save failed:', error.message);
+            displayError(error.message);
+        });
+    }
+
+    function showApplyReturnPopup() {
         const returnFlightExists = document.getElementById('returnMeal').style.display !== 'none';
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
+        const applyToReturnTrip = document.getElementById('applyToReturnTrip')?.value;
 
         if (applyToReturnTrip === 'yes' && returnFlightExists) {
             document.getElementById('applyReturnPopup').classList.remove('hidden');
@@ -248,61 +231,68 @@
         }
     }
 
-    function applyToReturnTrip(shouldApply) {
+    function applyToReturnTrip(apply) {
         document.getElementById('applyReturnPopup').classList.add('hidden');
-        if (shouldApply) {
-            document.querySelectorAll('input[name^="departMeals"]').forEach(departInput => {
-                const mealId = departInput.name.match(/\d+/)[0];
-                const returnInput = document.getElementById('return-' + mealId);
-                if (returnInput) {
-                    returnInput.value = departInput.value;
-                    document.getElementById('return-quantity-' + mealId).textContent = departInput.value;
+        if (apply) {
+            selectedReturnMeal = { ...selectedDepartMeal };
+            document.querySelectorAll('#returnMeal input[type="hidden"]').forEach(input => {
+                const idParts = input.id.split('-');
+                if (idParts.length < 2) {
+                    console.error(`Invalid input ID format: ${input.id}`);
+                    return;
                 }
+                const mealId = idParts[1];
+                const quantity = selectedReturnMeal[mealId] || 0;
+                input.value = quantity.toString();
+                document.getElementById(`return-quantity-${mealId}`).textContent = quantity.toString();
             });
         }
-        submitForm(shouldApply);
+        submitForm(apply);
     }
 
     function submitForm(applyToReturn) {
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
-        if (applyToReturnTrip === 'yes' && applyToReturn) {
-            let hasReturnSelection = false;
-            document.querySelectorAll('input[name^="returnMeals"]').forEach(input => {
-                if (parseInt(input.value) > 0) hasReturnSelection = true;
-            });
-
-            if (!hasReturnSelection && document.getElementById('returnMeal').style.display !== 'none') {
-                alert("Please select at least one meal for Return trip before confirming.");
-                return;
-            }
-        }
         document.getElementById('mealForm').submit();
     }
 
     function skipSelection() {
-        document.querySelectorAll('input[name^="departMeals"], input[name^="returnMeals"]').forEach(input => {
-            input.value = '0';
-            const displayId = input.id.replace(/(depart|return)-/, '$1-quantity-');
-            const displayElement = document.getElementById(displayId);
-            if (displayElement) displayElement.textContent = '0';
+        document.querySelectorAll('#departMeal input[type="hidden"]').forEach(input => {
+            const idParts = input.id.split('-');
+            if (idParts.length < 2) {
+                console.error(`Invalid input ID format: ${input.id}`);
+                return;
+            }
+            const mealId = idParts[1];
+            input.value = "0";
+            document.getElementById(`depart-quantity-${mealId}`).textContent = "0";
         });
+        document.querySelectorAll('#returnMeal input[type="hidden"]').forEach(input => {
+            const idParts = input.id.split('-');
+            if (idParts.length < 2) {
+                console.error(`Invalid input ID format: ${input.id}`);
+                return;
+            }
+            const mealId = idParts[1];
+            input.value = "0";
+            document.getElementById(`return-quantity-${mealId}`).textContent = "0";
+        });
+        selectedDepartMeal = {};
+        selectedReturnMeal = {};
         document.getElementById('mealForm').submit();
     }
 
     function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
+        document.getElementById(modalId)?.classList.add('hidden');
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        const applyToReturnTrip = document.getElementById('applyToReturnTrip').value;
-        const returnFlightExists = /*[(${returnFlight != null})]*/ false;
+    function displayError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+    }
 
-        if (applyToReturnTrip !== 'yes' || !returnFlightExists) {
-            document.getElementById('returnMealTab').style.display = 'none';
-            document.getElementById('returnMeal').style.display = 'none';
-        }
-    });
+    function clearError() {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = '';
+    }
 </script>
 </body>
 </html>

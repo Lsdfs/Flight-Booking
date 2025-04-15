@@ -27,8 +27,6 @@ public class Seat {
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
-
-
     @Enumerated(EnumType.STRING)
     @Column(name = "seat_class", nullable = false)
     private SeatClass seatClass;
@@ -52,7 +50,6 @@ public class Seat {
     }
 
     public Seat() {
-
     }
 
     public Seat(Flight flight, String seatNumber, int rowId, String columnLetter, SeatClass seatClass, double price) {
