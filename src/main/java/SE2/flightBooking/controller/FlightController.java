@@ -332,6 +332,11 @@ public class FlightController {
 
         Booking booking = new Booking();
         booking.setPassengerCount(passengers);
+        String code = randomString(10);
+        while(!bookingRepository.findByReservationCode(code).isEmpty()){
+            code = randomString(10);
+        }
+        booking.setReservationCode(code);
         bookingRepository.save(booking);
 
         HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
@@ -392,5 +397,18 @@ public class FlightController {
         if (hour < 12) return "Morning (08:00 - 11:59)";
         if (hour < 18) return "Afternoon (12:00 - 17:59)";
         return "Evening (18:00 - 23:59)";
+    }
+
+    protected String randomString(int length) {
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder salt = new StringBuilder();
+        Random rnd = new Random();
+        while (salt.length() < length) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        String saltStr = salt.toString();
+        return saltStr;
+
     }
 }
