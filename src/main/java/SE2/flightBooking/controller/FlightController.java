@@ -4,16 +4,16 @@ import SE2.flightBooking.dto.request.InitPaymentRequest;
 import SE2.flightBooking.dto.response.InitPaymentResponse;
 import SE2.flightBooking.model.Payment;
 import SE2.flightBooking.model.User;
-import SE2.flightBooking.repository.PaymentRepository;
-import SE2.flightBooking.repository.UserRepo;
+import SE2.flightBooking.repository.*;
+import SE2.flightBooking.service.AuthService;
 import SE2.flightBooking.service.paymentService.PaymentService;
 import SE2.flightBooking.service.paymentService.VNPayService;
 import SE2.flightBooking.model.Booking;
 import SE2.flightBooking.model.Flight;
-import SE2.flightBooking.repository.BookingRepository;
-import SE2.flightBooking.repository.FlightRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +57,14 @@ public class FlightController {
     @Autowired
     private UserRepo userRepository;
 
+    private final AuthService authService;
+    private final UserRepo userRepo;
 
+    // Constructor injection
+    public FlightController(AuthService authService, UserRepo userRepo, CoflightRepo coflightRepo) {
+        this.authService = authService;
+        this.userRepo = userRepo;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(FlightController.class);
 
@@ -91,8 +98,12 @@ public class FlightController {
                                 @RequestParam(required = false) String departureTime,
                                 @RequestParam(required = false) String returnTime,
                                 @RequestParam(required = false) Integer passengers,
+                                @AuthenticationPrincipal UserDetails authenticatedUser,
                                 HttpSession session,
                                 Model model) {
+        if (authenticatedUser == null) {
+            return "redirect:/auth/login";
+        }
         // Reset booked lists after returning home.
         session.removeAttribute("departureBookedIds");
         session.removeAttribute("returnBookedIds");
@@ -317,6 +328,7 @@ public class FlightController {
                                    @SessionAttribute(required = false) List<Long> returnBookedIds,
                                    @RequestParam Integer passengers,
                                    @RequestParam String ticketType,
+                                   @AuthenticationPrincipal UserDetails authenticatedUser,
                                    Model model) {
         if (departureBookedIds == null) departureBookedIds = new ArrayList<>();
         if (returnBookedIds == null) returnBookedIds = new ArrayList<>();
@@ -329,13 +341,19 @@ public class FlightController {
                     currentBookings + " ticket(s) that selected.");
             return "searchFlight";
         }
-
+        int userId = -1;
+        if(authenticatedUser!=null){
+            authenticatedUser.getUsername();
+        }else{
+            return "redirect:/auth/login";
+        }
         Booking booking = new Booking();
         booking.setPassengerCount(passengers);
         String code = randomString(10);
         while(!bookingRepository.findByReservationCode(code).isEmpty()){
             code = randomString(10);
         }
+
         booking.setReservationCode(code);
         bookingRepository.save(booking);
 
