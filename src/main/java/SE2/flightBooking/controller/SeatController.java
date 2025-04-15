@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.util.*;
 
 @Controller
@@ -74,6 +74,8 @@ public class SeatController {
             }
         }
 
+        System.out.println("Depart Seats Found: " + departSeats.size());
+
         String passengerName = booking.getUser() != null
                 ? booking.getUser().getLastName() + " " + booking.getUser().getFirstName()
                 : "Unknown Passenger";
@@ -85,8 +87,10 @@ public class SeatController {
                 Flight returnFlight = returnFlightOpt.get();
                 returnSeats = seatService.getAvailableSeatsForFlight(returnFlight);
                 returnSeats.forEach(seat -> seat.setFlight(returnFlight));
+                System.out.println("Return Seats Found: " + returnSeats.size());
             } else {
-                model.addAttribute("warning", "Return flight not found.");
+                model.addAttribute("warning", "Return flight specified in booking (ID: " + returnFlightId + ") not found.");
+                System.err.println("Warning: Return flight with ID " + returnFlightId + " not found for booking " + bookingId);
             }
         }
 
@@ -131,12 +135,15 @@ public class SeatController {
 
         try {
             int numberOfPassengers = booking.getPassengerCount();
+            if (booking.getUser() != null && booking.getUser().getCoflightMembers() != null) {
+                numberOfPassengers = 1 + booking.getUser().getCoflightMembers().size();
+            }
+
             if (numberOfPassengers <= 0) {
                 model.addAttribute("error", "Invalid number of passengers for this booking.");
                 return prepareSeatSelectionModel(model, booking, departFlight, applyToReturnTrip, departSeatIds, returnSeatIds);
             }
 
-            // Xóa các ghế miễn phí cũ của chuyến đi khởi hành
             List<Seat> seatsToRemove = new ArrayList<>();
             for (Seat seat : booking.getSeats()) {
                 if (seat.getFlight().getId().equals(departFlight.getId())) {
@@ -151,8 +158,8 @@ public class SeatController {
             Seat.SeatClass freeSeatClass = ticketClass.getFreeSeatClass();
 
             if (departSeatIds != null && !departSeatIds.isEmpty()) {
-                if (departSeatIds.size() != numberOfPassengers) {
-                    model.addAttribute("error", "You must select exactly " + numberOfPassengers + " seats for the departure trip.");
+                if (departSeatIds.size() > numberOfPassengers) {
+                    model.addAttribute("error", "The number of seats selected for the departure trip exceeds the number of passengers (" + numberOfPassengers + ").");
                     return prepareSeatSelectionModel(model, booking, departFlight, applyToReturnTrip, departSeatIds, returnSeatIds);
                 }
 
@@ -170,12 +177,10 @@ public class SeatController {
                     if (seat.getSeatClass() != freeSeatClass) {
                         additionalSeatCost += seat.getPrice();
                     }
-                    // Truyền thêm Flight vào assignSeatToBooking
                     seatService.assignSeatToBooking(booking, seat, departFlight);
                 }
             }
 
-            // Xử lý chuyến về nếu có
             if ("yes".equals(applyToReturnTrip) && booking.getFlights().size() > 1) {
                 Long returnFlightId = booking.getFlights().get(1).getId();
                 Optional<Flight> returnFlightOpt = flightRepository.findById(returnFlightId);
@@ -191,7 +196,6 @@ public class SeatController {
                     return prepareSeatSelectionModel(model, booking, departFlight, applyToReturnTrip, departSeatIds, returnSeatIds);
                 }
 
-                // Xóa các ghế miễn phí cũ của chuyến về
                 seatsToRemove.clear();
                 for (Seat seat : booking.getSeats()) {
                     if (seat.getFlight().getId().equals(returnFlight.getId())) {
@@ -205,8 +209,8 @@ public class SeatController {
                 Seat.SeatClass returnFreeSeatClass = returnTicketClass.getFreeSeatClass();
 
                 if (returnSeatIds != null && !returnSeatIds.isEmpty()) {
-                    if (returnSeatIds.size() != numberOfPassengers) {
-                        model.addAttribute("error", "You must select exactly " + numberOfPassengers + " seats for the return trip.");
+                    if (returnSeatIds.size() > numberOfPassengers) {
+                        model.addAttribute("error", "The number of seats selected for the return trip exceeds the number of passengers (" + numberOfPassengers + ").");
                         return prepareSeatSelectionModel(model, booking, departFlight, applyToReturnTrip, departSeatIds, returnSeatIds);
                     }
 
@@ -224,13 +228,11 @@ public class SeatController {
                         if (seat.getSeatClass() != returnFreeSeatClass) {
                             additionalSeatCost += seat.getPrice();
                         }
-                        // Truyền thêm Flight vào assignSeatToBooking
                         seatService.assignSeatToBooking(booking, seat, returnFlight);
                     }
                 }
             }
 
-            // Cập nhật chi phí bổ sung
             booking.setAdditionalCost(booking.getAdditionalCost() + additionalSeatCost);
             booking.calculateTotalPrice();
             bookingRepository.save(booking);
@@ -267,58 +269,25 @@ public class SeatController {
             }
 
             Booking booking = bookingOpt.get();
-            int numberOfPassengers = booking.getPassengerCount();
-            if (numberOfPassengers <= 0) {
+            User user = booking.getUser();
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No user associated with this booking.");
+            }
+
+            int numberOfPassengers = 1;
+            if (user.getCoflightMembers() != null) {
+                numberOfPassengers += user.getCoflightMembers().size();
+            }
+
+            if (departSeatIds.size() > numberOfPassengers) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Invalid number of passengers for this booking.");
+                        .body("The number of seats selected for the departure trip exceeds the number of passengers (" + numberOfPassengers + ").");
             }
-
-            if (departSeatIds.size() != numberOfPassengers) {
+            if (returnSeatIds.size() > numberOfPassengers) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("You must select exactly " + numberOfPassengers + " seats for the departure trip.");
-            }
-            if (returnSeatIds.size() != 0 && returnSeatIds.size() != numberOfPassengers) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("You must select exactly " + numberOfPassengers + " seats for the return trip.");
+                        .body("The number of seats selected for the return trip exceeds the number of passengers (" + numberOfPassengers + ").");
             }
 
-            // Validate seat availability for departure seats
-            if (!departSeatIds.isEmpty()) {
-                Optional<Flight> flightOpt = flightRepository.findById(booking.getFlights().get(0).getId());
-                if (flightOpt.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("Departure flight not found.");
-                }
-                Flight departFlight = flightOpt.get();
-                List<Seat> availableDepartSeats = seatService.getAvailableSeatsForFlight(departFlight);
-                for (Long seatId : departSeatIds) {
-                    Optional<Seat> seatOpt = seatService.findById(seatId);
-                    if (seatOpt.isEmpty() || !availableDepartSeats.contains(seatOpt.get())) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body("Seat with ID " + seatId + " is not available for the departure flight.");
-                    }
-                }
-            }
-
-            // Validate seat availability for return seats
-            if (!returnSeatIds.isEmpty() && booking.getFlights().size() > 1) {
-                Optional<Flight> returnFlightOpt = flightRepository.findById(booking.getFlights().get(1).getId());
-                if (returnFlightOpt.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("Return flight not found.");
-                }
-                Flight returnFlight = returnFlightOpt.get();
-                List<Seat> availableReturnSeats = seatService.getAvailableSeatsForFlight(returnFlight);
-                for (Long seatId : returnSeatIds) {
-                    Optional<Seat> seatOpt = seatService.findById(seatId);
-                    if (seatOpt.isEmpty() || !availableReturnSeats.contains(seatOpt.get())) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body("Seat with ID " + seatId + " is not available for the return flight.");
-                    }
-                }
-            }
-
-            // Save temporarily to session
             session.setAttribute("tempDepartSeatIds_" + bookingId, departSeatIds);
             session.setAttribute("tempReturnSeatIds_" + bookingId, returnSeatIds);
 
@@ -326,6 +295,47 @@ public class SeatController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Auto-save failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/save-ajax")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<Map<String, Object>> saveSeatAjax(
+            @RequestBody Map<String, Object> payload) {
+        try {
+            Long bookingId = Long.valueOf(payload.get("bookingId").toString());
+            Long seatId = Long.valueOf(payload.get("seatId").toString());
+
+            Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+            Optional<Seat> seatOpt = seatService.findById(seatId);
+
+            if (bookingOpt.isEmpty() || seatOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            Booking booking = bookingOpt.get();
+            Seat seat = seatOpt.get();
+
+            Flight flight = booking.getFlights().get(0);
+
+            for (Seat oldSeat : new ArrayList<>(booking.getSeats())) {
+                seatService.releaseSeat(booking, oldSeat);
+            }
+
+            seatService.assignSeatToBooking(booking, seat, flight);
+
+            double seatCost = seat.getPrice() > 0 ? seat.getPrice() : 0;
+            booking.setAdditionalCost(booking.getAdditionalCost() + seatCost);
+            booking.calculateTotalPrice();
+            bookingRepository.save(booking);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("additionalCost", booking.getAdditionalCost());
+            response.put("total", booking.getFlights().get(0).getPrice() + (booking.getFlights().get(0).getPrice() * 0.2) + booking.getAdditionalCost());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -362,49 +372,5 @@ public class SeatController {
                 : "Unknown Passenger");
 
         return "option/seat";
-    }
-
-    @PostMapping("/save-ajax")
-    @ResponseBody
-    @Transactional
-    public ResponseEntity<Map<String, Object>> saveSeatAjax(
-            @RequestBody Map<String, Object> payload) {
-        try {
-            Long bookingId = Long.valueOf(payload.get("bookingId").toString());
-            Long seatId = Long.valueOf(payload.get("seatId").toString());
-
-            Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
-            Optional<Seat> seatOpt = seatService.findById(seatId);
-
-            if (bookingOpt.isEmpty() || seatOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-
-            Booking booking = bookingOpt.get();
-            Seat seat = seatOpt.get();
-
-            // Giả định ghế chỉ áp dụng cho chuyến đi đầu tiên (departFlight)
-            Flight flight = booking.getFlights().get(0); // Cần điều chỉnh nếu hỗ trợ nhiều chuyến
-
-            // Xóa các ghế cũ
-            for (Seat oldSeat : new ArrayList<>(booking.getSeats())) {
-                seatService.releaseSeat(booking, oldSeat);
-            }
-
-            // Gán ghế mới với flight tương ứng
-            seatService.assignSeatToBooking(booking, seat, flight);
-
-            double seatCost = seat.getPrice() > 0 ? seat.getPrice() : 0;
-            booking.setAdditionalCost(booking.getAdditionalCost() + seatCost);
-            booking.calculateTotalPrice();
-            bookingRepository.save(booking);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("additionalCost", booking.getAdditionalCost());
-            response.put("total", booking.getFlights().get(0).getPrice() + (booking.getFlights().get(0).getPrice() * 0.2) + booking.getAdditionalCost());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
     }
 }
