@@ -5,99 +5,423 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flight Booking</title>
     <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/errorDate.css}">
+
 </head>
-<body style="background-image: url('/image/background.webp');">
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
-background-attachment: fixed;
-font-family: 'Inter', sans-serif;
-height: 100vh;
-overflow: hidden;">
-<!--div for under_head contains search-box-->
-<div class="under-head">
-    <img th:src="@{/image/under-head.png}" alt="under_head">
-    <div class="search-box">
-        <form id="search-form" action="/flight/search" method="get">
-            <div class="trip-type">
-                <input type="radio" id="return-trip" name="ticketType" value="round-trip" checked>
-                <label for="return-trip">Return</label>
-                <input type="radio" id="one-way" name="ticketType" value="one-way">
-                <label for="one-way">One-way</label>
-            </div>
-            <div class="from">
-                <label for="from">From</label>
-                <select id="from" name="departure">
-                    <option value="" disabled selected>Select departure city</option>
-                    <option th:each="city : ${departures}" th:value="${city}" th:text="${city}"></option>
-                </select>
-                <label for="departure">Departure Date</label>
-                <input type="date" id="departure" name="departureTime" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
-            </div>
-            <div class="to">
-                <label for="to">To</label>
-                <select id="to" name="destination">
-                    <option value="" disabled selected>Select destination city</option>
-                    <option th:each="city : ${destinations}" th:value="${city}" th:text="${city}"></option>
-                </select>
-                <div class="return-date-container">
-                    <label for="return">Return Date</label>
-                    <input type="date" id="return" name="returnTime" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
-                </div>
-            </div>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    let returnTrip = document.getElementById("return-trip");
-                    let oneWay = document.getElementById("one-way");
-                    let returnDateContainer = document.querySelector(".return-date-container");
-
-                    function toggleReturnDate() {
-                        if (oneWay.checked) {
-                            returnDateContainer.classList.add("hidden");
-                            document.getElementById("return").value = "";
-                        } else {
-                            returnDateContainer.classList.remove("hidden");
-                        }
-                    }
-
-                    // Chạy hàm ngay khi tải để thiết lập trạng thái ban đầu
-                    toggleReturnDate();
-
-                    returnTrip.addEventListener("change", toggleReturnDate);
-                    oneWay.addEventListener("change", toggleReturnDate);
-                });
-            </script>
-            <!-- Number of passenger -->
-            <label for="passengers">Passengers</label>
-            <input type="number" id="passengers" name="passengers" min="1" value="1">
-            <button type="submit">Search</button>
-        </form>
-    </div>
-</div>
-
+<body>
+<!-- Header -->
 <header class="header-container">
     <div class="header-left">
         <img th:src="@{/image/logo.webp}" alt="Vietjet Air" class="logo">
     </div>
+    <button class="mobile-menu-btn" aria-label="Menu">
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+    </button>
     <div class="header-right">
         <div class="user-info">
-            <a href="/support">
+            <a href="/frag">
                 <img th:src="@{/image/support_icon.png}" alt="Support-icon" class="support">
                 <span class="support-text">Support</span>
             </a>
             <a href="/account">
                 <img th:src="@{/image/avatar icon.png}" alt="Avatar_user" class="avatar">
-                <span class="user-name" th:text="${username}">NguyenVanA</span>
+                <span class="user-name" th:text="${#authentication.principal.fullName}">NguyenVanA</span>
             </a>
         </div>
         <nav>
-            <a href="/flight">Skyjoy</a>
+            <a href="#">Skyjoy</a>
             <a href="/my-booking">My Booking</a>
             <a href="/check-in">Online Check-in</a>
-            <a href="/booking/services">Flight Extras</a>
+            <a href="#">Flight Extras</a>
         </nav>
     </div>
 </header>
-<section></section>
+
+<!-- Under Head Section with Main Search Box -->
+<div class="under-head">
+    <img th:src="@{/image/under-head.png}" alt="under_head">
+
+    <div class="search-box">
+        <!-- Promotional Header -->
+        <div class="promo-header">
+            <a href="/buy-baggage" class="promo-button baggage">Buy baggage</a>
+            <a href="#" class="promo-button redeem">Redeem & Buy Skypoint</a>
+            <a href="#" class="promo-button express">Express shipping</a>
+        </div>
+        <div th:if="${errorDate}" class="error-message">
+            <div class="error-box">
+                <div class="error-icon">⚠️</div>
+                <h2>Oops!</h2>
+                <p th:text="${errorDate}"></p>
+                <button class="close-btn" onclick="goToHome()">OK</button>
+            </div>
+        </div>
+        <form id="search-form" action="/flight/search" method="get">
+            <!-- Trip Type Selection -->
+            <div class="trip-type">
+                <div class="currency">
+                    <select id="currency" name="currency">
+                        <option value="VND" selected>VND</option>
+                        <!-- Add more currency options if needed -->
+                    </select>
+                </div>
+                <label class="trip-label">
+                    <input type="radio" id="return-trip" name="ticketType" value="round-trip" checked>
+                    <span>Return</span>
+                </label>
+                <label class="trip-label">
+                    <input type="radio" id="one-way" name="ticketType" value="one-way">
+                    <span>One-way</span>
+                </label>
+            </div>
+
+            <!-- From and Departure Date (First Row) -->
+            <div class="form-row">
+                <div class="input-field">
+                    <img src="/image/departure.png" alt="Departure Icon" class="icon">
+                    <select id="from" name="departure">
+                        <option value="" disabled selected>From</option>
+                        <option th:each="city : ${departures}" th:value="${city}" th:text="${city}"></option>
+                    </select>
+                </div>
+                <div class="input-field">
+                    <input type="date" id="departure" name="departureTime" placeholder="Departure Date" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
+                </div>
+            </div>
+
+            <!-- To and Return Date (Second Row) -->
+            <div class="form-row">
+                <div class="input-field">
+                    <img src="/image/return.png" alt="Return Icon" class="icon">
+                    <select id="to" name="destination">
+                        <option value="" disabled selected>To</option>
+                        <option th:each="city : ${destinations}" th:value="${city}" th:text="${city}"></option>
+                    </select>
+                </div>
+                <div class="input-field return-date-container">
+                    <input type="date" id="return" name="returnTime" placeholder="Return Date" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
+                </div>
+            </div>
+
+            <!-- Number of Passengers -->
+            <div class="form-row">
+                <div class="input-field">
+                    <span class="icon">👤</span>
+                    <input type="number" id="passengers" name="passengers" min="1" value="1">
+                </div>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit">Let's go</button>
+        </form>
+    </div>
+</div>
+<!-- Main Content Section -->
+<section class="secondary-search-section">
+    <div class="custom-header">
+        <a href="/Buy-baggage" class="header-link baggage">
+            <img src="/image/baggage.png" alt="Baggage Icon" class="header-icon">
+            Buy baggage, meals, select seat
+        </a>
+        <a href="#" class="header-link redeem">
+            <img src="/image/redeem.png" alt="Redeem Icon" class="header-icon">
+            Redeem & Buy SkyPoint
+        </a>
+        <a href="#" class="header-link express">
+            <img src="/image/shipping.png" alt="Express Icon" class="header-icon">
+            Express shipping
+        </a>
+        <a href="/Check-in" class="header-link express">
+            <img src="/image/check-in.png" alt="Check in Icon" class="header-icon">
+            Check in
+        </a>
+    </div>
+
+    <form id="secondary-search-form" method="get" action="/flight/search" class="form-container">
+
+        <div class="trip-type">
+            <label class="trip-label">
+                <input type="radio" id="return-trip-secondary" name="ticketType" value="round-trip" checked> Return
+            </label>
+            <label class="trip-label">
+                <input type="radio" id="one-way-secondary" name="ticketType" value="one-way"> One-way
+            </label>
+            <div class="currency">
+                <select name="currency">
+                    <option value="VND" selected>VND</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="input-field">
+                <img src="/image/departure.png" alt="Departure Icon" class="icon">
+                <select id="from2" name="departure" required>
+                    <option value="" disabled selected>From</option>
+                    <option th:each="city : ${departures}" th:value="${city}" th:text="${city}"></option>
+                </select>
+            </div>
+            <div class="input-field">
+                <input type="date" id="departure2" name="departureTime" placeholder="Departure Date" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}" required>
+            </div>
+        </div>
+        <div class="form-row return-date-row">
+            <div class="input-field">
+                <img src="/image/return.png" alt="Return Icon" class="icon">
+                <select id="to2" name="destination" required>
+                    <option value="" disabled selected>To</option>
+                    <option th:each="city : ${destinations}" th:value="${city}" th:text="${city}"></option>
+                </select>
+            </div>
+            <div class="input-field return-date-container">
+                <input type="date" id="return2" name="returnTime" placeholder="Return Date" th:attr="min=${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="input-field">
+                <span class="icon">👤</span>
+                <input type="number" id="passengers2" name="passengers" min="1" value="1" required>
+            </div>
+            <button type="submit">Let’s go</button>
+        </div>
+
+    </form>
+</section>
+
+
+<div class="enjoy-fly">
+    <img src="/image/enjoy flight.png" alt="Enjoy flying" />
+</div>
+<div class="insurance-ship">
+    <div class="insurance">
+        <img src="/image/Insurance.png" alt="Insurance" />
+        <h2>Worry-free to flight with Vietjet</h2>
+        <h3>Attractive insurance programs provided by prestigious insurance partners of Vietjet.
+            Simple and fast purchase and comprehensation procedure</h3>
+    </div>
+    <div class="insurance">
+        <img src="/image/ship.png" alt="Ship" />
+        <h2>Convenient and express delivery from North to South</h2>
+        <h3>Shorten thousand of kilometers in distance shortest time.
+            Booked, delivered and received 24/7.</h3>
+    </div>
+</div>
+<div class="preorder">
+    <img src="/image/Preorder.png" alt="Preorder" />
+</div>
+<div class="destination">
+    <img src="/image/Attractive.png" alt="Attractive"/>
+    <img src="/image/Phu Quoc.png" alt="Phu Quoc"/>
+    <img src="/image/Nghe An.png" alt="Nghe An"/>
+    <img src="/image/Thanh Hoa.png" alt="Thanh Hoa"/>
+    <img src="/image/Gia Lai.png" alt="Gia Lai"/>
+    <img src="/image/Ha Noi.png" alt="Ha Noi"/>
+</div>
+
+<div class="Question">
+    <div class="frequence-question"><img src="/image/Frequence%20question.png"/></div>
+    <div class="question-links">
+        <a href="/frag"><img src="/image/Checkin.png" alt="Checkin"/></a>
+        <a href="/frag"><img src="/image/Reversation.png" alt="Reversation"/></a>
+        <a href="/frag"><img src="/image/Baggagee.png" alt="Baggage"/></a>
+        <a href="/frag"><img src="/image/Seat.png" alt="Seat"/></a>
+        <a href="/frag"><img src="/image/meal.png" alt="Meal"/></a></div>
+</div>
+<div class="Above-footer">
+    <img src="/image/under footer.png" alt="Above footer"/>
+</div>
+<div class="footer">
+    <div class="footer-content">
+        <div class="footer-contact">
+            <p><b>Contact:</b> 1900 1234</p>
+            <p><b>Email  :</b> abc123@vietjet.com</p>
+            <p><b>Address:</b> Hanoi University</p>
+        </div>
+        <div class="footer-col1">
+            <p>Customer Support</p>
+            <a href="/frag">Support</a>
+            <a href="#">Skyjoy</a>
+            <a href="/my-booking">My Booking</a>
+            <a href="/check-in">Online Check-in</a>
+            <a href="#">Flight Extras</a>
+        </div>
+        <div class="footer-col2">
+            <p>Frequently Asked Questions</p>
+            <a href="/frag">Checkin</a>
+            <a href="/frag">Reservation</a>
+            <a href="/frag">Baggage</a>
+            <a href="/frag">Seat</a>
+            <a href="/frag">Meal</a>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <p>© 2025 Vietjet Air. All rights reserved.</p>
+    </div>
+</div>
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        function setupTripTypeToggle(formId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const returnTrip = form.querySelector('input[name="ticketType"][value="round-trip"]');
+            const oneWay = form.querySelector('input[name="ticketType"][value="one-way"]');
+            const returnDateContainer = form.querySelector(".return-date-container");
+            const returnDateInput = form.querySelector('input[name="returnTime"]');
+
+            if (!returnTrip || !oneWay || !returnDateContainer || !returnDateInput) return;
+
+            function toggleReturnDate() {
+                if (oneWay.checked) {
+                    returnDateContainer.classList.add("hidden");
+                    returnDateInput.value = "";
+                    returnDateInput.removeAttribute("required");
+                } else {
+                    returnDateContainer.classList.remove("hidden");
+                    returnDateInput.setAttribute("required", "required");
+                }
+            }
+
+            toggleReturnDate();
+
+            returnTrip.addEventListener("change", toggleReturnDate);
+            oneWay.addEventListener("change", toggleReturnDate);
+        }
+
+
+        setupTripTypeToggle("search-form");
+        setupTripTypeToggle("secondary-search-form");
+
+
+        const forms = [document.getElementById("search-form"), document.getElementById("secondary-search-form")];
+        forms.forEach(form => {
+            if (!form) return;
+
+            form.addEventListener("submit", function (event) {
+                const departure = form.querySelector('select[name="departure"]').value;
+                const destination = form.querySelector('select[name="destination"]').value;
+                const departureTime = form.querySelector('input[name="departureTime"]').value;
+                const returnTime = form.querySelector('input[name="returnTime"]').value;
+                const oneWay = form.querySelector('input[name="ticketType"][value="one-way"]').checked;
+
+                if (!departure || !destination || !departureTime) {
+                    event.preventDefault();
+                    alert("Please fill in all required fields: From, To, and Departure Date.");
+                    return;
+                }
+                if (!oneWay && !returnTime) {
+                    event.preventDefault();
+                    alert("Please select a Return Date for a round-trip.");
+                    return;
+                }
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        const headerRight = document.querySelector('.header-right');
+        menuBtn.addEventListener('click', function() {
+            this.classList.toggle('active');
+            headerRight.classList.toggle('active');
+
+            if(headerRight.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+
+        const navLinks = document.querySelectorAll('.header-right nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                menuBtn.classList.remove('active');
+                headerRight.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = [
+            document.getElementById('search-form'),
+            document.getElementById('secondary-search-form')
+        ];
+
+        document.querySelectorAll('.error-message').forEach(errorMsg => {
+            if (errorMsg.textContent.trim() !== '') {
+                errorMsg.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        });
+
+
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', goToFlight);
+        });
+
+        document.querySelectorAll('.error-message').forEach(errorMsg => {
+            errorMsg.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    goToFlight();
+                }
+            });
+        });
+
+        forms.forEach(form => {
+            form?.addEventListener('submit', function(e) {
+                const departureDate = form.querySelector('input[name="departureTime"]').value;
+                const returnDate = form.querySelector('input[name="returnTime"]')?.value;
+                const ticketType = form.querySelector('input[name="ticketType"]:checked').value;
+
+                if (ticketType === 'round-trip' && returnDate && departureDate > returnDate) {
+                    e.preventDefault();
+                    showError("Return date must be after departure date", form);
+                }
+            });
+        });
+    });
+
+    function goToFlight() {
+        window.location.href = "/flight/";
+    }
+
+    function showError(message, form) {
+        let errorBox = form.querySelector('.error-message');
+
+        if (!errorBox) {
+            errorBox = document.createElement('div');
+            errorBox.className = 'error-message';
+            errorBox.innerHTML = `
+            <div class="error-box">
+                <div class="error-icon">⚠️</div>
+                <h2>Oops!</h2>
+                <p>${message}</p>
+                <button class="close-btn">OK</button>
+            </div>
+        `;
+            form.insertBefore(errorBox, form.firstChild);
+        } else {
+            errorBox.querySelector('p').textContent = message;
+        }
+
+        errorBox.style.display = 'flex';
+
+        errorBox.querySelector('.close-btn').addEventListener('click', goToFlight);
+        errorBox.addEventListener('click', function(e) {
+            if (e.target === this) {
+                goToFlight();
+            }
+        });
+
+        document.body.style.overflow = 'hidden';
+    }</script>
 </body>
 </html>

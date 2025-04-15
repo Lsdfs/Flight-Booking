@@ -1,0 +1,61 @@
+.error-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.error-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: relative;
+}
+.error-icon {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.error-box h2 {
+    color: #D32F2F;
+    margin-bottom: 8px;
+    font-size: 1.5em;
+}
+
+.error-box p {
+    color: #333;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    font-size: 0.9em;
+}
+
+.close-btn {
+    background-color: #D32F2F;
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.close-btn:hover {
+    background-color: #B71C1C;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+

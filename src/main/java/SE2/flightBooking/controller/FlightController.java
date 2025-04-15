@@ -116,7 +116,7 @@ public class FlightController {
         }
 
         if (departure.equals(destination)) {
-            model.addAttribute("error", "Điểm đi và điểm đến không được trùng nhau.");
+            model.addAttribute("errorDate", "Departure and destination not allow the same city. Please try again!");
             return "home";
         }
 
