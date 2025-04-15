@@ -341,13 +341,19 @@ public class FlightController {
                     currentBookings + " ticket(s) that selected.");
             return "searchFlight";
         }
-        int userId = -1;
+        User user = null;
         if(authenticatedUser!=null){
-            authenticatedUser.getUsername();
+            String phoneNumber = authenticatedUser.getUsername();
+            user = userRepo.findByPhoneNumber(phoneNumber);
         }else{
             return "redirect:/auth/login";
         }
+
+        if (user == null) {
+            return "error"; // Show an error page if the user is not found
+        }
         Booking booking = new Booking();
+        booking.setUser(user);
         booking.setPassengerCount(passengers);
         String code = randomString(10);
         while(!bookingRepository.findByReservationCode(code).isEmpty()){
