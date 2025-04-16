@@ -363,6 +363,7 @@ public class FlightController {
 
 
         booking.setReservationCode(code);
+
         bookingRepository.save(booking);
 
         HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
@@ -408,7 +409,11 @@ public class FlightController {
                 .txnRef(String.valueOf(reservationCode))
                 .ipAddress("127.0.0.1")
                 .build();
-
+        if (bookings.isPresent()) {
+            Booking booking = bookings.get();
+            booking.setStatus(Booking.BookingStatus.PAID);
+            bookingRepository.save(booking);
+        }
         InitPaymentResponse initPaymentResponse = paymentService.init(initPaymentRequest);
         return "redirect:" + initPaymentResponse.getVnpUrl();
     }
