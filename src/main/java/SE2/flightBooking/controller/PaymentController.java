@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -32,11 +29,15 @@ public class PaymentController {
     private IpnHandler ipnHandler; // Inject IpnHandler for processing IPN
 
 
-
-
     @GetMapping("/vnpay_ipn")
     public IpnResponse processIpn(@RequestParam Map<String, String> params) {
         log.info("[VNPay Ipn] Params: {}", params);
         return ipnHandler.process(params); // Process the IPN and return the response
+    }
+    @GetMapping("/processing")
+    public String showPaymentSuccessPage(Model model) {
+        // You can pass additional data to the view if needed
+        model.addAttribute("message", "Your payment has been successfully processed.");
+        return "booking/processing-payment"; // This corresponds to payment-processed.html in your templates folder
     }
 }

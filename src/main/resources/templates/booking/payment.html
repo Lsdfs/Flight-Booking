@@ -1,84 +1,823 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>Passenger Info</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
         .form-container {
-            max-width: 700px;
-            margin: 50px auto;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            padding: 30px;
+            width: 55%;
+            margin: 30px 0 30px 5%;
+            padding: 25px;
+            background-color: #ffffff;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .form-title {
-            text-align: center;
+        h2 {
+            margin-bottom: 20px;
+            color: #e32526;
+        }
+        .radio-group {
+            margin-top: 10px;
+        }
+        .input-container {
+            display: flex;
+            gap: 5%;
+            margin-bottom: 3%;
+        }
+        .form-section {
             margin-bottom: 20px;
         }
-        .form-group label {
-            font-weight: 500;
+        .submit-btn {
+            background-color: #e32526;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
         }
-        .text-danger {
-            font-size: 0.875em;
+        .submit-btn:hover {
+            background-color: #c41e21;
+        }
+        .input-line {
+            all: unset;
+            border-bottom: 1px solid #ccc;
+            padding: 8px 4px;
+            width: 100%;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: transparent;
+        }
+        .input-line:focus {
+            border-bottom: 2px solid #e60000;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('/image/background.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header-container {
+            font-family: Arial, Helvetica, sans-serif;
+            height: 90px;
+            background-color: rgba(80, 80, 80, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            position: relative;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 0 !important;
+        }
+        .header-left .logo {
+            height: 30px;
+            width: auto;
+            align-items: center;
+        }
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            margin-right: 50px;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-self: flex-end;
+            gap: 15px;
+            margin-bottom: 2px;
+        }
+        .user-info .support,
+        .user-info .avatar {
+            height: 24px;
+            width: 24px;
+            object-fit: cover;
+        }
+
+        .support-text, .user-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .header-right nav {
+            display: flex;
+            gap: 15px;
+            margin-top:2px;
+        }
+
+        .header-right nav a {
+            font-family: 'Inter', sans-serif;
+            text-decoration: none;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 20px;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .header-right nav a:hover {
+            color: #e60000;
+        }
+
+        .user-info a {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .under-head img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .trip-label input[type="radio"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #FFFFFF;
+            border-radius: 50%;
+            background-color: transparent;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .trip-label input[type="radio"]:checked {
+            background-color: #FFC107;
+            border: none;
+        }
+
+        .trip-label input[type="radio"]:checked::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+
+        .currency select {
+            padding: 4px;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+            background-color: #FFFFFF;
+            color: #333333;
+            font-family: Arial, sans-serif;
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23333" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 8px center;
+            background-size: 12px;
+            padding-right: 25px;
+        }
+
+        .input-field select {
+            border: none;
+            outline: none;
+            width: 100%;
+            background: transparent;
+            font-family: Arial, sans-serif;
+            color: #333333;
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23333" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 8px center;
+            background-size: 12px;
+            padding-right: 25px;
+        }
+
+        /* Submit Button */
+        .search-box button {
+            background-color: #FFC107;
+            color: #000000;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: Arial, sans-serif;
+        }
+
+        .search-box button:hover {
+            background-color: #FFA000;
+        }
+
+
+        .secondary-search-section .custom-header {
+            display: flex;
+            flex-wrap:wrap;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #D32F2F;
+            padding: 4px 0;
+        }
+
+        .secondary-search-section .header-link {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 12px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            transition: opacity 0.3s ease;
+            background: none;
+        }
+
+        .secondary-search-section .header-link:hover {
+            opacity: 0.8;
+        }
+
+        .secondary-search-section .header-icon {
+            width: 30px;
+            height: 24px;
+            margin-right: 5px;
+        }
+
+        .secondary-search-section .form-container {
+            background-color: #FFFFFF;
+            padding: 8px;
+        }
+
+        /* Trip Type Selection */
+        .secondary-search-section .trip-type {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .secondary-search-section .trip-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #333333;
+            font-size: 11px;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+        }
+
+        .secondary-search-section .trip-label input[type="radio"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #333333;
+            border-radius: 50%;
+            background-color: transparent;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .secondary-search-section .trip-label input[type="radio"]:checked {
+            background-color: #FFC107;
+            border: none;
+        }
+
+        .secondary-search-section .trip-label input[type="radio"]:checked::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .secondary-search-section .currency {
+            position: absolute;
+            right: 0;
+        }
+
+        .secondary-search-section .currency select {
+            padding: 4px;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+            background-color: #FFFFFF;
+            color: #333333;
+            font-family: Arial, sans-serif;
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23333" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 8px center;
+            background-size: 12px;
+            padding-right: 25px;
+            cursor: pointer;
+        }
+
+        .secondary-search-section .form-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            justify-content: space-between;
+        }
+
+        .secondary-search-section .form-row.return-date-row {
+            transition: all 0.3s ease;
+        }
+
+        .secondary-search-section .date-field {
+            flex: 0 1 150px;
+        }
+        .secondary-search-section .form-row.passenger-row {
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .secondary-search-section .passenger-field {
+            flex: 0 1 100px;
+        }
+
+        .secondary-search-section .input-field {
+            display: flex;
+            align-items: center;
+            background-color: #FFFFFF;
+            border: 1px solid #CCCCCC;
+            border-radius: 10px;
+            padding: 8px;
+        }
+        .secondary-search-section .input-field .icon {
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .secondary-search-section .input-field select,
+        .secondary-search-section .input-field input[type="date"],
+        .secondary-search-section .input-field input[type="number"] {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            background-color: transparent;
+            color: #333333;
+            font-family: Arial, sans-serif;
+        }
+
+        .secondary-search-section .input-field select {
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23333" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 8px center;
+            background-size: 12px;
+            padding-right: 25px;
+        }
+
+        .secondary-search-section .input-field input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(40%);
+        }
+
+        .secondary-search-section .input-field input[type="date"]::placeholder {
+            color: #333333;
+        }
+
+        .secondary-search-section .input-field input[type="number"] {
+            width: 100%;
+        }
+        .secondary-search-section .hidden {
+            display: none;
+        }
+
+        .secondary-search-section button {
+            background-color: #FFC107;
+            color: #000000;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: Arial, sans-serif;
+        }
+
+        .secondary-search-section button:hover {
+            background-color: #FFA000;
+        }
+
+        .enjoy-fly img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+
+
+        .insurance img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .insurance h2, .insurance h3 {
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+        .insurance h3 {
+            font-size: 14px;
+            font-weight: normal;
+            text-align: justify;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .preorder img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .destination img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .destination img:hover {
+            transform: scale(1.03);
+        }
+
+
+
+        .question-links a {
+            width: calc((100% - 4 * 30px) / 5);
+            height: 100px;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .question-links a img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .question-links a:hover {
+            transform: scale(1.1);
+        }
+
+        .Above-footer {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            margin-top: 60px;
+            margin-bottom: 2px;
+        }
+        .Above-footer img {
+            width: 100%;
+            max-width: 200px;
+            height: 80px;
+            object-fit: cover;
+            display: block;
+        }
+        .footer {
+            position: relative;
+            z-index: 1;
+            margin-top: -40px;
+            background-image: url('/image/footer.png');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin-top: 2px;
+            padding: 0 20px 80px;
+        }
+
+        .footer-contact,
+        .footer-col1,
+        .footer-col2 {
+            padding: 15px;
+        }
+
+        .footer-contact p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .footer-col1 p,
+        .footer-col2 p {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #d32f2f;
+        }
+
+        .footer-col1 a,
+        .footer-col2 a {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-col1 a:hover,
+        .footer-col2 a:hover {
+            color: #d32f2f;
+        }
+
+
+        .footer-copyright {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .menu-icon {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: white;
+            margin: 5px 0;
+            transition: 0.4s;
+        }
+
+        .mobile-menu-btn.active .menu-icon:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .mobile-menu-btn.active .menu-icon:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active .menu-icon:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        @media (max-width: 768px) {
+            .secondary-search-section .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .secondary-search-section .header-link {
+                padding: 0 5px;
+                font-size: 10px;
+            }
+
+            .secondary-search-section .header-icon {
+                width: 24px;
+                height: 18px;
+            }
+
+
+            /* Header */
+            .header-container {
+                padding: 0 20px;
+                height: 70px;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+                z-index: 100;
+            }
+
+            .header-right {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: rgba(0,0,0,0.9);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: 0.5s;
+                margin-right: 0;
+                padding-top: 70px;
+            }
+
+            .header-right.active {
+                right: 0;
+            }
+
+            .header-right nav {
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+            }
+
+            .header-right nav a {
+                padding: 15px;
+                border-bottom: 1px solid #444;
+            }
+
+            .user-info {
+                margin-top: 20px;
+                align-self: center;
+            }
+
+            /* Search box */
+            .search-box {
+                width: 90%;
+                right: 5%;
+                bottom: 10px;
+            }
+
+            /* Destination grid */
+            .destination {
+                grid-template-columns: 1fr;
+            }
+
+            /* Question links */
+            .question-links a {
+                width: calc(50% - 15px);
+            }
+
+            /* Footer */
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .header-right {
+                width: 85%;
+            }
+
+            .question-links a {
+                width: 100%;
+            }
+
+            .footer {
+                height: auto;
+                padding-bottom: 60px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="form-container">
-    <h2 class="form-title">Passenger Information</h2>
-    <form th:action="@{/flight/payment}" th:object="${passengers}" method="post">
-        <div class="mb-3">
-            <label class="form-label">First Name: </label>
-            <input type="text" class="form-control" th:field="*{firstName}" />
-            <small class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{fullName}"></small>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" th:field="*{email}" />
-            <small class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Phone Number</label>
-            <input type="text" class="form-control" th:field="*{phone}" />
-            <small class="text-danger" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></small>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Gender</label>
-            <div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{gender}" value="Male" id="genderMale" />
-                    <label class="form-check-label" for="genderMale">Male</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{gender}" value="Female" id="genderFemale" />
-                    <label class="form-check-label" for="genderFemale">Female</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{gender}" value="Other" id="genderOther" />
-                    <label class="form-check-label" for="genderOther">Other</label>
-                </div>
+<!-- Header -->
+<header class="header-container">
+    <a th:href="@{/}" class="header-left" style="text-decoration: none;">
+        <img th:src="@{/image/logo.webp}" alt="Vietjet Air" class="logo">
+    </a>
+    <button class="mobile-menu-btn" aria-label="Menu">
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+    </button>
+    <div class="header-right">
+        <div class="user-info">
+            <a href="/faq/categories">
+                <img th:src="@{/image/support_icon.png}" alt="Support-icon" class="support">
+                <span class="support-text">Support</span>
+            </a>
+            <div class="dropdown ms-3">
+                <button class="btn btn-link dropdown-toggle" type="button"
+                        id="userDropdown" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <span class="text-white text-decoration-none" sec:authorize="isAuthenticated()" sec:authentication="name"></span>
+                    <span class="text-white text-decoration-none" sec:authorize="!isAuthenticated()">Guest</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li sec:authorize="!isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/auth/login">Login</a>
+                    </li>
+                    <li sec:authorize="!isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/auth/register">Sign up</a>
+                    </li>
+
+                    <!-- Authenticated user options -->
+                    <li sec:authorize="isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/user/profile">Profile</a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post">
+                            <button class="dropdown-item fs-5" type="submit">Sign out</button>
+                        </form>
+                    </li>
+                </ul>
             </div>
-            <small class="text-danger" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></small>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Date of Birth</label>
-            <input type="date" class="form-control" th:field="*{dob}" id="dob" />
-            <small class="text-danger" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></small>
+        <nav>
+            <a href="#">Skyjoy</a>
+            <a href="/my-booking">My Booking</a>
+            <a href="/check-in">Online Check-in</a>
+            <a href="#">Flight Extras</a>
+        </nav>
+    </div>
+</header>
+
+<div class="form-container">
+    <form th:action="'/flight/payment'" th:object="${payment}" method="post">
+
+        <div class="form-section">
+            <div class="radio-group">
+                <label><input type="radio" th:field="*{gender}" value="Nam" /> Nam</label>
+                <label><input type="radio" th:field="*{gender}" value="Nữ" /> Nữ</label>
+                <label><input type="radio" th:field="*{gender}" value="Khác" /> Khác</label>
+            </div>
         </div>
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-primary me-3">Submit</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Cancel</button>
+        <div class="input-container">
+            <input type="text" th:field="*{lastName}" placeholder="Họ" class="input-line" required>
+            <input type="text" th:field="*{firstName}" placeholder="Tên đệm & tên" class="input-line" required>
         </div>
+        <div class="input-container">
+            <input type="date" th:field="*{dob}" class="input-line" required>
+            <select th:field="*{country}" class="input-line" required>
+                <option value="">Select Country</option>
+                <option value="Vietnam">Vietnam</option>
+                <option value="USA">USA</option>
+                <option value="Germany">Germany</option>
+                <option value="Afghanistan">Afghanistan</option>
+                <option value="Albania">Albania</option>
+                <option value="Algeria">Algeria</option>
+                <option value="Andorra">Andorra</option>
+                <option value="Angola">Angola</option>
+                <option value="Antigua and Barbuda">Antigua and Barbuda</option>
+                <option value="Others...">Others</option>
+            </select>
+        </div>
+        <div class="input-container">
+            <input type="tel" th:field="*{phone}" placeholder="Số điện thoại" class="input-line" required>
+            <input type="email" th:field="*{email}" placeholder="Email" class="input-line" required>
+        </div>
+        <div class="input-container">
+            <input type="text" th:field="*{identity}" placeholder="CCCD / Passport" class="input-line" required>
+        </div>
+        <input type="text" th:field="*{currentLocation}" placeholder="Nơi ở hiện tại" class="input-line" required>
+
+        <button type="submit" class="submit-btn">Submit</button>
     </form>
 </div>
+<div class="Above-footer">
+    <img src="/image/under footer.png" alt="Above footer"/>
+</div>
+<div class="footer">
+    <div class="footer-content">
+        <div class="footer-contact">
+            <p><b>Contact:</b> 1900 1234</p>
+            <p><b>Email  :</b> abc123@vietjet.com</p>
+            <p><b>Address:</b> Hanoi University</p>
+        </div>
+        <div class="footer-col1">
+            <p>Customer Support</p>
+            <a href="/faq/categories">Support</a>
+            <a href="#">Skyjoy</a>
+            <a href="/my-booking">My Booking</a>
+            <a href="/check-in">Online Check-in</a>
+            <a href="#">Flight Extras</a>
+        </div>
+        <div class="footer-col2">
+            <p>Frequently Asked Questions</p>
+            <a href="/frag">Checkin</a>
+            <a href="/frag">Reservation</a>
+            <a href="/frag">Baggage</a>
+            <a href="/frag">Seat</a>
+            <a href="/frag">Meal</a>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <p>© 2025 Vietjet Air. All rights reserved.</p>
+    </div>
+</div>
 
-<script>
-    document.getElementById('dob').max = new Date().toISOString().split('T')[0];
-</script>
 </body>
 </html>

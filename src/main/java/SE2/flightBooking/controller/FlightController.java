@@ -31,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.view.RedirectView;
 
 
 @Controller
@@ -265,6 +263,9 @@ public class FlightController {
             departureBookedIds.add(flightId);
             session.setAttribute("departureBookedIds", departureBookedIds);
         }
+        double totalPrice = (departureBookedIds.size() + (returnBookedIds != null ? returnBookedIds.size() : 0)) * flight.getPrice();
+        session.setAttribute("totalPrice", totalPrice);
+
 
         response.put("success", true);
         response.put("airline", flight.getAirline());
@@ -272,7 +273,7 @@ public class FlightController {
         response.put("arrivalTime", newDepartureTime.plusHours(2).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")));
         response.put("price", flight.getPrice());
         response.put("bookedCount", departureBookedIds.size() + (returnBookedIds != null ? returnBookedIds.size() : 0));
-        response.put("totalPrice", (departureBookedIds.size() + (returnBookedIds != null ? returnBookedIds.size() : 0)) * flight.getPrice());
+        response.put("totalPrice", totalPrice) ;
         response.put("flightId", flightId);
 
         return response;
@@ -360,6 +361,7 @@ public class FlightController {
             code = randomString(10);
         }
 
+
         booking.setReservationCode(code);
         bookingRepository.save(booking);
 
@@ -367,8 +369,10 @@ public class FlightController {
         session.removeAttribute("departureBookedIds");
         session.removeAttribute("returnBookedIds");
 
+        session.setAttribute("reservationCode", code);
         return "booking/payment";
     }
+
     @ModelAttribute("payment")
     public Payment getPayment() {
         return new Payment();
@@ -376,42 +380,37 @@ public class FlightController {
     @GetMapping("/payment")
     public String showPaymentForm(Model model) {
         model.addAttribute("payment", new Payment());
-        return "payment"; // The name of your HTML template
-    }
+        return "booking/payment";     }
+
     @PostMapping("/payment")
     public String submitPassenger(@ModelAttribute Payment payment, HttpSession session) {
-        Booking booking = (Booking) session.getAttribute("currentBooking");
-        if (booking != null) {
-            payment.setReservationCode(booking.getReservationCode());
-        } else {
-            // Handle error: no booking found in session
-            log.warn("No booking found in session.");
-            return "redirect:/flight/payment"; // or some error page
+        String reservationCode = (String) session.getAttribute("reservationCode");
+        Optional<Booking> bookings = bookingRepository.findByReservationCode(reservationCode);
+        if (bookings == null) {
+            log.warn("No booking found in session. Redirecting to error page.");
+            return "error"; // better to show an actual error page
         }
-
-        paymentRepository.save(payment);
-        log.info("Redirecting to /flight/vnpay_ipn");
-        return "redirect:/flight/vnpay_ipn";
+            paymentRepository.save(payment);
+            log.info("Payment saved successfully. Redirecting to VNPay initialization.");
+        return "redirect:/flight/init-payment";
     }
 
-    @GetMapping("/vnpay_ipn")
-    @ResponseBody
-    public RedirectView paying(HttpSession session, @ModelAttribute InitPaymentRequest request) {
+    @GetMapping("/init-payment")
+    public String paying(HttpSession session, @ModelAttribute InitPaymentRequest request) {
 
-        Booking booking = (Booking) session.getAttribute("currentBooking");
-
+        String reservationCode = (String) session.getAttribute("reservationCode");
+        Optional<Booking> bookings = bookingRepository.findByReservationCode(reservationCode);
+        Payment payment = new Payment();
+        double totalPrice = (double) session.getAttribute("totalPrice");
         InitPaymentRequest initPaymentRequest = InitPaymentRequest.builder()
-                .userId(booking.getId())
-                .amount((long) booking.getTotalPrice()) // Adjust according to how you calculate total price
-                .txnRef(String.valueOf(request.getTxnRef()))
+                .userId(payment.getId())
+                .amount((long) totalPrice) // Adjust according to how you calculate total price
+                .txnRef(String.valueOf(reservationCode))
                 .ipAddress("127.0.0.1")
                 .build();
 
         InitPaymentResponse initPaymentResponse = paymentService.init(initPaymentRequest);
-
-        log.info("[request_id={}] user_name={} created booking_id={} successfully",
-                booking.getReservationCode(), booking.getUser(), booking.getId());
-        return new RedirectView(initPaymentResponse.getVnpUrl());
+        return "redirect:" + initPaymentResponse.getVnpUrl();
     }
 
 
