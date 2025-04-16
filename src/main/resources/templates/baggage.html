@@ -107,7 +107,10 @@
             </div>
 
             <div class="free-baggage-info">
-                <p th:text="'Your ticket class (' + ${departFlight?.ticketClass?.name} + ') includes ' + ${departFlight?.ticketClass?.freeBaggageWeight * booking.passengerCount} + ' kg of free Standard baggage. Additional fees may apply for excess weight or Extra baggage.'"></p>
+                <p th:text="${(departFlight != null and departFlight.ticketClass != null and departFlight.ticketClass.freeBaggageWeight != null and booking != null and booking.passengerCount != null)
+    ? 'Your ticket class (' + departFlight.ticketClass.name + ') includes ' + (departFlight.ticketClass.freeBaggageWeight * booking.passengerCount) + ' kg of free Standard baggage. Additional fees may apply for excess weight or Extra baggage.'
+    : 'Free baggage information is currently unavailable.'}">
+                </p>
             </div>
             <h3>Add more baggage</h3>
             <div th:if="${#lists.isEmpty(baggageOptions)}">
@@ -141,7 +144,13 @@
                 <p th:text="${returnFlight?.departure} + ' - ' + ${returnFlight?.destination}"></p>
             </div>
             <div class="free-baggage-info">
-                <p th:text="'Your ticket class (' + ${returnFlight?.ticketClass?.name} + ') includes ' + ${returnFlight?.ticketClass?.freeBaggageWeight * booking.passengerCount} + ' kg of free Standard baggage. Additional fees may apply for excess weight or Extra baggage.'"></p>
+                <div th:if="${returnFlight != null and returnFlight.ticketClass != null}"
+                     th:with="freeBaggage=${returnFlight.ticketClass.freeBaggageWeight * booking.passengerCount}">
+                    <p th:text="'Your ticket class (' + ${returnFlight.ticketClass.name} + ') includes ' + ${freeBaggage} + ' kg of free Standard baggage. Additional fees may apply for excess weight or Extra baggage.'"></p>
+                </div>
+                <div th:if="${returnFlight == null or returnFlight.ticketClass == null}">
+                    <p>Free baggage information is not available for your return flight.</p>
+                </div>
             </div>
             <h3>Add more baggage</h3>
             <div th:if="${#lists.isEmpty(baggageOptions)}">

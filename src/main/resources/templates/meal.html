@@ -108,7 +108,13 @@
                 <p th:text="${departFlight.departure} + ' - ' + ${departFlight.destination}"></p><p>a</p>
             </div>
             <div class="free-meal-info">
-                <p th:text="'Your ticket class (' + ${departFlight.ticketClass.name} + ') includes ' + ${departFlight.ticketClass.freeMealQuantity * booking.passengerCount} + ' free Standard meals.'"></p>
+                <div th:if="${departFlight != null and departFlight.ticketClass != null}"
+                     th:with="freeMeals=${departFlight.ticketClass.freeMealQuantity * booking.passengerCount}">
+                    <p th:text="'Your ticket class (' + ${departFlight.ticketClass.name} + ') includes ' + ${freeMeals} + ' free Standard meals.'"></p>
+                </div>
+                <div th:if="${departFlight == null or departFlight.ticketClass == null}">
+                    <p>Free meal information is not available for your departure flight.</p>
+                </div>
             </div>
             <h3>Add more meals</h3>
             <div th:if="${#lists.isEmpty(mealOptions)}">
@@ -143,7 +149,13 @@
                 <p th:text="${returnFlight.departure} + ' - ' + ${returnFlight.destination}"></p>
             </div>
             <div class="free-meal-info">
-                <p th:text="'Your ticket class (' + ${returnFlight.ticketClass.name} + ') includes ' + ${returnFlight.ticketClass.freeMealQuantity * booking.passengerCount} + ' free Standard meals.'"></p>
+                <div th:if="${returnFlight != null and returnFlight.ticketClass != null}"
+                     th:with="freeMeals=${returnFlight.ticketClass.freeMealQuantity * booking.passengerCount}">
+                    <p th:text="'Your ticket class (' + ${returnFlight.ticketClass.name} + ') includes ' + ${freeMeals} + ' free Standard meals.'"></p>
+                </div>
+                <div th:if="${returnFlight == null or returnFlight.ticketClass == null}">
+                    <p>Free meal information is not available for your return flight.</p>
+                </div>
             </div>
             <h3>Add more meals</h3>
             <div th:if="${#lists.isEmpty(mealOptions)}">
