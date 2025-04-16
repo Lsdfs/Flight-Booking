@@ -110,7 +110,7 @@ public class FlightController {
         session.setAttribute("destination", destination); // Lưu destination cho /book
 
         // Check condition
-        if (ticketType == null || departure == null || destination == null || passengers == null || departureTime == null) {
+        if (ticketType == null || departure == null || destination == null || departureTime == null) {
             model.addAttribute("error", "Vui lòng nhập đầy đủ thông tin tìm kiếm.");
             return "home";
         }
@@ -167,7 +167,7 @@ public class FlightController {
         Map<String, List<Flight>> returnFlightsByTimeFrame = new HashMap<>();
         if ("round-trip".equals(ticketType)) {
             List<Flight> returnFlights = flightRepository.findFlightsByDepartureDestinationAndType(
-                    destination, departure, Flight.FlightType.ONE_WAY, passengers);
+                    destination, departure, Flight.FlightType.ROUND_TRIP, passengers);
             processedFlightIds.clear();
 
             for (Flight flight : returnFlights) {
