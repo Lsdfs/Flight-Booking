@@ -298,7 +298,7 @@ public class FlightController {
 
         if (!departureBookedIds.contains(flightId) && !returnBookedIds.contains(flightId)) {
             response.put("success", false);
-            response.put("error", "This flight hss not been booked or not exist in the list.");
+            response.put("error", "This flight has not been booked or not exist in the list.");
             return response;
         }
 
@@ -370,7 +370,16 @@ public class FlightController {
         while(bookingRepository.findByReservationCode(code).isPresent()){
             code = randomString(10);
         }
-
+        ArrayList<Flight> flights = new ArrayList<>();
+        for(Long a: departureBookedIds){
+            Optional<Flight> curr = flightRepository.findById(a);
+            curr.ifPresent(flights::add);
+        }
+        for(Long a: returnBookedIds){
+            Optional<Flight> curr = flightRepository.findById(a);
+            curr.ifPresent(flights::add);
+        }
+        booking.setFlights(flights);
 
         booking.setReservationCode(code);
         session.setAttribute("booking", booking);
