@@ -371,6 +371,8 @@ public class FlightController {
         session.removeAttribute("returnBookedIds");
 
         session.setAttribute("reservationCode", code);
+        session.setAttribute("booking status", Booking.BookingStatus.PENDING);
+
         return "booking/payment";
     }
 
@@ -391,8 +393,8 @@ public class FlightController {
             log.warn("No booking found in session. Redirecting to error page.");
             return "error"; // better to show an actual error page
         }
-            paymentRepository.save(payment);
-            log.info("Payment saved successfully. Redirecting to VNPay initialization.");
+        paymentRepository.save(payment);
+        log.info("Payment saved successfully. Redirecting to VNPay initialization.");
         return "redirect:/flight/init-payment";
     }
 
@@ -403,17 +405,16 @@ public class FlightController {
         Optional<Booking> bookings = bookingRepository.findByReservationCode(reservationCode);
         Payment payment = new Payment();
         double totalPrice = (double) session.getAttribute("totalPrice");
+        session.setAttribute("booking status", Booking.BookingStatus.CONFIRMED);
+        bookingRepository.save(bookings.get());
+
         InitPaymentRequest initPaymentRequest = InitPaymentRequest.builder()
                 .userId(payment.getId())
                 .amount((long) totalPrice) // Adjust according to how you calculate total price
                 .txnRef(String.valueOf(reservationCode))
                 .ipAddress("127.0.0.1")
                 .build();
-        if (bookings.isPresent()) {
-            Booking booking = bookings.get();
-            booking.setStatus(Booking.BookingStatus.PAID);
-            bookingRepository.save(booking);
-        }
+
         InitPaymentResponse initPaymentResponse = paymentService.init(initPaymentRequest);
         return "redirect:" + initPaymentResponse.getVnpUrl();
     }

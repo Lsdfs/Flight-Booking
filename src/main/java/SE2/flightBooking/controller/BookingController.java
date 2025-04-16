@@ -98,27 +98,6 @@ public class BookingController {
         }
     }
 
-    @GetMapping("/payment")
-    public String showPayment(
-            @RequestParam Long bookingId,
-            Model model,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            Booking booking = bookingService.findById(bookingId)
-                    .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-
-            booking.calculateTotalPrice();
-            bookingService.updateBooking(booking);
-
-            model.addAttribute("booking", booking);
-            return "payment";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/booking/services";
-        }
-    }
-
     @PostMapping("/confirm")
     @Transactional
     public String confirmBooking(
