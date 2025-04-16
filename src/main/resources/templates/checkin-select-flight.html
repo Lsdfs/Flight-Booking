@@ -108,66 +108,87 @@
     </div>
   </header>
   <body class="min-vh-100 d-flex flex-column">
-    <div
-      class="container d-flex flex-column flex-grow-1 items-center justify-content-center"
-    >
-      <h2 class="mb-3 align-self-start text-center">Select Flight</h2>
+  <div class="container d-flex flex-column flex-grow-1 items-center justify-content-center">
+    <h2 class="mb-3 align-self-start text-center">Select Flight</h2>
 
-      <!-- Originating Flight -->
-      <div class="flight-card">
-        <div class="d-flex justify-content-between align-items-center">
-          <div><span class="flight-label h5">Originating Flight</span><br /></div>
-          <div class="d-flex justify-content-center align-items-center">
-            <input
-              type="radio"
-              name="flightSelection"
-              id="r1"
-              th:value="${booking.flights[0].id}"
-              class="form-check-input m-0"
-            />
-            <label for="r1" class="select-label ms-2 mb-0 h5">Select to check-in</label>
-          </div>
+    <!-- Originating Flight -->
+    <div class="flight-card" th:if="${flightType == 'ONE_WAY' or (flightType == 'ROUND_TRIP' and firstFlight)}">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <span class="flight-label h5">Originating Flight</span><br/>
         </div>
-        <hr />
+        <div class="d-flex justify-content-center align-items-center">
+          <input
+                  type="radio"
+                  name="flightSelection"
+                  id="r1"
+                  th:value="${flight.id}"
+                  class="form-check-input m-0"
+          />
+          <label for="r1" class="select-label ms-2 mb-0 h5">Select to check-in</label>
+        </div>
+      </div>
+      <hr/>
 
-        <div class="">
-            <p>THU, 13/07/2025</p>
-          <div
-            class="d-flex justify-content-around align-items-center flight-time"
-          >
-            <div class="h4"><strong>HAN</strong><br />13:45</div>
-            <div class="text-center">
-              <div><span class="flight-icon">✈️</span></div>
-              <div>2 hours 10 minutes</div>
-              <div class="text-muted">Direct flight</div>
-            </div>
-            <div class="h4"><strong>SGN</strong><br />13:45</div>
+      <div>
+        <p th:text="${#temporals.format(flight.departureTime, 'EEE, dd/MM/yyyy')}"></p>
+        <div class="d-flex justify-content-around align-items-center flight-time">
+          <div class="h4">
+            <strong th:text="${flight.departure}"></strong><br/>
+            <span th:text="${#temporals.format(flight.departureTime, 'HH:mm')}"></span>
+          </div>
+          <div class="text-center">
+            <div><span class="flight-icon">✈️</span></div>
+            <div>2 hours 10 minutes</div>
+            <div class="text-muted">Direct flight</div>
+          </div>
+          <div class="h4">
+            <strong th:text="${flight.destination}"></strong><br/>
+            <span th:text="${#temporals.format(flight.departureTime.plusHours(2), 'HH:mm')}"></span>
           </div>
         </div>
       </div>
-      <!-- Return Flight -->
-      <div class="flight-card not-supported-card">
-        <div class="d-flex justify-content-between align-items-center">
-          <div><span class="flight-label h5">Return Flight</span><br /></div>
-          <div class="not-supported"><p class="select-label h5 mb-0">This flight is not supported yet</p></div>
-        </div>
-        <hr />
+    </div>
 
-        <div class="">
-            <p>THU, 13/07/2025</p>
-          <div
-            class="d-flex justify-content-around align-items-center flight-time"
-          >
-            <div class="h4"><strong>HAN</strong><br />13:45</div>
-            <div class="text-center">
-              <div><span class="flight-icon">✈️</span></div>
-              <div>2 hours 10 minutes</div>
-              <div class="text-muted">Direct flight</div>
-            </div>
-            <div class="h4"><strong>SGN</strong><br />13:45</div>
+    <!-- Return Flight -->
+    <div class="flight-card" th:if="${flightType == 'ROUND_TRIP' and secondFlight}">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <span class="flight-label h5">Return Flight</span><br/>
+        </div>
+        <div class="d-flex justify-content-center align-items-center">
+          <input
+                  type="radio"
+                  name="flightSelection"
+                  id="r2"
+                  th:value="${flight.id}"
+                  class="form-check-input m-0"
+          />
+          <label for="r2" class="select-label ms-2 mb-0 h5">Select to check-in</label>
+        </div>
+      </div>
+      <hr/>
+
+      <div>
+        <p th:text="${#temporals.format(flight.returnTime, 'EEE, dd/MM/yyyy')}"></p>
+        <div class="d-flex justify-content-around align-items-center flight-time">
+          <div class="h4">
+            <strong th:text="${flight.destination}"></strong><br/>
+            <span th:text="${#temporals.format(flight.returnTime, 'HH:mm')}"></span>
+          </div>
+          <div class="text-center">
+            <div><span class="flight-icon">✈️</span></div>
+            <div>2 hours 10 minutes</div>
+            <div class="text-muted">Direct flight</div>
+          </div>
+          <div class="h4">
+            <strong th:text="${flight.departure}"></strong><br/>
+            <span th:text="${#temporals.format(flight.returnTime.plusHours(2), 'HH:mm')}"></span>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
       <!-- Buttons -->
       <div class="d-flex justify-content-center mt-4">
