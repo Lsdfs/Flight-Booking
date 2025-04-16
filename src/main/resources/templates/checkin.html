@@ -91,7 +91,7 @@
           Ready for comfortable flight, you can check-in quickly and simply
           online.
         </p>
-        <form action="/check-in/" method="post">
+        <form th:action="@{/check-in/submit}" method="post">
           <div class="form-group my-2">
             <input
                     type="text"

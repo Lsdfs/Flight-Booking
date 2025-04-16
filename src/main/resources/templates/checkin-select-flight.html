@@ -110,7 +110,7 @@
   <body class="min-vh-100 d-flex flex-column">
   <div class="container d-flex flex-column flex-grow-1 items-center justify-content-center">
     <h2 class="mb-3 align-self-start text-center">Select Flight</h2>
-
+    <form th:action="@{/confirm-flight}" method="post">
     <!-- Originating Flight -->
     <div class="flight-card" th:if="${flightType == 'ONE_WAY' or (flightType == 'ROUND_TRIP' and firstFlight)}">
       <div class="d-flex justify-content-between align-items-center">
@@ -188,13 +188,13 @@
         </div>
       </div>
     </div>
-  </div>
 
       <!-- Buttons -->
       <div class="d-flex justify-content-center mt-4">
-        <a href="#" class="btn btn-warning mx-2"><b>Go back</b></a>
+        <a th:href="@{/check-in}" class="btn btn-warning mx-2"><b>Go back</b></a>
         <button class="btn btn-primary mx-2" type="submit"><b>Continue</b></button>
       </div>
+    </form>
     </div>
   </body>
 </html>

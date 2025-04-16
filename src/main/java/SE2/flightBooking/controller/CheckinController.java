@@ -9,7 +9,7 @@ import SE2.flightBooking.repository.CoflightRepo;
 import SE2.flightBooking.repository.UserRepo;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,11 +27,9 @@ public class CheckinController {
     @Autowired
     BookingRepository bookingRepository;
     @Autowired UserRepo userRepo;
-    @GetMapping({"", "/"})
-    public String checkInMain(@AuthenticationPrincipal UserDetails authenticatedUser, Model model, HttpSession httpSession){
-        if(authenticatedUser==null){
-            return "redirect:/auth/login";
-        }
+    @GetMapping
+    public String checkInMain(Model model, HttpSession httpSession){
+
         httpSession.removeAttribute("bookingCheckin");
         httpSession.removeAttribute("flightCheckin");
         String reservationCode = "";
@@ -41,36 +39,36 @@ public class CheckinController {
         return "checkin";
     }
 
-    @PostMapping("/")
+    @PostMapping("/submit")
     public String checkCheckinInfo(
             @RequestParam("reservationCode") String reservationCode,
             @RequestParam("lastName") String lastName,
-            @AuthenticationPrincipal UserDetails authenticatedUser, HttpSession httpSession){
-        if(authenticatedUser==null){
-            return "redirect:/auth/login";
-        }
+             HttpSession httpSession){
+        System.out.println("aaa here");
+
         if(reservationCode.isEmpty()||reservationCode.isBlank()||lastName.isEmpty()||lastName.isBlank()){
             return "redirect:/check-in";
         }
         Optional<Booking> opt = bookingRepository.findByReservationCodeAndUserLastName(reservationCode, lastName);
         if(opt.isEmpty()){
+            System.err.println("error");
             return "redirect:/check-in";
         }
         Booking booking = opt.get();
         httpSession.setAttribute("bookingCheckin", booking);
-        return "redirect:/select-flight";
+        return "redirect:/check-in/select-flight";
     }
 
     @GetMapping("/select-flight")
-    public String checkinSelectFlight(Model model,@AuthenticationPrincipal UserDetails authenticatedUser, HttpSession httpSession){
-        if(authenticatedUser==null){
-            return "redirect:/auth/login";
-        }
+    public String checkinSelectFlight(Model model, HttpSession httpSession){
+        System.out.println("abc11111");
         Booking currentBooking = (Booking)httpSession.getAttribute("bookingCheckin");
+        System.out.println("debug" + currentBooking);
         if(currentBooking==null){
             return "redirect:/check-in";
         }
         List<Flight> flightList = currentBooking.getFlights();
+        System.out.println("flight list: " + flightList);
         for(Flight a: flightList){
             if(a.getFlightType()== Flight.FlightType.ONE_WAY&&a.getDepartureTime().isBefore(LocalDateTime.now())){
                 flightList.remove(a);
@@ -102,10 +100,7 @@ public class CheckinController {
     }
 
     @GetMapping("/confirm-flight")
-    public String checkinFlightSelected(@AuthenticationPrincipal UserDetails authenticatedUser, HttpSession httpSession, Model model){
-        if(authenticatedUser==null){
-            return "redirect:/auth/login";
-        }
+    public String checkinFlightSelected( HttpSession httpSession, Model model){
         Booking currentBooking = (Booking)httpSession.getAttribute("bookingCheckin");
         Flight currentFlight = (Flight)httpSession.getAttribute("flightCheckin");
         if(currentBooking==null||currentFlight==null){
@@ -117,10 +112,8 @@ public class CheckinController {
     }
 
     @PostMapping("lastPage")
-    public String lastPage(@AuthenticationPrincipal UserDetails authenticatedUser, HttpSession httpSession, Model model){
-        if(authenticatedUser==null){
-            return "redirect:/auth/login";
-        }
+    public String lastPage( HttpSession httpSession, Model model){
+
         Booking currentBooking = (Booking)httpSession.getAttribute("bookingCheckin");
         Flight currentFlight = (Flight)httpSession.getAttribute("flightCheckin");
         if(currentBooking==null||currentFlight==null){

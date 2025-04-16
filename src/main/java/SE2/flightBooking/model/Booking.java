@@ -35,7 +35,7 @@ public class Booking {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "booking_flights",
             joinColumns = @JoinColumn(name = "booking_id"),
@@ -44,6 +44,9 @@ public class Booking {
     private List<Flight> flights = new ArrayList<>();
 
 
+    public String toString(){
+        return reservationCode + " " + passengerCount + status;
+    }
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Seat> seats = new ArrayList<>();
