@@ -3,6 +3,7 @@ package SE2.flightBooking.controller;
 import SE2.flightBooking.model.CoflightMember;
 import SE2.flightBooking.model.User;
 import SE2.flightBooking.model.UserDTO;
+import SE2.flightBooking.model.UserProfileUpdateDTO;
 import SE2.flightBooking.repository.CoflightRepo;
 import SE2.flightBooking.repository.UserRepo;
 import SE2.flightBooking.service.AuthService;
@@ -37,63 +38,61 @@ public class UserController {
         if (authenticatedUser == null) {
             return "error"; // Redirect to an error page if not authenticated
         }
-
         String phoneNumber = authenticatedUser.getUsername();
         User user = userRepo.findByPhoneNumber(phoneNumber);
         if (user == null) {
             return "error"; // Show an error page if the user is not found
         }
-        UserDTO userDTO = new UserDTO();
-        userDTO.setDateOfBirth(user.getDateOfBirth());
-        userDTO.setPhoneNumber(user.getPhoneNumber());
-        userDTO.setAddress(user.getAddress());
-        userDTO.setGender(user.getGender());
-        userDTO.setLastName(user.getLastName());
-        userDTO.setFirstName(user.getFirstName());
-        userDTO.setCitizenID(user.getCitizenID());
-        userDTO.setPassportNumber(user.getPassportNumber());
-        model.addAttribute("user", userDTO);
+        model.addAttribute("user", user);
         return "profile"; // Render the "profile.html" template
     }
 
     @GetMapping("/update")
     public String showUpdateForm(Model model, @AuthenticationPrincipal UserDetails authenticatedUser) {
         if (authenticatedUser == null) {
-            return "error"; // Redirect to an error page if not authenticated
+            return "error"; // Not authenticated
         }
 
-        String phoneNumber = authenticatedUser.getUsername();
-        User user = userRepo.findByPhoneNumber(phoneNumber);
-
+        User user = userRepo.findByPhoneNumber(authenticatedUser.getUsername());
         if (user == null) {
-            return "error"; // Show an error page if the user is not found
+            return "error"; // User not found
         }
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setDateOfBirth(user.getDateOfBirth());
-        userDTO.setAddress(user.getAddress());
-        userDTO.setGender(user.getGender());
-        userDTO.setLastName(user.getLastName());
-        userDTO.setFirstName(user.getFirstName());
-        userDTO.setCitizenID(user.getCitizenID());
-        userDTO.setPassportNumber(user.getPassportNumber());
+        UserProfileUpdateDTO dto = new UserProfileUpdateDTO();
+        dto.setLastName(user.getLastName());
+        dto.setFirstName(user.getFirstName());
+        dto.setAddress(user.getAddress());
+        dto.setGender(user.getGender());
+        dto.setCitizenID(user.getCitizenID());
+        dto.setPassportNumber(user.getPassportNumber());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        // Set any other fields you want the user to be able to update
 
-
-        model.addAttribute("user", userDTO);
-        return "update"; // Render "update.html" template
+        model.addAttribute("user", dto);
+        return "update";
     }
 
     @PostMapping("/update")
-    public String updateUser(@Valid @ModelAttribute("user") UserDTO userDTO,
+    public String updateUser(@Valid @ModelAttribute("user") UserProfileUpdateDTO dto,
+                             BindingResult result,
                              @AuthenticationPrincipal UserDetails authenticatedUser) {
-        if (authenticatedUser == null) {
-            return "error"; // Redirect to an error page if not authenticated
+        if (result.hasErrors()) {
+            return "update";
         }
 
-        String phoneNumber = authenticatedUser.getUsername();
-        authService.updateUser(userDTO, phoneNumber);
+        User user = userRepo.findByPhoneNumber(authenticatedUser.getUsername());
+        if (user == null) return "error";
 
-        return "redirect:/user/profile"; // Redirect to the account page after update
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setGender(dto.getGender());
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setAddress(dto.getAddress());
+        user.setPassportNumber(dto.getPassportNumber());
+        user.setCitizenID(dto.getCitizenID());
+
+        userRepo.save(user);
+        return "redirect:/user/profile";
     }
 
     @GetMapping("/coflight")
