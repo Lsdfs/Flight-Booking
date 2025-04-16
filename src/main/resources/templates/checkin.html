@@ -91,27 +91,31 @@
           Ready for comfortable flight, you can check-in quickly and simply
           online.
         </p>
-        <form>
+        <form action="/check-in/" method="post">
           <div class="form-group my-2">
             <input
-              type="text"
-              class="form-control"
-              id="reservationCode"
-              placeholder="Reservation Code"
+                    type="text"
+                    class="form-control"
+                    id="reservationCode"
+                    name="reservationCode"
+                    placeholder="Reservation Code"
+                    th:value="${reservationCode}"
             />
           </div>
           <div class="form-group mb-2">
             <input
-              type="text"
-              class="form-control"
-              id="checkinAccountName"
-              placeholder="Last/Family name (as in passport)"
+                    type="text"
+                    class="form-control"
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Last/Family name (as in passport)"
+                    th:value="${lastName}"
             />
           </div>
           <div class="d-flex justify-content-center">
             <button
-              type="submit"
-              style="
+                    type="submit"
+                    style="
                 border: 0;
                 height: 39px;
                 padding: 0px 15px;

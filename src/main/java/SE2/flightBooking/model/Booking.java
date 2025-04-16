@@ -16,6 +16,9 @@ public class Booking {
     @Column(name = "reservation_code", nullable = false, unique = true)
     private String reservationCode;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
     @Column(name = "booking_date", nullable = false)
     private LocalDateTime bookingDate;
 
@@ -40,9 +43,7 @@ public class Booking {
     )
     private List<Flight> flights = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Seat> seats = new ArrayList<>();
@@ -54,7 +55,7 @@ public class Booking {
     private List<BookingBaggage> bookingBaggages = new ArrayList<>();
 
     public enum BookingStatus {
-        PENDING, CONFIRMED, CANCELLED, PAID, NOTCHECKEDIN, CHECKEDIN, FLIGHTDONE
+        PENDING, CONFIRMED, CANCELLED, PAID, ONEWAYCHECKEDIN, ONEWAYNOTCHECKEDIN,ROUNDTRIPNOTCHECKEDIN,ROUNDTRIPCHECKEDIN, FLIGHTDONE
     }
 
     // Constructors
