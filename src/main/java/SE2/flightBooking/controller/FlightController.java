@@ -11,6 +11,7 @@ import SE2.flightBooking.service.paymentService.VNPayService;
 import SE2.flightBooking.model.Booking;
 import SE2.flightBooking.model.Flight;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -360,16 +361,17 @@ public class FlightController {
         if (user == null) {
             return "error"; // Show an error page if the user is not found
         }
-
-        double totalPrice = (double) session.getAttribute("totalPrice");
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setPassengerCount(passengers);
-        booking.setTotalPrice(totalPrice);
         String code = randomString(10);
         while(bookingRepository.findByReservationCode(code).isPresent()){
             code = randomString(10);
         }
+        booking.setReservationCode(code);
+
+
+        bookingRepository.save(booking);
         ArrayList<Flight> flights = new ArrayList<>();
         for(Long a: departureBookedIds){
             Optional<Flight> curr = flightRepository.findById(a);
@@ -379,12 +381,17 @@ public class FlightController {
             Optional<Flight> curr = flightRepository.findById(a);
             curr.ifPresent(flights::add);
         }
-        booking.setFlights(flights);
-
-        booking.setReservationCode(code);
+        for (Flight flight : flights) {
+            flight.getBookings().add(booking);
+            flightRepository.save(flight);
+        }
+        booking.setFlights(flights); // set after bookings added to flights
+        session.setAttribute("totalPrice", booking.getTotalPrice());
+        System.err.println(session.getAttribute("totalPrice"));
+        bookingRepository.save(booking); // Save again to persist the link
         session.setAttribute("booking", booking);
 
-        bookingRepository.save(booking);
+
 
         session.removeAttribute("departureBookedIds");
         session.removeAttribute("returnBookedIds");
