@@ -81,25 +81,27 @@
 </header>
 <body>
 <main>
-    <div class="content">
-        <h2>BUY BAGGAGE, MEALS, SEAT AND MORE...</h2>
-        <p>Explore Vietjet's Skyshop store to buy more baggage, meals, seats and more ... Your flight will be comfortable, and surprisingly enjoyable.</p>
-        <div th:if="${error}" class="error-message" th:text="${error}"></div>
-        <form th:action="@{/booking/services}" method="get">
-            <label for="reservationCode">Reservation Code:</label>
-            <input type="text" id="reservationCode" name="reservationCode" required>
+    <div class="service-container">
+        <div class="content">
+            <h2>BUY BAGGAGE, MEALS, SEAT AND MORE...</h2>
+            <p>Explore Vietjet's Skyshop store to buy more baggage, meals, seats and more ... Your flight will be comfortable, and surprisingly enjoyable.</p>
+            <div th:if="${error}" class="error-message" th:text="${error}"></div>
+            <form th:action="@{/booking/services}" method="get">
+                <label for="reservationCode">Reservation Code:</label>
+                <input type="text" id="reservationCode" name="reservationCode" required>
 
-            <label for="lastName">Last/Family Name (as in passport):</label>
-            <input type="text" id="lastName" name="lastName" required>
+                <label for="lastName">Last/Family Name (as in passport):</label>
+                <input type="text" id="lastName" name="lastName" required>
 
-            <label for="firstName">First Name:</label>
-            <input type="text" id="firstName" name="firstName" required>
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
 
-            <button type="submit">Continue</button>
-        </form>
-    </div>
-    <div class="image-section">
-        <img src="/image/service.webp" alt="Chef holding meals">
+                <button type="submit">Continue</button>
+            </form>
+        </div>
+        <div class="image-section">
+            <img src="/image/service.webp" alt="Chef holding meals">
+        </div>
     </div>
 </main>
 <footer>
