@@ -1,39 +1,30 @@
 package SE2.flightBooking.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
-@Table
 public class Payment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String gender;
-
     private String lastName;
-
     private String firstName;
-
     private LocalDate dob;
-
     private String phone;
-
     private String email;
-
     private String identity; // CCCD / Passport
-
     private String currentLocation;
     private String paymentStatus;
-
-
+    private String country;
 
     @Column(name = "reservation_code")
     private String reservationCode;
 
-
+    // --- Getters and Setters ---
 
     public String getReservationCode() {
         return reservationCode;
@@ -42,6 +33,7 @@ public class Payment {
     public void setReservationCode(String reservationCode) {
         this.reservationCode = reservationCode;
     }
+
     public Long getId() {
         return id;
     }
@@ -120,5 +112,13 @@ public class Payment {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }
