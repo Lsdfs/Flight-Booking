@@ -216,7 +216,9 @@ public class FlightController {
                                           @RequestParam(required = false) String ticketType,
                                           @SessionAttribute(required = false) List<Long> departureBookedIds,
                                           @SessionAttribute(required = false) List<Long> returnBookedIds,
-                                          HttpSession session) {
+                                          HttpSession session,
+                                          @AuthenticationPrincipal UserDetails authenticatedUser
+    ) {
         Map<String, Object> response = new HashMap<>();
 
         // Create list if not exist.
@@ -276,6 +278,10 @@ public class FlightController {
         response.put("totalPrice", totalPrice) ;
         response.put("flightId", flightId);
 
+
+
+
+
         return response;
     }
 
@@ -330,7 +336,8 @@ public class FlightController {
                                    @RequestParam Integer passengers,
                                    @RequestParam String ticketType,
                                    @AuthenticationPrincipal UserDetails authenticatedUser,
-                                   Model model) {
+                                   Model model,
+                                   HttpSession session) {
         if (departureBookedIds == null) departureBookedIds = new ArrayList<>();
         if (returnBookedIds == null) returnBookedIds = new ArrayList<>();
 
@@ -353,9 +360,12 @@ public class FlightController {
         if (user == null) {
             return "error"; // Show an error page if the user is not found
         }
+
+        double totalPrice = (double) session.getAttribute("totalPrice");
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setPassengerCount(passengers);
+        booking.setTotalPrice(totalPrice);
         String code = randomString(10);
         while(bookingRepository.findByReservationCode(code).isPresent()){
             code = randomString(10);
@@ -363,15 +373,14 @@ public class FlightController {
 
 
         booking.setReservationCode(code);
+        session.setAttribute("booking", booking);
 
         bookingRepository.save(booking);
 
-        HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
         session.removeAttribute("departureBookedIds");
         session.removeAttribute("returnBookedIds");
 
         session.setAttribute("reservationCode", code);
-        session.setAttribute("booking status", Booking.BookingStatus.PENDING);
 
         return "booking/payment";
     }
@@ -402,11 +411,11 @@ public class FlightController {
     public String paying(HttpSession session, @ModelAttribute InitPaymentRequest request) {
 
         String reservationCode = (String) session.getAttribute("reservationCode");
-        Optional<Booking> bookings = bookingRepository.findByReservationCode(reservationCode);
+        Booking booking = (Booking) session.getAttribute("booking");
+        booking.setStatus(Booking.BookingStatus.CONFIRMED);
+        bookingRepository.save(booking);
         Payment payment = new Payment();
         double totalPrice = (double) session.getAttribute("totalPrice");
-        session.setAttribute("booking status", Booking.BookingStatus.CONFIRMED);
-        bookingRepository.save(bookings.get());
 
         InitPaymentRequest initPaymentRequest = InitPaymentRequest.builder()
                 .userId(payment.getId())
@@ -438,6 +447,5 @@ public class FlightController {
         }
         String saltStr = salt.toString();
         return saltStr;
-
     }
 }
