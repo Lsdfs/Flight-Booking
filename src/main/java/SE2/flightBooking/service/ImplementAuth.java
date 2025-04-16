@@ -37,6 +37,7 @@ public class ImplementAuth implements AuthService {
 
         user.setPhoneNumber(userRegistrationDTO.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
+        user.setDateOfBirth(userRegistrationDTO.getDateOfBirth());
         user.setFirstName(userRegistrationDTO.getFirstName());
         user.setLastName(userRegistrationDTO.getLastName());
         user.setGmail(userRegistrationDTO.getGmail());
