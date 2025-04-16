@@ -356,7 +356,7 @@ public class FlightController {
         booking.setUser(user);
         booking.setPassengerCount(passengers);
         String code = randomString(10);
-        while(!bookingRepository.findByReservationCode(code).isEmpty()){
+        while(bookingRepository.findByReservationCode(code).isPresent()){
             code = randomString(10);
         }
 

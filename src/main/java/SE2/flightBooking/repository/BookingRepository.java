@@ -23,4 +23,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("lastName") String lastName,
             @Param("firstName") String firstName
     );
+    @Query("SELECT b FROM Booking b JOIN b.user u WHERE b.reservationCode = :reservationCode AND u.lastName = :lastName")
+    Optional<Booking> findByReservationCodeAndUserLastName(
+            @Param("reservationCode") String reservationCode,
+            @Param("lastName") String lastName
+    );
+
+    Optional<Booking> findByReservationCode(String reservationCode);
 }
