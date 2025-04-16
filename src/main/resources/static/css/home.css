@@ -96,9 +96,6 @@ body {
     transition: transform 0.2s ease-in-out;
 }
 
-.user-info a:hover {
-    transform: scale(1.05);
-}
 .under-head {
     margin-top: -90px;
     margin-bottom: 20px;
