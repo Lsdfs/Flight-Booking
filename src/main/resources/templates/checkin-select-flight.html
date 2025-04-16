@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
     <title>Select Flight</title>
-    <link href="check-in.css" rel="stylesheet" />
+    <link href="check-in.css" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/errorDate.css}">
     <link
@@ -23,178 +23,179 @@
             crossorigin="anonymous"
     ></script>
     <style>
-      body {
-        font-family: "Segoe UI", sans-serif;
-      }
-      .flight-card {
-        border-radius: 12px;
-        background-color: white;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin-bottom: 20px;
-      }
+        body {
+          font-family: "Segoe UI", sans-serif;
+        }
+        .flight-card {
+          border-radius: 12px;
+          background-color: white;
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+          margin-bottom: 20px;
+        }
 
-      .not-supported {
-        background-color: #fff3cd;
-        padding: 5px;
-        border-radius: 8px;
-        color: #856404;
-        font-size: 0.9rem;
-      }
-      .flight-time {
-        font-size: 1.1rem;
-      }
+        .not-supported {
+          background-color: #fff3cd;
+          padding: 5px;
+          border-radius: 8px;
+          color: #856404;
+          font-size: 0.9rem;
+        }
+        .flight-time {
+          font-size: 1.1rem;
+        }
 
-      .not-supported-card{
-        opacity: 0.79;
-      }
+        .not-supported-card{
+          opacity: 0.79;
+        }
 
-      .select-label{
-        font-weight: 400;
-      }
-      .flight-label{
-        font-weight: 400;
-      }
+        .select-label{
+          font-weight: 400;
+        }
+        .flight-label{
+          font-weight: 400;
+        }
     </style>
-  </head>
-  <header class="header-container">
+</head>
+<header class="header-container">
     <a th:href="@{/}" class="header-left" style="text-decoration: none;">
-      <img th:src="@{/image/logo.webp}" alt="Vietjet Air" class="logo">
+        <img th:src="@{/image/logo.webp}" alt="Vietjet Air" class="logo">
     </a>
     <button class="mobile-menu-btn" aria-label="Menu">
-      <span class="menu-icon"></span>
-      <span class="menu-icon"></span>
-      <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
     </button>
     <div class="header-right">
-      <div class="user-info">
-        <a href="/faq/categories">
-          <img th:src="@{/image/support_icon.png}" alt="Support-icon" class="support">
-          <span class="support-text">Support</span>
-        </a>
-        <div class="dropdown ms-3">
-          <button class="btn btn-link dropdown-toggle" type="button"
-                  id="userDropdown" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-            <span class="text-white text-decoration-none" sec:authorize="isAuthenticated()" sec:authentication="name"></span>
-            <span class="text-white text-decoration-none" sec:authorize="!isAuthenticated()">Guest</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-            <li sec:authorize="!isAuthenticated()">
-              <a class="dropdown-item fs-5" href="/auth/login">Login</a>
-            </li>
-            <li sec:authorize="!isAuthenticated()">
-              <a class="dropdown-item fs-5" href="/auth/register">Sign up</a>
-            </li>
+        <div class="user-info">
+            <a href="/faq/categories">
+                <img th:src="@{/image/support_icon.png}" alt="Support-icon" class="support">
+                <span class="support-text">Support</span>
+            </a>
+            <div class="dropdown ms-3">
+                <button class="btn btn-link dropdown-toggle" type="button"
+                        id="userDropdown" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <span class="text-white text-decoration-none" sec:authorize="isAuthenticated()"
+                          sec:authentication="name"></span>
+                    <span class="text-white text-decoration-none" sec:authorize="!isAuthenticated()">Guest</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li sec:authorize="!isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/auth/login">Login</a>
+                    </li>
+                    <li sec:authorize="!isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/auth/register">Sign up</a>
+                    </li>
 
-            <!-- Authenticated user options -->
-            <li sec:authorize="isAuthenticated()">
-              <a class="dropdown-item fs-5" href="/user/profile">Profile</a>
-            </li>
-            <li sec:authorize="isAuthenticated()">
-              <form th:action="@{/logout}" method="post">
-                <button class="dropdown-item fs-5" type="submit">Sign out</button>
-              </form>
-            </li>
-          </ul>
+                    <!-- Authenticated user options -->
+                    <li sec:authorize="isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/user/profile">Profile</a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post">
+                            <button class="dropdown-item fs-5" type="submit">Sign out</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
-      <nav>
-        <a href="#">Skyjoy</a>
-        <a href="/my-booking">My Booking</a>
-        <a href="/check-in">Online Check-in</a>
-        <a href="#">Flight Extras</a>
-      </nav>
+        <nav>
+            <a href="#">Skyjoy</a>
+            <a href="/my-booking">My Booking</a>
+            <a href="/check-in">Online Check-in</a>
+            <a href="#">Flight Extras</a>
+        </nav>
     </div>
-  </header>
-  <body class="min-vh-100 d-flex flex-column">
-  <div class="container d-flex flex-column flex-grow-1 items-center justify-content-center">
+</header>
+<body class="min-vh-100 d-flex flex-column">
+<div class="container d-flex flex-column flex-grow-1 items-center justify-content-center">
     <h2 class="mb-3 align-self-start text-center">Select Flight</h2>
     <form th:action="@{/confirm-flight}" method="post">
-    <!-- Originating Flight -->
-    <div class="flight-card" th:if="${flightType == 'ONE_WAY' or (flightType == 'ROUND_TRIP' and firstFlight)}">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <span class="flight-label h5">Originating Flight</span><br/>
-        </div>
-        <div class="d-flex justify-content-center align-items-center">
-          <input
-                  type="radio"
-                  name="flightSelection"
-                  id="r1"
-                  th:value="${flight.id}"
-                  class="form-check-input m-0"
-          />
-          <label for="r1" class="select-label ms-2 mb-0 h5">Select to check-in</label>
-        </div>
-      </div>
-      <hr/>
+        <!-- Originating Flight -->
+        <div class="flight-card" th:if="${flightType == 'ONE_WAY' or (flightType == 'ROUND_TRIP' and firstFlight)}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="flight-label h5">Originating Flight</span><br/>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <input
+                            type="radio"
+                            name="flightSelection"
+                            id="r1"
+                            th:value="${flight.id}"
+                            class="form-check-input m-0"
+                    />
+                    <label for="r1" class="select-label ms-2 mb-0 h5">Select to check-in</label>
+                </div>
+            </div>
+            <hr/>
 
-      <div>
-        <p th:text="${#temporals.format(flight.departureTime, 'EEE, dd/MM/yyyy')}"></p>
-        <div class="d-flex justify-content-around align-items-center flight-time">
-          <div class="h4">
-            <strong th:text="${flight.departure}"></strong><br/>
-            <span th:text="${#temporals.format(flight.departureTime, 'HH:mm')}"></span>
-          </div>
-          <div class="text-center">
-            <div><span class="flight-icon">✈️</span></div>
-            <div>2 hours 10 minutes</div>
-            <div class="text-muted">Direct flight</div>
-          </div>
-          <div class="h4">
-            <strong th:text="${flight.destination}"></strong><br/>
-            <span th:text="${#temporals.format(flight.departureTime.plusHours(2), 'HH:mm')}"></span>
-          </div>
+            <div>
+                <p th:text="${#temporals.format(flight.departureTime, 'EEE, dd/MM/yyyy')}"></p>
+                <div class="d-flex justify-content-around align-items-center flight-time">
+                    <div class="h4">
+                        <strong th:text="${flight.departure}"></strong><br/>
+                        <span th:text="${#temporals.format(flight.departureTime, 'HH:mm')}"></span>
+                    </div>
+                    <div class="text-center">
+                        <div><span class="flight-icon">✈️</span></div>
+                        <div>2 hours 10 minutes</div>
+                        <div class="text-muted">Direct flight</div>
+                    </div>
+                    <div class="h4">
+                        <strong th:text="${flight.destination}"></strong><br/>
+                        <span th:text="${#temporals.format(flight.departureTime.plusHours(2), 'HH:mm')}"></span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Return Flight -->
-    <div class="flight-card" th:if="${flightType == 'ROUND_TRIP' and secondFlight}">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <span class="flight-label h5">Return Flight</span><br/>
-        </div>
-        <div class="d-flex justify-content-center align-items-center">
-          <input
-                  type="radio"
-                  name="flightSelection"
-                  id="r2"
-                  th:value="${flight.id}"
-                  class="form-check-input m-0"
-          />
-          <label for="r2" class="select-label ms-2 mb-0 h5">Select to check-in</label>
-        </div>
-      </div>
-      <hr/>
+        <!-- Return Flight -->
+        <div class="flight-card" th:if="${flightType == 'ROUND_TRIP' and secondFlight}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="flight-label h5">Return Flight</span><br/>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <input
+                            type="radio"
+                            name="flightSelection"
+                            id="r2"
+                            th:value="${flight.id}"
+                            class="form-check-input m-0"
+                    />
+                    <label for="r2" class="select-label ms-2 mb-0 h5">Select to check-in</label>
+                </div>
+            </div>
+            <hr/>
 
-      <div>
-        <p th:text="${#temporals.format(flight.returnTime, 'EEE, dd/MM/yyyy')}"></p>
-        <div class="d-flex justify-content-around align-items-center flight-time">
-          <div class="h4">
-            <strong th:text="${flight.destination}"></strong><br/>
-            <span th:text="${#temporals.format(flight.returnTime, 'HH:mm')}"></span>
-          </div>
-          <div class="text-center">
-            <div><span class="flight-icon">✈️</span></div>
-            <div>2 hours 10 minutes</div>
-            <div class="text-muted">Direct flight</div>
-          </div>
-          <div class="h4">
-            <strong th:text="${flight.departure}"></strong><br/>
-            <span th:text="${#temporals.format(flight.returnTime.plusHours(2), 'HH:mm')}"></span>
-          </div>
+            <div>
+                <p th:text="${#temporals.format(flight.returnTime, 'EEE, dd/MM/yyyy')}"></p>
+                <div class="d-flex justify-content-around align-items-center flight-time">
+                    <div class="h4">
+                        <strong th:text="${flight.destination}"></strong><br/>
+                        <span th:text="${#temporals.format(flight.returnTime, 'HH:mm')}"></span>
+                    </div>
+                    <div class="text-center">
+                        <div><span class="flight-icon">✈️</span></div>
+                        <div>2 hours 10 minutes</div>
+                        <div class="text-muted">Direct flight</div>
+                    </div>
+                    <div class="h4">
+                        <strong th:text="${flight.departure}"></strong><br/>
+                        <span th:text="${#temporals.format(flight.returnTime.plusHours(2), 'HH:mm')}"></span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-      <!-- Buttons -->
-      <div class="d-flex justify-content-center mt-4">
-        <a th:href="@{/check-in}" class="btn btn-warning mx-2"><b>Go back</b></a>
-        <button class="btn btn-primary mx-2" type="submit"><b>Continue</b></button>
-      </div>
+        <!-- Buttons -->
+        <div class="d-flex justify-content-center mt-4">
+            <a th:href="@{/check-in}" class="btn btn-warning mx-2"><b>Go back</b></a>
+            <button class="btn btn-primary mx-2" type="submit"><b>Continue</b></button>
+        </div>
     </form>
-    </div>
-  </body>
+</div>
+</body>
 </html>

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head>
-    <meta charset="utf-8" />
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8"/>
     <title></title>
     <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/errorDate.css}">
@@ -22,100 +23,101 @@
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"
     ></script>
-    <link href="style.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet"/>
 
-  </head>
-  <body>
-  <header class="header-container">
+</head>
+<body>
+<header class="header-container">
     <a th:href="@{/}" class="header-left" style="text-decoration: none;">
-      <img th:src="@{/image/logo.webp}" alt="Vietjet Air" class="logo">
+        <img th:src="@{/image/logo.webp}" alt="Vietjet Air" class="logo">
     </a>
     <button class="mobile-menu-btn" aria-label="Menu">
-      <span class="menu-icon"></span>
-      <span class="menu-icon"></span>
-      <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
+        <span class="menu-icon"></span>
     </button>
     <div class="header-right">
-      <div class="user-info">
-        <a href="/faq/categories">
-          <img th:src="@{/image/support_icon.png}" alt="Support-icon" class="support">
-          <span class="support-text">Support</span>
-        </a>
-        <div class="dropdown ms-3">
-          <button class="btn btn-link dropdown-toggle" type="button"
-                  id="userDropdown" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-            <span class="text-white text-decoration-none" sec:authorize="isAuthenticated()" sec:authentication="name"></span>
-            <span class="text-white text-decoration-none" sec:authorize="!isAuthenticated()">Guest</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-            <li sec:authorize="!isAuthenticated()">
-              <a class="dropdown-item fs-5" href="/auth/login">Login</a>
-            </li>
-            <li sec:authorize="!isAuthenticated()">
-              <a class="dropdown-item fs-5" href="/auth/register">Sign up</a>
-            </li>
+        <div class="user-info">
+            <a href="/faq/categories">
+                <img th:src="@{/image/support_icon.png}" alt="Support-icon" class="support">
+                <span class="support-text">Support</span>
+            </a>
+            <div class="dropdown ms-3">
+                <button class="btn btn-link dropdown-toggle" type="button"
+                        id="userDropdown" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <span class="text-white text-decoration-none" sec:authorize="isAuthenticated()"
+                          sec:authentication="name"></span>
+                    <span class="text-white text-decoration-none" sec:authorize="!isAuthenticated()">Guest</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li sec:authorize="!isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/auth/login">Login</a>
+                    </li>
+                    <li sec:authorize="!isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/auth/register">Sign up</a>
+                    </li>
 
-            <!-- Authenticated user options -->
-            <li sec:authorize="isAuthenticated()">
-              <a class="dropdown-item fs-5" href="/user/profile">Profile</a>
-            </li>
-            <li sec:authorize="isAuthenticated()">
-              <form th:action="@{/logout}" method="post">
-                <button class="dropdown-item fs-5" type="submit">Sign out</button>
-              </form>
-            </li>
-          </ul>
+                    <!-- Authenticated user options -->
+                    <li sec:authorize="isAuthenticated()">
+                        <a class="dropdown-item fs-5" href="/user/profile">Profile</a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post">
+                            <button class="dropdown-item fs-5" type="submit">Sign out</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
-      <nav>
-        <a href="#">Skyjoy</a>
-        <a href="/my-booking">My Booking</a>
-        <a href="/check-in">Online Check-in</a>
-        <a href="#">Flight Extras</a>
-      </nav>
+        <nav>
+            <a href="#">Skyjoy</a>
+            <a href="/my-booking">My Booking</a>
+            <a href="/check-in">Online Check-in</a>
+            <a href="#">Flight Extras</a>
+        </nav>
     </div>
-  </header>
+</header>
 
-    <div
-      class="outer mx-5 my-4 row"
-      style="
+<div
+        class="outer mx-5 my-4 row"
+        style="
         box-shadow: 0px 3px 12px 0px rgba(0, 31, 62, 0.08);
         background-color: rgba(255, 255, 255, 0.6);
         border-radius: 10px;
       "
-    >
-      <div class="checkin-col col-5" style="padding: 20px">
+>
+    <div class="checkin-col col-5" style="padding: 20px">
         <h4>CHECK-IN</h4>
         <p>
-          Ready for comfortable flight, you can check-in quickly and simply
-          online.
+            Ready for comfortable flight, you can check-in quickly and simply
+            online.
         </p>
         <form th:action="@{/check-in/submit}" method="post">
-          <div class="form-group my-2">
-            <input
-                    type="text"
-                    class="form-control"
-                    id="reservationCode"
-                    name="reservationCode"
-                    placeholder="Reservation Code"
-                    th:value="${reservationCode}"
-            />
-          </div>
-          <div class="form-group mb-2">
-            <input
-                    type="text"
-                    class="form-control"
-                    id="lastName"
-                    name="lastName"
-                    placeholder="Last/Family name (as in passport)"
-                    th:value="${lastName}"
-            />
-          </div>
-          <div class="d-flex justify-content-center">
-            <button
-                    type="submit"
-                    style="
+            <div class="form-group my-2">
+                <input
+                        type="text"
+                        class="form-control"
+                        id="reservationCode"
+                        name="reservationCode"
+                        placeholder="Reservation Code"
+                        th:value="${reservationCode}"
+                />
+            </div>
+            <div class="form-group mb-2">
+                <input
+                        type="text"
+                        class="form-control"
+                        id="lastName"
+                        name="lastName"
+                        placeholder="Last/Family name (as in passport)"
+                        th:value="${lastName}"
+                />
+            </div>
+            <div class="d-flex justify-content-center">
+                <button
+                        type="submit"
+                        style="
                 border: 0;
                 height: 39px;
                 padding: 0px 15px;
@@ -129,106 +131,106 @@
                 border-radius: 10px;
                 color: black;
               "
-            >
-              <b>Submit</b>
-            </button>
-          </div>
+                >
+                    <b>Submit</b>
+                </button>
+            </div>
         </form>
-      </div>
+    </div>
 
-      <div class="col-7" style="padding: 20px; border-left: 1px solid #d1d3d4">
+    <div class="col-7" style="padding: 20px; border-left: 1px solid #d1d3d4">
         <p>
-          Passengers can proactively complete flight check-in using the "Online
-          Check-in" feature on Vietjet's website or the Vietjet Air app on
-          mobile devices. This simple, convenient feature saves time by reducing
-          wait times at the airport. Passengers can complete the process anytime
-          from 24 hours to 60 minutes before departure (note that closing times
-          may vary by airport).
+            Passengers can proactively complete flight check-in using the "Online
+            Check-in" feature on Vietjet's website or the Vietjet Air app on
+            mobile devices. This simple, convenient feature saves time by reducing
+            wait times at the airport. Passengers can complete the process anytime
+            from 24 hours to 60 minutes before departure (note that closing times
+            may vary by airport).
         </p>
         <div
-          class="airport-tips"
-          style="
+                class="airport-tips"
+                style="
             border: 1px solid rgb(237, 206, 0);
             background-color: rgb(255, 255, 255);
             padding: 16px;
             border-radius: 8px;
           "
         >
-          <h5>Tips at the airport</h5>
-          <ul>
-            <li>
-              If you do not have checked baggage, ensure your carry-on meets
-              Vietjet's requirements (size, weight, and quantity depend on
-              ticket class) and proceed directly to airport security.
-            </li>
-            <li>
-              Note: If you have checked baggage, please bring it along with your
-              carry-on to the check-in counter. Check-in counters for domestic
-              flights close 40 minutes before departure, while international
-              flight close 50 minutes prior (some airports close 60 minutes
-              prior depending on their facilities).
-            </li>
-          </ul>
+            <h5>Tips at the airport</h5>
+            <ul>
+                <li>
+                    If you do not have checked baggage, ensure your carry-on meets
+                    Vietjet's requirements (size, weight, and quantity depend on
+                    ticket class) and proceed directly to airport security.
+                </li>
+                <li>
+                    Note: If you have checked baggage, please bring it along with your
+                    carry-on to the check-in counter. Check-in counters for domestic
+                    flights close 40 minutes before departure, while international
+                    flight close 50 minutes prior (some airports close 60 minutes
+                    prior depending on their facilities).
+                </li>
+            </ul>
         </div>
 
         <p>
           <span style="color: rgb(186, 55, 42)"
-            ><strong>Flights operated by vietjet</strong></span
+          ><strong>Flights operated by vietjet</strong></span
           >
         </p>
         <p>
-          <em><strong>1. Domestic flights:</strong></em>
+            <em><strong>1. Domestic flights:</strong></em>
         </p>
         <ul>
-          <li>
-            Applicable to all flights departing from airports within Vietnam.
-          </li>
-          <li>
-            Check-in available: From 24 hours to 60 minutes before departure.
-          </li>
+            <li>
+                Applicable to all flights departing from airports within Vietnam.
+            </li>
+            <li>
+                Check-in available: From 24 hours to 60 minutes before departure.
+            </li>
         </ul>
         <p>
-          <em><strong>2. International flights:</strong></em>
+            <em><strong>2. International flights:</strong></em>
         </p>
         <ul>
-          <li>Applies to flights departing from:</li>
-          <li>Vietnam</li>
-          <li>Australia</li>
-          <li>India</li>
-          <li>Japan</li>
-          <li>South Korea Southeast Asia</li>
+            <li>Applies to flights departing from:</li>
+            <li>Vietnam</li>
+            <li>Australia</li>
+            <li>India</li>
+            <li>Japan</li>
+            <li>South Korea Southeast Asia</li>
         </ul>
         <p>Check-in available:</p>
         <ul>
-          <li>From 24 hours to 90 minutes before departure.</li>
-          <li>
-            For flights departing from Australia: From 24 hours to 4 hours
-            before departure.
-          </li>
+            <li>From 24 hours to 90 minutes before departure.</li>
+            <li>
+                For flights departing from Australia: From 24 hours to 4 hours
+                before departure.
+            </li>
         </ul>
         <p><strong>General requirements:</strong></p>
         <p>
-          Passengers need to prepare valid travel documents in compliance with
-          entry, exit, and residency regulations.
+            Passengers need to prepare valid travel documents in compliance with
+            entry, exit, and residency regulations.
         </p>
         <p></p>
         <p>
-          Departures from Ho Chi Minh city (SGN): For international flights,
-          passengers are required to complete online check-in and print their
-          boarding pass on A4 paper before arriving at the airport. Electronic
-          boarding passes saved on mobile devices (such as phones, tablets, or
-          email) are not valid for international flights.
+            Departures from Ho Chi Minh city (SGN): For international flights,
+            passengers are required to complete online check-in and print their
+            boarding pass on A4 paper before arriving at the airport. Electronic
+            boarding passes saved on mobile devices (such as phones, tablets, or
+            email) are not valid for international flights.
         </p>
         <p></p>
         <p>
-          At the airport: Passengers should be present at the Online Check-in
-          counter at least 60 minutes before departure for identity
-          verification, including travel documents, entry/exit permits, and any
-          other documents as required by the relevant authorities. This
-          requirement applies even if passengers do not have checked baggage.
+            At the airport: Passengers should be present at the Online Check-in
+            counter at least 60 minutes before departure for identity
+            verification, including travel documents, entry/exit permits, and any
+            other documents as required by the relevant authorities. This
+            requirement applies even if passengers do not have checked baggage.
         </p>
         <p></p>
-      </div>
     </div>
-  </body>
+</div>
+</body>
 </html>
