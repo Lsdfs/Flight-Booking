@@ -166,7 +166,7 @@ public class FlightController {
         Map<String, List<Flight>> returnFlightsByTimeFrame = new HashMap<>();
         if ("round-trip".equals(ticketType)) {
             List<Flight> returnFlights = flightRepository.findFlightsByDepartureDestinationAndType(
-                    destination, departure, Flight.FlightType.ROUND_TRIP, passengers);
+                    destination, departure, Flight.FlightType.ONE_WAY, passengers);
             processedFlightIds.clear();
 
             for (Flight flight : returnFlights) {

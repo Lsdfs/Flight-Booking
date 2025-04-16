@@ -6,6 +6,7 @@ import SE2.flightBooking.model.Flight;
 import SE2.flightBooking.model.User;
 import SE2.flightBooking.repository.BookingRepository;
 import SE2.flightBooking.repository.CoflightRepo;
+import SE2.flightBooking.repository.FlightRepository;
 import SE2.flightBooking.repository.UserRepo;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ import java.util.Optional;
 public class CheckinController {
     @Autowired
     BookingRepository bookingRepository;
+    @Autowired
+    FlightRepository flightRepository;
     @Autowired UserRepo userRepo;
     @GetMapping
     public String checkInMain(Model model, HttpSession httpSession){
@@ -44,7 +47,6 @@ public class CheckinController {
             @RequestParam("reservationCode") String reservationCode,
             @RequestParam("lastName") String lastName,
              HttpSession httpSession){
-        System.out.println("aaa here");
 
         if(reservationCode.isEmpty()||reservationCode.isBlank()||lastName.isEmpty()||lastName.isBlank()){
             return "redirect:/check-in";
@@ -55,13 +57,15 @@ public class CheckinController {
             return "redirect:/check-in";
         }
         Booking booking = opt.get();
+        if(booking.getStatus()!= Booking.BookingStatus.CONFIRMED){
+            return "redirect:/check-in";
+        }
         httpSession.setAttribute("bookingCheckin", booking);
         return "redirect:/check-in/select-flight";
     }
 
     @GetMapping("/select-flight")
     public String checkinSelectFlight(Model model, HttpSession httpSession){
-        System.out.println("abc11111");
         Booking currentBooking = (Booking)httpSession.getAttribute("bookingCheckin");
         System.out.println("debug" + currentBooking);
         if(currentBooking==null){
@@ -111,7 +115,7 @@ public class CheckinController {
         return "checkin-confirm";
     }
 
-    @PostMapping("lastPage")
+    @GetMapping("/lastPage")
     public String lastPage( HttpSession httpSession, Model model){
 
         Booking currentBooking = (Booking)httpSession.getAttribute("bookingCheckin");
@@ -126,6 +130,7 @@ public class CheckinController {
         }else{
             return "redirect:/check-in";
         }
+        bookingRepository.save(currentBooking);
         model.addAttribute("flight", currentFlight);
         model.addAttribute("booking", currentBooking);
         return "checkin-last";
