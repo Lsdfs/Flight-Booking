@@ -411,16 +411,18 @@ public class FlightController {
         return "booking/payment";     }
 
     @PostMapping("/payment")
-    public String submitPassenger(@ModelAttribute Payment payment, HttpSession session) {
+    public String submitPassenger(@ModelAttribute Payment payment, HttpSession session, Model model) {
         String reservationCode = (String) session.getAttribute("reservationCode");
         Optional<Booking> bookings = bookingRepository.findByReservationCode(reservationCode);
-        if (bookings == null) {
-            log.warn("No booking found in session. Redirecting to error page.");
-            return "error"; // better to show an actual error page
+        if (bookings.isEmpty()) {
+            log.warn("No booking found with reservation code. Redirecting to error page.");
+            return "error";
         }
         paymentRepository.save(payment);
-        log.info("Payment saved successfully. Redirecting to VNPay initialization.");
-        return "redirect:/flight/init-payment";
+
+        // Add reservation code to model and show the intermediate page
+        model.addAttribute("reservationCode", reservationCode);
+        return "reservationCodeDisplay";
     }
 
     @GetMapping("/init-payment")
