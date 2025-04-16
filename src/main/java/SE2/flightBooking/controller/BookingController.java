@@ -39,16 +39,28 @@ public class BookingController {
             RedirectAttributes redirectAttributes) {
 
         try {
+            String cleanCode = reservationCode.trim();
+            String cleanLastName = lastName.trim();
+            String cleanFirstName = firstName.trim();
+
+            logger.debug("Searching booking - Code: {}, Last: {}, First: {}",
+                    cleanCode, cleanLastName, cleanFirstName);
+
             Optional<Booking> bookingOpt = bookingService.findByReservationCodeAndNames(
-                    reservationCode.trim(), lastName.trim(), firstName.trim());
+                    cleanCode, cleanLastName, cleanFirstName);
 
             if (bookingOpt.isEmpty()) {
-                model.addAttribute("error", "Booking not found");
+                logger.warn("Booking not found - Code: {}, Last: {}, First: {}",
+                        cleanCode, cleanLastName, cleanFirstName);
+                model.addAttribute("error", "Booking not found - please check your details");
                 return "option/services";
             }
 
             Booking booking = bookingOpt.get();
+            logger.info("Found booking ID: {}", booking.getId());
+
             if (needsDefaultServices(booking)) {
+                logger.debug("Adding default services to booking {}", booking.getId());
                 bookingService.updateBooking(booking);
             }
 
@@ -56,11 +68,10 @@ public class BookingController {
             return "redirect:/booking/options";
         } catch (Exception e) {
             logger.error("Error finding booking", e);
-            model.addAttribute("error", "Error finding booking: " + e.getMessage());
+            model.addAttribute("error", "System error - please try again later");
             return "option/services";
         }
     }
-
     private boolean needsDefaultServices(Booking booking) {
         return booking.getSeats().size() < booking.getPassengerCount() ||
                 booking.getBookingMeals().size() < booking.getPassengerCount() ||
